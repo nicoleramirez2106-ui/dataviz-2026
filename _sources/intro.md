@@ -12,5 +12,5 @@
 - El capítulo **6** contiene el análisis exploratorio: univariado, bivariado y multivariado.
 - El capítulo **7** reúne los hallazgos y las recomendaciones para el entrenador.
 
-Cada capítulo de análisis termina con un recuadro **"Para el entrenador"** con la lectura práctica de sus resultados.
+En el capítulo 6, cada análisis termina con un recuadro **"Para el entrenador"** con la lectura práctica de sus resultados.
 

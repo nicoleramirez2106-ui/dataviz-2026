@@ -354,19 +354,27 @@ gt.opt_stylize(style=1, color="gray")
 ```
 
 ```{code-cell} ipython3
-:tags: [remove-cell]
+:tags: [hide-input, remove-output]
 gana = lg[lg.resultado == "Ganador"]
 pareado = {}
 for v in ["ventaja_rank", "ventaja_estatura_cm", "ventaja_edad"]:
     s = gana[v].dropna()
     s = s[s != 0]
-    pareado[v] = {"n": len(s), "pct": 100 * (s > 0).mean(), "p": wilcoxon(s).pvalue}
+    w = wilcoxon(s)
+    pareado[v] = {"n": len(s), "pct": 100 * (s > 0).mean(), "p": w.pvalue, "w": w.statistic}
     registrar(f"t6_2_wilcoxon_pct_{v}", pareado[v]["pct"])
 avp_fuertes = tabla_62[tabla_62.Muestra.str.startswith("AVP") & (tabla_62.Poder != "Bajo")]
 
 pegar("t62_n_eq", fmt(n_eq, 0))
 pegar("t62_max_p", fmt_p(max_p))
 pegar("t62_rbc_rank", fmt(t62.RBC["rank_main"]))
+pegar("t62_u_rank", fmt(t62.U["rank_main"], 0))
+pegar("t62_p_rank", fmt_p(t62["p-valor"]["rank_main"]))
+pegar("t62_w_stat", fmt(pareado["ventaja_rank"]["w"], 0))
+pegar("t62_w_n", fmt(pareado["ventaja_rank"]["n"], 0))
+pegar("t62_w_p_rank", fmt_p(pareado["ventaja_rank"]["p"]))
+pegar("t62_u_hit", fmt(t62.U["hitpct"], 0))
+pegar("t62_p_hit", fmt_p(t62["p-valor"]["hitpct"]))
 pegar("t62_med_g_rank", fmt(t62["Mediana G"]["rank_main"], 0))
 pegar("t62_med_p_rank", fmt(t62["Mediana P"]["rank_main"], 0))
 pegar("t62_max_fis", fmt(t62.loc[["edad_media", "estatura_media_cm"], "RBC"].abs().max()))
@@ -379,11 +387,13 @@ pegar("t62_solap_hit", fmt(t62["Solapamiento IQR"]["hitpct"]))
 pegar("t62_avp_fuertes", ", ".join(avp_fuertes.Variable.iloc[1:].str.lower()))
 ```
 
-Con {glue}`t62_n_eq` equipos-partido, todas las diferencias son estadísticamente significativas (el p-valor más alto es {glue}`t62_max_p`); por eso se interpreta el tamaño del efecto y no el p-valor (Tabla 6.2). En la muestra completa, ninguna variable supera el poder bajo. El ranking es la que más separa (RBC = {glue}`t62_rbc_rank`): la mediana de los ganadores es {glue}`t62_med_g_rank` y la de los perdedores {glue}`t62_med_p_rank`, es decir, los ganadores suelen estar mejor rankeados. La edad y la estatura tienen efectos todavía menores (|RBC| ≤ {glue}`t62_max_fis`), y las diferencias entre compañeros de la misma pareja prácticamente no separan el resultado.
+Para cada variable se aplicó la prueba U de Mann-Whitney con un nivel de significancia α = 0,05. La hipótesis nula (H₀) es que la variable se distribuye igual en ganadores y en perdedores, y la alternativa (H₁) es que las distribuciones son distintas. En todas las variables el p-valor fue menor que α (el más alto fue {glue}`t62_max_p`), así que se rechaza H₀ en todos los casos (Tabla 6.2). Como la muestra tiene {glue}`t62_n_eq` equipos-partido, incluso diferencias muy pequeñas resultan significativas; por eso también se revisa el tamaño del efecto (RBC).
 
-Este resultado no contradice que el favorito gane la mayoría de los partidos. Mann-Whitney compara a todos los ganadores con todos los perdedores, mezclando partidos de equipos de élite con partidos de equipos de mitad de tabla. Lo que importa en un partido es la posición **frente al rival**. Al comparar cada pareja ganadora con su propio rival (prueba de Wilcoxon de rangos con signo sobre la ventaja), el ganador tiene mejor ranking en el {glue}`t62_w_rank` de los partidos, es más alto en el {glue}`t62_w_est` y es mayor en el {glue}`t62_w_edad` (p {glue}`t62_w_p` en los tres casos). El ranking, entonces, informa mucho más como diferencia con el rival que como valor absoluto.
+Para el ranking se obtuvo U = {glue}`t62_u_rank`, p {glue}`t62_p_rank` y RBC = {glue}`t62_rbc_rank`, un efecto bajo. La mediana de los ganadores es {glue}`t62_med_g_rank` y la de los perdedores {glue}`t62_med_p_rank`, es decir, los ganadores suelen estar mejor rankeados. La edad y la estatura tienen efectos todavía menores (|RBC| ≤ {glue}`t62_max_fis`), y las diferencias de edad y estatura entre compañeros casi no separan el resultado. En la muestra completa ninguna de estas variables pasa de poder bajo.
 
-En la AVP, las estadísticas de juego separan mucho más que las variables físicas. El % de ataque tiene poder alto (RBC = {glue}`t62_rbc_hit`) y sus rangos centrales no se tocan (solapamiento de {glue}`t62_solap_hit`). Le siguen {glue}`t62_avp_fuertes`, todas con poder moderado. El % de ataque, los kills y los errores se miden durante el partido: describen **cómo** se gana, no permiten anticipar quién ganará.
+Mann-Whitney compara a todos los ganadores con todos los perdedores, sin tener en cuenta contra quién jugó cada uno. Como cada partido aporta un ganador y un perdedor, también se aplicó la prueba de Wilcoxon de rangos con signo sobre la ventaja de cada pareja ganadora frente a su rival (H₀: la mediana de la ventaja es 0, α = 0,05). Para el ranking se obtuvo W = {glue}`t62_w_stat` con {glue}`t62_w_n` partidos y p {glue}`t62_w_p_rank`, por lo que se rechaza H₀: el ganador tiene mejor ranking que su rival en el {glue}`t62_w_rank` de los partidos. Con la estatura y la edad pasa lo mismo, pero con porcentajes más cercanos al 50 %: el ganador es más alto en el {glue}`t62_w_est` de los partidos y mayor en el {glue}`t62_w_edad` (p {glue}`t62_w_p` en los tres casos). Esto indica que el ranking sirve más como diferencia con el rival que como valor por sí solo.
+
+En la AVP, las estadísticas de juego separan más que las variables físicas. Para el % de ataque se obtuvo U = {glue}`t62_u_hit`, p {glue}`t62_p_hit` y RBC = {glue}`t62_rbc_hit`, que corresponde a un poder alto; además, los rangos centrales de ganadores y perdedores no se tocan (solapamiento de {glue}`t62_solap_hit`). Le siguen {glue}`t62_avp_fuertes`, todas con poder moderado. Hay que tener en cuenta que estas estadísticas se registran durante el partido, así que sirven para describir el juego de los ganadores, pero no para anticipar el resultado antes del partido.
 
 ```{code-cell} ipython3
 paneles = [(lg, "rank_main", "Ranking (posición)"),
@@ -490,6 +500,9 @@ pegar("t63_v_etapa", fmt(t63["V de Cramér"]["Upset × etapa"], 3))
 pegar("t63_perd_clasif", fmt_pct(perd_clasif[1]))
 pegar("t63_perd_directo", fmt_pct(perd_clasif[0]))
 pegar("t63_v_clasif", fmt(t63["V de Cramér"]["Resultado × viene de clasificatoria"], 3))
+pegar("t63_chi_circ", fmt(t63["χ²"]["Upset × circuito"]))
+pegar("t63_gl_circ", fmt(t63["gl"]["Upset × circuito"], 0))
+pegar("t63_p_max", fmt_p(t63["p-valor"].max()))
 ```
 
 **Tabla 6.3.** Pruebas chi-cuadrado y V de Cramér para variables categóricas.
@@ -505,7 +518,7 @@ t["p-valor"] = t["p-valor"].map(fmt_p)
  .opt_stylize(style=1, color="gray"))
 ```
 
-Las cuatro asociaciones son estadísticamente significativas, pero todas son despreciables en magnitud (V < 0,1; Tabla 6.3). La tasa de sorpresas es algo mayor en la FIVB ({glue}`t63_ups_fivb`) que en la AVP ({glue}`t63_ups_avp`; V = {glue}`t63_v_circ`) y casi igual entre hombres ({glue}`t63_ups_m`) y mujeres ({glue}`t63_ups_w`; V = {glue}`t63_v_gen`). Según la etapa, la asociación también es despreciable (V = {glue}`t63_v_etapa`). Los equipos que vienen de clasificatoria pierden más: el {glue}`t63_perd_clasif` de sus partidos, frente al {glue}`t63_perd_directo` de los que entraron directo (V = {glue}`t63_v_clasif`).
+Para las variables categóricas se aplicó la prueba chi-cuadrado de independencia con α = 0,05, donde H₀ es que las dos variables son independientes. En los cuatro cruces el p-valor fue {glue}`t63_p_max`, así que se rechaza H₀, pero la V de Cramér es menor que 0,1 en todos: la asociación existe, aunque es despreciable (Tabla 6.3). Por ejemplo, para sorpresa × circuito se obtuvo χ²({glue}`t63_gl_circ`) = {glue}`t63_chi_circ`, p {glue}`t63_p_max` y V = {glue}`t63_v_circ`. La tasa de sorpresas es algo mayor en la FIVB ({glue}`t63_ups_fivb`) que en la AVP ({glue}`t63_ups_avp`; V = {glue}`t63_v_circ`) y casi igual entre hombres ({glue}`t63_ups_m`) y mujeres ({glue}`t63_ups_w`; V = {glue}`t63_v_gen`). Según la etapa, la asociación también es despreciable (V = {glue}`t63_v_etapa`). Los equipos que vienen de clasificatoria pierden más: el {glue}`t63_perd_clasif` de sus partidos, frente al {glue}`t63_perd_directo` de los que entraron directo (V = {glue}`t63_v_clasif`).
 
 ### Upsets y diferencia de ranking
 
