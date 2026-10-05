@@ -237,7 +237,3 @@ pegar("t53_jg", fmt(len(jg), 0))
 
 El análisis parte de tres archivos con distinta unidad de observación (Tabla 5.3): {glue}`t53_m` partidos, {glue}`t53_lg` filas equipo-partido y {glue}`t53_jg` filas jugador-partido. El formato equipo-partido es el que permite comparar ganadores y perdedores en el capítulo siguiente: cada partido aparece dos veces, una por pareja, con una columna `resultado` que vale "Ganador" o "Perdedor".
 
-```{admonition} Para el entrenador
-:class: tip
-Las estadísticas de juego (kills, aces, bloqueos, defensas) solo existen de forma confiable para la AVP. Si su pareja compite en el circuito FIVB, este libro no puede decirle qué acciones de juego la acercan a ganar; sí puede hacerlo con el ranking, la edad, la estatura y la etapa del torneo, que están disponibles para casi todos los partidos.
-```

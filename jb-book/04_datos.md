@@ -289,8 +289,3 @@ pegar("t43_celdas", fmt(celdas, 0))
 ```
 
 Ninguna variable supera el {glue}`t43_pct_max` de valores atípicos; el máximo corresponde a la {glue}`t43_var_max` (Tabla 4.3). En todos los casos los atípicos son valores reales: jugadores muy jóvenes o veteranos, jugadores excepcionalmente altos, equipos de ranking bajo y partidos especialmente largos o con retiro. Por eso no se eliminan. Solo se anulan las {glue}`t43_celdas` celdas de estadísticas lógicamente imposibles, como más ataques convertidos que ataques realizados.
-
-```{admonition} Para el entrenador
-:class: tip
-El {glue}`t42_pct_usa` de los registros de jugador son de Estados Unidos y dos de cada tres partidos son de la FIVB: cualquier promedio general mezcla dos circuitos distintos, así que conviene filtrar por el circuito en el que compite su pareja. La clasificatoria es un tercio de todos los partidos; si su pareja suele entrar por ahí, hay abundante información sobre esa etapa.
-```

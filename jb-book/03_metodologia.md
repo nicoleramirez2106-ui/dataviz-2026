@@ -41,6 +41,8 @@ Cuando las dos parejas tienen ranking numérico, el **favorito** es la pareja co
 
 Las variables del análisis no siguen una distribución normal: el ranking es discreto y acotado, la duración es asimétrica y las estadísticas de juego son conteos. Por eso se usan **pruebas no paramétricas**, que comparan órdenes (rangos) en lugar de medias y no suponen normalidad.
 
+En todas las pruebas se usa un nivel de significancia **α = 0,05**. La hipótesis nula (H₀) es que no hay diferencia entre ganadores y perdedores o, en el caso del chi-cuadrado, que las dos variables son independientes. Si el p-valor es menor que α, se rechaza H₀. Después se revisa el tamaño del efecto para saber si la diferencia encontrada es grande o pequeña.
+
 **Mann-Whitney U** {cite:p}`mann1947` compara una variable numérica entre ganadores y perdedores. Contrasta si, al tomar una pareja ganadora y una perdedora al azar, una tiende a tener valores mayores que la otra. Su **tamaño del efecto** es la **correlación rango-biserial** (RBC) {cite:p}`kerby2014`:
 
 $$
