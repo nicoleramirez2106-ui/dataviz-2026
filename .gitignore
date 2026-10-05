@@ -7,3 +7,8 @@ data/clean/
 # Archivos temporales
 __pycache__/
 .ipynb_checkpoints/
+
+# Entornos virtuales y configuración personal de VS Code
+.venv/
+venv/
+.vscode/

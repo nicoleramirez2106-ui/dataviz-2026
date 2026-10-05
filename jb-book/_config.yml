@@ -32,6 +32,6 @@ html:
   home_page_in_navbar: true
 
 repository:
-  url: https://github.com/USUARIO/vb-libro
+  url: https://github.com/nicoleramirez2106-ui/dataviz-2026
   path_to_book: jb-book
   branch: main
