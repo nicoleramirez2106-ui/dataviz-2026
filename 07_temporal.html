@@ -1,0 +1,959 @@
+
+<!DOCTYPE html>
+
+
+<html lang="es" data-content_root="./" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>7. Análisis temporal &#8212; ¿Qué hace ganar a una pareja de voleibol de playa?</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css?v=8cd3d715" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=b40b49cd" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="_static/documentation_options.js?v=78d55cf8"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Haz clic para mostrar';</script>
+    <script>let toggleHintHide = 'Haz clic para ocultar';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=b8b12719"></script>
+    <script src="_static/translations.js?v=d190bf04"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '07_temporal';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Búsqueda" href="search.html" />
+    <link rel="next" title="8. Modelado" href="08_modelado.html" />
+    <link rel="prev" title="6. Análisis exploratorio (EDA)" href="06_eda.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="es"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="light">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Saltar al contenido principal</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Volver arriba</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Advertencia de versión"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Navegación del sitio">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Búsqueda" aria-label="Búsqueda" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Búsqueda</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Búsqueda" aria-label="Búsqueda" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Búsqueda</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">¿Qué hace ganar a una pareja de voleibol de playa?</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Búsqueda" aria-label="Búsqueda" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Búsqueda</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="01_contexto.html">1. Contexto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_objetivos.html">2. Objetivos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_metodologia.html">3. Metodología</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_datos.html">4. Descripción del conjunto de datos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_limpieza.html">5. Limpieza y preparación</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_eda.html">6. Análisis exploratorio (EDA)</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">7. Análisis temporal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_modelado.html">8. Modelado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_conclusiones.html">9. Conclusiones</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10_referencias.html">10. Referencias</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Descarga esta pagina">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/07_temporal.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Descargar archivo fuente"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Imprimir en PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Modo de pantalla completa"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Tema" data-bs-title="Tema"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Claro"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Oscuro"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="Sistema"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Búsqueda" aria-label="Búsqueda" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Análisis temporal</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contenido </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cobertura-del-conjunto-de-datos-por-ano">7.1. Cobertura del conjunto de datos por año</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#duracion-edad-y-estatura-por-ano">7.2. Duración, edad y estatura por año</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tasa-de-sorpresas-por-ano">7.3. Tasa de sorpresas por año</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#prueba-de-tendencia">7.4. Prueba de tendencia</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="analisis-temporal">
+<h1><span class="section-number">7. </span>Análisis temporal<a class="headerlink" href="#analisis-temporal" title="Link to this heading">#</a></h1>
+<p>Este capítulo describe cómo cambian los partidos y los jugadores entre 2000 y 2019. No se ajusta un modelo de series de tiempo (ARIMA, suavizado exponencial o similares) por tres razones: hay como máximo 20 puntos anuales por serie, cuando un modelo así necesita del orden de 50; varias series tienen años con cobertura incompleta, que el modelo confundiría con cambios reales; y el objetivo es describir, no pronosticar. En su lugar, cada gráfico muestra la serie anual, algunas con una media móvil de 3 años, y la Tabla 7.1 evalúa si la tendencia es significativa con la prueba de Mann-Kendall (sección 3.5).</p>
+<p>Tres periodos se marcan con una banda gris en todos los gráficos y se excluyen de las pruebas de tendencia: 2000, con un solo torneo de la FIVB desde el 16 de septiembre; 2011–2012 en la AVP, cuando el circuito suspendió operaciones y se reorganizó tras su bancarrota <span class="bibtex-citation" id="id1">[<a class="reference internal" href="10_referencias.html#id5" title="Wikipedia. Association of volleyball professionals. https://en.wikipedia.org/wiki/Association_of_Volleyball_Professionals, 2026. Consultado el 1 de octubre de 2026.">Wikipedia, 2026a</a>]</span>; y 2019, con datos solo hasta el 29 de agosto (este último solo afecta a los conteos de partidos).</p>
+<section id="cobertura-del-conjunto-de-datos-por-ano">
+<h2><span class="section-number">7.1. </span>Cobertura del conjunto de datos por año<a class="headerlink" href="#cobertura-del-conjunto-de-datos-por-ano" title="Link to this heading">#</a></h2>
+<p><strong>Figura 7.1.</strong> Partidos por año y circuito, 2000–2019.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">conteo</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">"year"</span><span class="p">,</span> <span class="s2">"circuit"</span><span class="p">])</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"FIVB"</span><span class="p">,</span> <span class="s2">"AVP"</span><span class="p">]:</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">por_anio</span><span class="p">(</span><span class="n">conteo</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines+markers"</span><span class="p">,</span>
+                    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">PAL</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span>
+                    <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">"%</span><span class="si">{x}</span><span class="s2"> · "</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="s2">"&lt;br&gt;Partidos: %</span><span class="si">{y:,}</span><span class="s2">&lt;extra&gt;&lt;/extra&gt;"</span><span class="p">)</span>
+<span class="n">bandas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">dtick</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tickangle</span><span class="o">=-</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">estilo_plotly</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"Partidos por año y circuito, 2000–2019"</span><span class="p">,</span> <span class="s2">"Año"</span><span class="p">,</span> <span class="s2">"Número de partidos"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">        <script>
+        window.PlotlyConfig = {MathJaxConfig: 'local'};
+        if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}
+        </script>
+        <script type="module">import "https://cdn.plot.ly/plotly-4.1.1.min"</script>
+        </div><div class="output text_html"><div style="height:525px; width:100%;">            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script><script>if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-4.1.1.min.js" integrity="sha256-O24V1F27f8pb0glCkelh3cVHLNiHAJ5gCaVtq2aNch8=" crossorigin="anonymous"></script>                <div id="c1f097f8-9b01-4792-bb6a-d3cc2f5cd2bd" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("c1f097f8-9b01-4792-bb6a-d3cc2f5cd2bd")) {                    Plotly.newPlot(                        "c1f097f8-9b01-4792-bb6a-d3cc2f5cd2bd",                        [{"hovertemplate":"%{x} \u00b7 FIVB\u003cbr\u003ePartidos: %{y:,}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#1A8A9A","width":2},"marker":{"size":7},"mode":"lines+markers","name":"FIVB","x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"AAAAAACAUkAAAAAAAO6iQAAAAAAAZJ1AAAAAAADkoUAAAAAAAOaiQAAAAAAAyqRAAAAAAADSokAAAAAAAFSmQAAAAAAAiKpAAAAAAAD4oUAAAAAAAHijQAAAAAAAxqFAAAAAAADon0AAAAAAACiiQAAAAAAAkKNAAAAAAAAeqUAAAAAAAPSlQAAAAAAACJ9AAAAAAAB\u002fs0AAAAAAAKSvQA=="},"type":"scatter"},{"hovertemplate":"%{x} \u00b7 AVP\u003cbr\u003ePartidos: %{y:,}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#D9A441","width":2},"marker":{"size":7},"mode":"lines+markers","name":"AVP","x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"AAAAAAAA+H8AAAAAAAD4fwAAAAAA0IVAAAAAAADwi0AAAAAAAIydQAAAAAAAHKRAAAAAAAD8pkAAAAAAAFanQAAAAAAAuJ9AAAAAAADwokAAAAAAAGCVQAAAAAAAABhAAAAAAABgZkAAAAAAALiFQAAAAAAAmIpAAAAAAACwiEAAAAAAAHiOQAAAAAAAtJVAAAAAAABUlEAAAAAAACyVQA=="},"type":"scatter"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"shapes":[{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":1999.5,"x1":2000.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2010.5,"x1":2012.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2018.5,"x1":2019.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"}],"xaxis":{"dtick":1,"tickangle":-45,"title":{"text":"A\u00f1o"},"gridcolor":"#ECEEF1","showticklabels":true,"automargin":true},"title":{"text":"Partidos por a\u00f1o y circuito, 2000\u20132019","x":0,"y":0.97},"yaxis":{"title":{"text":"N\u00famero de partidos"},"gridcolor":"#ECEEF1","showticklabels":true,"automargin":true},"font":{"family":"Arial","size":13,"color":"#1F2937"},"legend":{"orientation":"h","x":0,"y":1.02,"xanchor":"left","yanchor":"bottom"},"margin":{"t":90,"b":100,"l":70,"r":20},"separators":",.","plot_bgcolor":"white","paper_bgcolor":"white","annotations":[{"font":{"color":"#6B7280","size":10},"showarrow":false,"text":"Fuente: vb_matches.csv (BigTimeStats v\u00eda TidyTuesday). Elaboraci\u00f3n propia.","x":0,"xanchor":"left","xref":"paper","y":0,"yanchor":"top","yref":"paper","yshift":-70}]},                        {"responsive": true}                    ).then(function(){
+                            
+var gd = document.getElementById('c1f097f8-9b01-4792-bb6a-d3cc2f5cd2bd');
+var x = new MutationObserver(function (mutations, observer) {{
+        var display = window.getComputedStyle(gd).display;
+        if (!display || display === 'none') {{
+            console.log([gd, 'removed!']);
+            Plotly.purge(gd);
+            observer.disconnect();
+        }}
+}});
+
+// Listen for the removal of the full notebook cells
+var notebookContainer = gd.closest('#notebook-container');
+if (notebookContainer) {{
+    x.observe(notebookContainer, {childList: true});
+}}
+
+// Listen for the clearing of the current output cell
+var outputEl = gd.closest('.output');
+if (outputEl) {{
+    x.observe(outputEl, {childList: true});
+}}
+
+                        })                };            </script>        </div></div></div>
+</div>
+<p>La FIVB pasa de <span class="output text_plain">74</span> partidos en 2000 a un máximo de <span class="output text_plain">4.991</span> en <span class="output text_plain">2018</span> (Figura 7.1). La AVP crece hasta <span class="output text_plain">2.987</span> partidos en <span class="output text_plain">2007</span>, cae a <span class="output text_plain">6</span> en 2011 y <span class="output text_plain">179</span> en 2012, y se recupera desde 2013. Por esos cortes, la curva mide la cobertura del conjunto de datos tanto como la actividad del deporte: un año con pocos partidos no significa necesariamente un año con poco voleibol. <span class="output text_plain">Bandas grises: años con cobertura incompleta (2000: un torneo; AVP 2011–2012: casi sin partidos; 2019: hasta el 29 de agosto).</span></p>
+<p><strong>Figura 7.2.</strong> Partidos por torneo, por año y circuito.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">torneos</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">"year"</span><span class="p">,</span> <span class="s2">"circuit"</span><span class="p">])</span><span class="o">.</span><span class="n">tournament_id</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span>
+<span class="n">ppt</span> <span class="o">=</span> <span class="n">conteo</span> <span class="o">/</span> <span class="n">torneos</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"FIVB"</span><span class="p">,</span> <span class="s2">"AVP"</span><span class="p">]:</span>
+    <span class="n">s</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">por_anio</span><span class="p">(</span><span class="n">ppt</span><span class="p">[</span><span class="n">c</span><span class="p">]),</span> <span class="n">por_anio</span><span class="p">(</span><span class="n">torneos</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines+markers"</span><span class="p">,</span>
+                    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">PAL</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span> <span class="n">customdata</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                    <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">"%</span><span class="si">{x}</span><span class="s2"> · "</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="s2">"&lt;br&gt;Partidos por torneo: %</span><span class="si">{y:.1f}</span><span class="s2">"</span>
+                                  <span class="s2">"&lt;br&gt;Torneos: %</span><span class="si">{customdata}</span><span class="s2">&lt;extra&gt;&lt;/extra&gt;"</span><span class="p">)</span>
+<span class="n">bandas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">dtick</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tickangle</span><span class="o">=-</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">estilo_plotly</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"Partidos por torneo, por año y circuito"</span><span class="p">,</span> <span class="s2">"Año"</span><span class="p">,</span> <span class="s2">"Partidos por torneo"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="height:525px; width:100%;">            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script><script>if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-4.1.1.min.js" integrity="sha256-O24V1F27f8pb0glCkelh3cVHLNiHAJ5gCaVtq2aNch8=" crossorigin="anonymous"></script>                <div id="64d944c7-f20e-4f72-a171-5f7a51f126e0" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("64d944c7-f20e-4f72-a171-5f7a51f126e0")) {                    Plotly.newPlot(                        "64d944c7-f20e-4f72-a171-5f7a51f126e0",                        [{"customdata":{"dtype":"f8","bdata":"AAAAAAAA8D8AAAAAAAAyQAAAAAAAACpAAAAAAAAALEAAAAAAAAA0QAAAAAAAADFAAAAAAAAAMUAAAAAAAAAzQAAAAAAAADhAAAAAAAAAMEAAAAAAAAAuQAAAAAAAACxAAAAAAAAAKkAAAAAAAAAsQAAAAAAAADBAAAAAAAAAM0AAAAAAAAAyQAAAAAAAADlAAAAAAACAS0AAAAAAAIBGQA=="},"hovertemplate":"%{x} \u00b7 FIVB\u003cbr\u003ePartidos por torneo: %{y:.1f}\u003cbr\u003eTorneos: %{customdata}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#1A8A9A","width":2},"marker":{"size":7},"mode":"lines+markers","name":"FIVB","x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"AAAAAACAUkA5juM4jtNgQGIndmInFmJAJUmSJElyZEDNzMzMzDxeQPHw8PDwkGNAl5aWlpa2YUDYUF5Dec1iQAAAAAAAsGFAAAAAAAD4YUBERERERMRkQAAAAAAAUGRAJ3ZiJ3aiY0AAAAAAAMBkQAAAAAAAkGNAbCivobwmZUA5juM4joNjQFyPwvUo3FNAcFj7hrWvVkAAAAAAAIBWQA=="},"type":"scatter"},{"customdata":{"dtype":"f8","bdata":"AAAAAAAA+H8AAAAAAAD4fwAAAAAAABxAAAAAAAAAIkAAAAAAAAAoQAAAAAAAACxAAAAAAAAAMEAAAAAAAAAyQAAAAAAAADJAAAAAAAAAMEAAAAAAAAAcQAAAAAAAAPA\u002fAAAAAAAAAEAAAAAAAAAcQAAAAAAAABxAAAAAAAAAHEAAAAAAAAAcQAAAAAAAACBAAAAAAAAAIEAAAAAAAAAcQA=="},"hovertemplate":"%{x} \u00b7 AVP\u003cbr\u003ePartidos por torneo: %{y:.1f}\u003cbr\u003eTorneos: %{customdata}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#D9A441","width":2},"marker":{"size":7},"mode":"lines+markers","name":"AVP","x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"AAAAAAAA+H8AAAAAAAD4f9u2bdu27VhAVVVVVVXVWECrqqqqqrJjQLdt27Zt+2ZAAAAAAAD8ZkDkOI7jOL5kQBzHcRzHMVxAAAAAAADwYkDbtm3btm1oQAAAAAAAABhAAAAAAABgVkAlSZIkSdJYQEmSJEmSZF5Abtu2bds2XECSJEmSJGlhQAAAAAAAtGVAAAAAAABUZEAlSZIkSTJoQA=="},"type":"scatter"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"shapes":[{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":1999.5,"x1":2000.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2010.5,"x1":2012.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2018.5,"x1":2019.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"}],"xaxis":{"dtick":1,"tickangle":-45,"title":{"text":"A\u00f1o"},"gridcolor":"#ECEEF1","showticklabels":true,"automargin":true},"title":{"text":"Partidos por torneo, por a\u00f1o y circuito","x":0,"y":0.97},"yaxis":{"title":{"text":"Partidos por torneo"},"gridcolor":"#ECEEF1","showticklabels":true,"automargin":true},"font":{"family":"Arial","size":13,"color":"#1F2937"},"legend":{"orientation":"h","x":0,"y":1.02,"xanchor":"left","yanchor":"bottom"},"margin":{"t":90,"b":100,"l":70,"r":20},"separators":",.","plot_bgcolor":"white","paper_bgcolor":"white","annotations":[{"font":{"color":"#6B7280","size":10},"showarrow":false,"text":"Fuente: vb_matches.csv (BigTimeStats v\u00eda TidyTuesday). Elaboraci\u00f3n propia.","x":0,"xanchor":"left","xref":"paper","y":0,"yanchor":"top","yref":"paper","yshift":-70}]},                        {"responsive": true}                    ).then(function(){
+                            
+var gd = document.getElementById('64d944c7-f20e-4f72-a171-5f7a51f126e0');
+var x = new MutationObserver(function (mutations, observer) {{
+        var display = window.getComputedStyle(gd).display;
+        if (!display || display === 'none') {{
+            console.log([gd, 'removed!']);
+            Plotly.purge(gd);
+            observer.disconnect();
+        }}
+}});
+
+// Listen for the removal of the full notebook cells
+var notebookContainer = gd.closest('#notebook-container');
+if (notebookContainer) {{
+    x.observe(notebookContainer, {childList: true});
+}}
+
+// Listen for the clearing of the current output cell
+var outputEl = gd.closest('.output');
+if (outputEl) {{
+    x.observe(outputEl, {childList: true});
+}}
+
+                        })                };            </script>        </div></div></div>
+</div>
+<p>La FIVB registra entre <span class="output text_plain">13</span> y <span class="output text_plain">24</span> torneos por año hasta 2016, y salta a <span class="output text_plain">25</span> en 2017, <span class="output text_plain">55</span> en 2018 y <span class="output text_plain">45</span> en 2019 (Figura 7.2). Al mismo tiempo, los partidos por torneo bajan de unos <span class="output text_plain">156</span> a unos <span class="output text_plain">87</span>. El aumento de partidos de la FIVB en 2018 se explica, entonces, por más torneos y más pequeños, no por torneos más grandes. Coincide con la estructura de torneos por categorías de 1 a 5 estrellas que la FIVB introdujo en 2017 <span class="bibtex-citation" id="id2">[<a class="reference internal" href="10_referencias.html#id6" title="Wikipedia. Volleyball world beach pro tour. https://en.wikipedia.org/wiki/Volleyball_World_Beach_Pro_Tour, 2026. Consultado el 3 de octubre de 2026.">Wikipedia, 2026c</a>]</span>, que sumó al circuito mundial muchos torneos de menor categoría. En la AVP el número de torneos es estable (entre <span class="output text_plain">7</span> y <span class="output text_plain">8</span> por año desde 2013).</p>
+</section>
+<section id="duracion-edad-y-estatura-por-ano">
+<h2><span class="section-number">7.2. </span>Duración, edad y estatura por año<a class="headerlink" href="#duracion-edad-y-estatura-por-ano" title="Link to this heading">#</a></h2>
+<p><strong>Figura 7.3.</strong> Duración media de los partidos por año y circuito (min).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dur</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">es_forfeit</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">"year"</span><span class="p">,</span> <span class="s2">"circuit"</span><span class="p">])</span><span class="o">.</span><span class="n">duracion_min</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"FIVB"</span><span class="p">,</span> <span class="s2">"AVP"</span><span class="p">]:</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">por_anio</span><span class="p">(</span><span class="n">dur</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines+markers"</span><span class="p">,</span>
+                    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">PAL</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span>
+                    <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">"%</span><span class="si">{x}</span><span class="s2"> · "</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="s2">"&lt;br&gt;Duración media: %</span><span class="si">{y:.1f}</span><span class="s2"> min&lt;extra&gt;&lt;/extra&gt;"</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2"> (media móvil 3 años)"</span><span class="p">,</span>
+                    <span class="n">mode</span><span class="o">=</span><span class="s2">"lines"</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">PAL</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">dash</span><span class="o">=</span><span class="s2">"dash"</span><span class="p">),</span>
+                    <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">"%</span><span class="si">{x}</span><span class="s2"> · "</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="s2">"&lt;br&gt;Media móvil: %</span><span class="si">{y:.1f}</span><span class="s2"> min&lt;extra&gt;&lt;/extra&gt;"</span><span class="p">)</span>
+<span class="n">bandas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">dtick</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tickangle</span><span class="o">=-</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">55</span><span class="p">])</span>
+<span class="n">estilo_plotly</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"Duración media de los partidos por año y circuito (min)"</span><span class="p">,</span> <span class="s2">"Año"</span><span class="p">,</span> <span class="s2">"Duración media (min)"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="height:525px; width:100%;">            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script><script>if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-4.1.1.min.js" integrity="sha256-O24V1F27f8pb0glCkelh3cVHLNiHAJ5gCaVtq2aNch8=" crossorigin="anonymous"></script>                <div id="226aa7b4-0706-4627-94b4-2ff50e2c27b7" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("226aa7b4-0706-4627-94b4-2ff50e2c27b7")) {                    Plotly.newPlot(                        "226aa7b4-0706-4627-94b4-2ff50e2c27b7",                        [{"hovertemplate":"%{x} \u00b7 FIVB\u003cbr\u003eDuraci\u00f3n media: %{y:.1f} min\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#1A8A9A","width":2},"marker":{"size":7},"mode":"lines+markers","name":"FIVB","x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"P378+PFjRUAoqLcPK9hEQJZ7GmG5WUVAlWmc35zLRUA+6wZT5INGQIESVb0eakZAi78nEnmXRkAala40KbhGQIjhj7+N20ZAQ\u002fOuEBRyRkCTWSNb2v5FQLJ+lvBXqERA16NwPQo\u002fRUB8xVd8xclEQNh\u002f5xHphkRAsj401ofyREDWIFZjc3pDQGlO7TOMWkNAVPg7kWpoQ0Ay0zli95RDQA=="},"type":"scatter"},{"hovertemplate":"%{x} \u00b7 FIVB\u003cbr\u003eMedia m\u00f3vil: %{y:.1f} min\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#1A8A9A","dash":"dash","width":1.5},"mode":"lines","name":"FIVB (media m\u00f3vil 3 a\u00f1os)","x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"AAAAAAAA+H+p4EQj8jFFQMbZJHCAVEVAzZqUhhPjRUBxIqj63z1GQBg\u002fgQvUgUZAYyK5VkCTRkAQEiICELlGQKF4pAGZrEZAdQ92DtRuRkCD7iJ0F7NFQLR+Y9i+TEVAAfh047flREBk+I\u002fuktpEQKzWeyESwURAIPUlGUxRRED7OX0kLe1DQDHNfw3OaUNAT7PLt6RyQ0AAAAAAAAD4fw=="},"type":"scatter"},{"hovertemplate":"%{x} \u00b7 AVP\u003cbr\u003eDuraci\u00f3n media: %{y:.1f} min\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#D9A441","width":2},"marker":{"size":7},"mode":"lines+markers","name":"AVP","x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"AAAAAAAA+H8AAAAAAAD4f8NpGSzyWEdA8MJB9PjOR0CEWtGjPTVHQBFJQ4AUv0dA1ubx5RM9R0CvJp4VjQRIQG9qXTbBIUlASIM0SIN0SEABdI5q5HVIQAAAAAAAAPh\u002fAAAAAAAA+H\u002fj5S0UC\u002fxGQPCjyLCm00ZAjwTxnqz\u002fRkDLx5IZoGdFQPpHtzEF4UZAAAAAAIDOR0DbZjCAafVIQA=="},"type":"scatter"},{"hovertemplate":"%{x} \u00b7 AVP\u003cbr\u003eMedia m\u00f3vil: %{y:.1f} min\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#D9A441","dash":"dash","width":1.5},"mode":"lines","name":"AVP (media m\u00f3vil 3 a\u00f1os)","x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"AAAAAAAA+H8AAAAAAAD4fwAAAAAAAPh\u002fvdcO7GJ0R0AsInJdbpZHQCMuAq7MZUdAMXJGKeeqR0D8J0+7ICFIQHixuobwiEhA6HW1TbiuSEAAAAAAAAD4fwAAAAAAAPh\u002fAAAAAAAA+H8AAAAAAAD4f3UvTSHK70ZAbSXEzftoRkDHBmmjcG1GQJdaw8NhskZA8eT35aThR0AAAAAAAAD4fw=="},"type":"scatter"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"shapes":[{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":1999.5,"x1":2000.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2010.5,"x1":2012.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2018.5,"x1":2019.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"}],"xaxis":{"dtick":1,"tickangle":-45,"title":{"text":"A\u00f1o"},"gridcolor":"#ECEEF1","showticklabels":true,"automargin":true},"yaxis":{"range":[30,55],"title":{"text":"Duraci\u00f3n media (min)"},"gridcolor":"#ECEEF1","showticklabels":true,"automargin":true},"title":{"text":"Duraci\u00f3n media de los partidos por a\u00f1o y circuito (min)","x":0,"y":0.97},"font":{"family":"Arial","size":13,"color":"#1F2937"},"legend":{"orientation":"h","x":0,"y":1.02,"xanchor":"left","yanchor":"bottom"},"margin":{"t":90,"b":100,"l":70,"r":20},"separators":",.","plot_bgcolor":"white","paper_bgcolor":"white","annotations":[{"font":{"color":"#6B7280","size":10},"showarrow":false,"text":"Fuente: vb_matches.csv (BigTimeStats v\u00eda TidyTuesday). Elaboraci\u00f3n propia.","x":0,"xanchor":"left","xref":"paper","y":0,"yanchor":"top","yref":"paper","yshift":-70}]},                        {"responsive": true}                    ).then(function(){
+                            
+var gd = document.getElementById('226aa7b4-0706-4627-94b4-2ff50e2c27b7');
+var x = new MutationObserver(function (mutations, observer) {{
+        var display = window.getComputedStyle(gd).display;
+        if (!display || display === 'none') {{
+            console.log([gd, 'removed!']);
+            Plotly.purge(gd);
+            observer.disconnect();
+        }}
+}});
+
+// Listen for the removal of the full notebook cells
+var notebookContainer = gd.closest('#notebook-container');
+if (notebookContainer) {{
+    x.observe(notebookContainer, {childList: true});
+}}
+
+// Listen for the clearing of the current output cell
+var outputEl = gd.closest('.output');
+if (outputEl) {{
+    x.observe(outputEl, {childList: true});
+}}
+
+                        })                };            </script>        </div></div></div>
+</div>
+<p>Los partidos de la AVP duran más que los de la FIVB casi todos los años (Figura 7.3). En la FIVB, la duración media sube de <span class="output text_plain">41,7</span> minutos en 2001 a un máximo de <span class="output text_plain">45,7</span> en <span class="output text_plain">2008</span>, y desde 2016 se mantiene alrededor de <span class="output text_plain">39</span> minutos. En la AVP oscila entre <span class="output text_plain">43</span> y <span class="output text_plain">50</span> minutos, sin un patrón claro. La baja reciente de la FIVB coincide con la entrada de torneos más pequeños (Figura 7.2).</p>
+<p><strong>Figura 7.4.</strong> Edad media y estatura media de los jugadores por año y género.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">edad</span> <span class="o">=</span> <span class="n">jg</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">"year"</span><span class="p">,</span> <span class="s2">"gender"</span><span class="p">])</span><span class="o">.</span><span class="n">edad</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span>
+<span class="n">est</span> <span class="o">=</span> <span class="n">jg</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">"year"</span><span class="p">,</span> <span class="s2">"gender"</span><span class="p">])</span><span class="o">.</span><span class="n">estatura_cm</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">make_subplots</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">horizontal_spacing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                    <span class="n">subplot_titles</span><span class="o">=</span><span class="p">[</span><span class="s2">"Edad media (años)"</span><span class="p">,</span> <span class="s2">"Estatura media (cm)"</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="n">edad</span><span class="p">,</span> <span class="s2">"años"</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="s2">"cm"</span><span class="p">)]:</span>
+    <span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="n">nombre</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">"M"</span><span class="p">,</span> <span class="s2">"Hombres"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"W"</span><span class="p">,</span> <span class="s2">"Mujeres"</span><span class="p">)]:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">por_anio</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">g</span><span class="p">])</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">nombre</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines+markers"</span><span class="p">,</span>
+                        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">PAL</span><span class="p">[</span><span class="n">g</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">6</span><span class="p">),</span>
+                        <span class="n">legendgroup</span><span class="o">=</span><span class="n">g</span><span class="p">,</span> <span class="n">showlegend</span><span class="o">=</span><span class="p">(</span><span class="n">col</span> <span class="o">==</span> <span class="mi">1</span><span class="p">),</span>
+                        <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">"%</span><span class="si">{x}</span><span class="s2"> · "</span> <span class="o">+</span> <span class="n">nombre</span> <span class="o">+</span> <span class="s2">"&lt;br&gt;%</span><span class="si">{y:.1f}</span><span class="s2"> "</span> <span class="o">+</span> <span class="n">u</span> <span class="o">+</span> <span class="s2">"&lt;extra&gt;&lt;/extra&gt;"</span><span class="p">,</span>
+                        <span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">col</span><span class="p">)</span>
+    <span class="n">bandas</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">col</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">dtick</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tickangle</span><span class="o">=-</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">estilo_plotly</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"Edad media y estatura media de los jugadores por año y género"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">title_text</span><span class="o">=</span><span class="s2">"Año"</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mi">520</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">140</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mf">0.98</span><span class="p">),</span>
+                  <span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mf">1.16</span><span class="p">,</span> <span class="n">yanchor</span><span class="o">=</span><span class="s2">"bottom"</span><span class="p">))</span>
+<span class="n">fig</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="height:520px; width:100%;">            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script><script>if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-4.1.1.min.js" integrity="sha256-O24V1F27f8pb0glCkelh3cVHLNiHAJ5gCaVtq2aNch8=" crossorigin="anonymous"></script>                <div id="6150d5af-00b8-4a87-8c11-68663cea8e12" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("6150d5af-00b8-4a87-8c11-68663cea8e12")) {                    Plotly.newPlot(                        "6150d5af-00b8-4a87-8c11-68663cea8e12",                        [{"hovertemplate":"%{x} \u00b7 Hombres\u003cbr\u003e%{y:.1f} a\u00f1os\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"M","line":{"color":"#2F6690","width":2},"marker":{"size":6},"mode":"lines+markers","name":"Hombres","showlegend":true,"x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"9GcKBEcpPkCx6yMTh2A8QG8eaPsv+TxAOOXYO7BGPUBi615iC4U9QPGuA1hDwT1AB6GENKyePUBwQinDjas9QGRrDwNkij1AfipYE33APUDwdbb+XKY9QBoGsu+iMD1ABmScUSKcPUBrxPhPrpY8QApzU23Z2zxA6baOkK0cPUBRZvU7Rw49QLACobxoJz1A1xsk\u002fSLoO0B3Cf4BKKc8QA=="},"type":"scatter","xaxis":"x","yaxis":"y"},{"hovertemplate":"%{x} \u00b7 Mujeres\u003cbr\u003e%{y:.1f} a\u00f1os\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"W","line":{"color":"#C97B63","width":2},"marker":{"size":6},"mode":"lines+markers","name":"Mujeres","showlegend":true,"x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"cD7IWLm3PECtp9jaoVc7QGipR+0xazxArHeLfVyrPEBM8r+atO08QB9+tHVcTDxAU28p07J3PEBy\u002fXSeI4o8QJcAAv8fyzxA3wnW0KN0PECqQOoFAu87QKdc2ENuPTtAU75p8pWQO0CWc9VGFxA7QJ3nvn+6LDtA9t\u002f7sI\u002f3O0A+dSrWego8QFJROFNBeztA9ZUMpORMOkBi9BgFX7s6QA=="},"type":"scatter","xaxis":"x","yaxis":"y"},{"hovertemplate":"%{x} \u00b7 Hombres\u003cbr\u003e%{y:.1f} cm\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"M","line":{"color":"#2F6690","width":2},"marker":{"size":6},"mode":"lines+markers","name":"Hombres","showlegend":false,"x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"nKZeMlInaEDGxsR8JhNoQM3SoM50FGhAyS+W\u002fGInaEAqQZ4S5BloQBhb7bu5F2hAgTWfR6YeaEBSVIFBWyJoQI5TC1vXLmhAmtsDTL0xaEAitnI9BDhoQJrc62ODWGhAwLYgGtBeaEDil8qGLFRoQDOoIaGxSmhAZE9OclZCaEBo6W\u002fA7ERoQCScKavZRWhAHInuIh82aEBRR7agcTNoQA=="},"type":"scatter","xaxis":"x2","yaxis":"y2"},{"hovertemplate":"%{x} \u00b7 Mujeres\u003cbr\u003e%{y:.1f} cm\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"W","line":{"color":"#C97B63","width":2},"marker":{"size":6},"mode":"lines+markers","name":"Mujeres","showlegend":false,"x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"Egu40x8pZkDzLEFuKilmQBfAi+z\u002fNWZAxDWxXstJZkCqTvmcOk1mQKg\u002f0DFJWGZAC1YuYx1tZkBxgUMHpHFmQBXSjpkIfWZAr7EVqDeEZkCsPE5kmYZmQMOVb93phGZAk9qZ3+aNZkApnYX4bZxmQLLqdURhnWZA3EMTG8yYZkDl2QpCNZhmQBD81S4Km2ZALGHmf4mBZkCl3U57I4dmQA=="},"type":"scatter","xaxis":"x2","yaxis":"y2"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"anchor":"y","domain":[0.0,0.45],"dtick":2,"tickangle":-45,"title":{"text":"A\u00f1o"},"gridcolor":"#ECEEF1","showticklabels":true,"automargin":true},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":""},"gridcolor":"#ECEEF1","showticklabels":true,"automargin":true},"xaxis2":{"anchor":"y2","domain":[0.55,1.0],"dtick":2,"tickangle":-45,"title":{"text":"A\u00f1o"}},"yaxis2":{"anchor":"x2","domain":[0.0,1.0]},"annotations":[{"font":{"size":16},"showarrow":false,"text":"Edad media (a\u00f1os)","x":0.225,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":16},"showarrow":false,"text":"Estatura media (cm)","x":0.775,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"color":"#6B7280","size":10},"showarrow":false,"text":"Fuente: vb_matches.csv (BigTimeStats v\u00eda TidyTuesday). Elaboraci\u00f3n propia.","x":0,"xanchor":"left","xref":"paper","y":0,"yanchor":"top","yref":"paper","yshift":-70}],"shapes":[{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":1999.5,"x1":2000.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2010.5,"x1":2012.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2018.5,"x1":2019.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":1999.5,"x1":2000.5,"xref":"x2","y0":0,"y1":1,"yref":"y2 domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2010.5,"x1":2012.5,"xref":"x2","y0":0,"y1":1,"yref":"y2 domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2018.5,"x1":2019.5,"xref":"x2","y0":0,"y1":1,"yref":"y2 domain"}],"title":{"text":"Edad media y estatura media de los jugadores por a\u00f1o y g\u00e9nero","x":0,"y":0.98},"font":{"family":"Arial","size":13,"color":"#1F2937"},"legend":{"orientation":"h","x":0,"y":1.16,"xanchor":"left","yanchor":"bottom"},"margin":{"t":140,"b":100,"l":70,"r":20},"separators":",.","plot_bgcolor":"white","paper_bgcolor":"white","height":520},                        {"responsive": true}                    ).then(function(){
+                            
+var gd = document.getElementById('6150d5af-00b8-4a87-8c11-68663cea8e12');
+var x = new MutationObserver(function (mutations, observer) {{
+        var display = window.getComputedStyle(gd).display;
+        if (!display || display === 'none') {{
+            console.log([gd, 'removed!']);
+            Plotly.purge(gd);
+            observer.disconnect();
+        }}
+}});
+
+// Listen for the removal of the full notebook cells
+var notebookContainer = gd.closest('#notebook-container');
+if (notebookContainer) {{
+    x.observe(notebookContainer, {childList: true});
+}}
+
+// Listen for the clearing of the current output cell
+var outputEl = gd.closest('.output');
+if (outputEl) {{
+    x.observe(outputEl, {childList: true});
+}}
+
+                        })                };            </script>        </div></div></div>
+</div>
+<p>Entre 2001 y 2019, la edad media oscila entre <span class="output text_plain">26,3</span> y <span class="output text_plain">29,8</span> años, siempre algo mayor en hombres que en mujeres (Figura 7.4). En los últimos años las mujeres son más jóvenes: su edad media baja a <span class="output text_plain">26,3</span> años en 2018. La estatura media cambia poco: varía <span class="output text_plain">2,4</span> cm en hombres y <span class="output text_plain">3,6</span> cm en mujeres en todo el periodo, aunque en las mujeres hay un aumento gradual, de unos <span class="output text_plain">178</span> cm a principios de siglo a unos <span class="output text_plain">181</span> cm al final.</p>
+</section>
+<section id="tasa-de-sorpresas-por-ano">
+<h2><span class="section-number">7.3. </span>Tasa de sorpresas por año<a class="headerlink" href="#tasa-de-sorpresas-por-ano" title="Link to this heading">#</a></h2>
+<p><strong>Figura 7.5.</strong> Tasa de sorpresas por año y circuito.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">rank_diff</span><span class="o">.</span><span class="n">notna</span><span class="p">()]</span>
+<span class="n">ua</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">"year"</span><span class="p">,</span> <span class="s2">"circuit"</span><span class="p">])</span><span class="o">.</span><span class="n">es_upset</span><span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s2">"mean"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">])</span>
+<span class="n">ua</span> <span class="o">=</span> <span class="n">ua</span><span class="p">[</span><span class="n">ua</span><span class="p">[</span><span class="s2">"size"</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">30</span><span class="p">][</span><span class="s2">"mean"</span><span class="p">]</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span>
+<span class="n">ut</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"year"</span><span class="p">)</span><span class="o">.</span><span class="n">es_upset</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span>
+<span class="n">tasa_global</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">r</span><span class="o">.</span><span class="n">es_upset</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"FIVB"</span><span class="p">,</span> <span class="s2">"AVP"</span><span class="p">]:</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">por_anio</span><span class="p">(</span><span class="n">ua</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines+markers"</span><span class="p">,</span>
+                    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">PAL</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span>
+                    <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">"%</span><span class="si">{x}</span><span class="s2"> · "</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="s2">"&lt;br&gt;Sorpresas: %</span><span class="si">{y:.1f}</span><span class="s2"> %&lt;extra&gt;&lt;/extra&gt;"</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">por_anio</span><span class="p">(</span><span class="n">ut</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Total"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"lines"</span><span class="p">,</span>
+                <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">PAL</span><span class="p">[</span><span class="s2">"Perdedor"</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="mf">2.5</span><span class="p">),</span>
+                <span class="n">hovertemplate</span><span class="o">=</span><span class="s2">"%</span><span class="si">{x}</span><span class="s2"> · Total&lt;br&gt;Sorpresas: %</span><span class="si">{y:.1f}</span><span class="s2"> %&lt;extra&gt;&lt;/extra&gt;"</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_hline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">tasa_global</span><span class="p">,</span> <span class="n">line_dash</span><span class="o">=</span><span class="s2">"dot"</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="n">GRIS_TOTAL</span><span class="p">,</span>
+              <span class="n">annotation_text</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Tasa global: </span><span class="si">{</span><span class="n">fmt_pct</span><span class="p">(</span><span class="n">tasa_global</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">annotation_position</span><span class="o">=</span><span class="s2">"top left"</span><span class="p">)</span>
+<span class="n">bandas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="n">dtick</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tickangle</span><span class="o">=-</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span> <span class="n">ticksuffix</span><span class="o">=</span><span class="s2">" %"</span><span class="p">)</span>
+<span class="n">estilo_plotly</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"Tasa de sorpresas por año y circuito"</span><span class="p">,</span> <span class="s2">"Año"</span><span class="p">,</span> <span class="s2">"</span><span class="si">% d</span><span class="s2">e sorpresas"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="height:525px; width:100%;">            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script><script>if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-4.1.1.min.js" integrity="sha256-O24V1F27f8pb0glCkelh3cVHLNiHAJ5gCaVtq2aNch8=" crossorigin="anonymous"></script>                <div id="d07f78da-3edc-4f78-86a9-2db56c71d2d3" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("d07f78da-3edc-4f78-86a9-2db56c71d2d3")) {                    Plotly.newPlot(                        "d07f78da-3edc-4f78-86a9-2db56c71d2d3",                        [{"hovertemplate":"%{x} \u00b7 FIVB\u003cbr\u003eSorpresas: %{y:.1f} %\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#1A8A9A","width":2},"marker":{"size":7},"mode":"lines+markers","name":"FIVB","x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"doMp8lk3QEDwxQIw7+w9QJy1WZu1WTtAQZjq8xHIO0CCt6CnvPFAQOILKQI2Rj5AI6FFxFEAQEDtSNs804w+QLmJLaw\u002fqD5A12gTbKUHPEBm\u002fUhLdMg+QBIswRIswTxAaJUFh5LuPkDQn+qllug\u002fQIHvyoHvyj9AhDnW7ZNWQECkIO3UwRc\u002fQGtMpAcqZz9Atl2M4\u002fvkQUDGL7c0YPxBQA=="},"type":"scatter"},{"hovertemplate":"%{x} \u00b7 AVP\u003cbr\u003eSorpresas: %{y:.1f} %\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#D9A441","width":2},"marker":{"size":7},"mode":"lines+markers","name":"AVP","x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"AAAAAAAA+H8AAAAAAAD4f2tRxY9sXDpAzObT8qhnO0DuiDvijrg3QCuJCY9htzlA4SWYWiOwNkC9Zfm9azU4QPMxX2N7hTdARN0MWnY8NkAyEV8vNjU4QAAAAAAAAPh\u002fbUlb0pa0NUDmmO8rAcY6QGijvrNR3ztAAAAAAAAAPkCOT3bkYBM\u002fQOWzbjBFvj5At23btm2bOkAcs06Lkvo\u002fQA=="},"type":"scatter"},{"hovertemplate":"%{x} \u00b7 Total\u003cbr\u003eSorpresas: %{y:.1f} %\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#E4572E","width":2.5},"mode":"lines","name":"Total","x":{"dtype":"i2","bdata":"0AfRB9IH0wfUB9UH1gfXB9gH2QfaB9sH3AfdB94H3wfgB+EH4gfjBw=="},"y":{"dtype":"f8","bdata":"doMp8lk3QEDwxQIw7+w9QLFr\u002fROlADtADnL1Uc+jO0BFF1100QE+QLHxQTRoVzxA1BV1RV1RO0AFE\u002fubtKg7QN9CbvB2CjxA712l6zRDOUBwC+cHBq08QBIswRIswTxAzbDFLgI1PkC5vdmNA\u002f4+QBusrZlYFj9AIYQQQgghQEBw+ZZv+RY\u002fQKlSrD4POz9AIZZpbSxSQUDA1se+o61BQA=="},"type":"scatter"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"shapes":[{"line":{"color":"#64748B","dash":"dot"},"type":"line","x0":0,"x1":1,"xref":"x domain","y0":29.914754098360657,"y1":29.914754098360657,"yref":"y"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":1999.5,"x1":2000.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2010.5,"x1":2012.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"fillcolor":"#C9D6E3","line":{"width":0},"opacity":0.35,"type":"rect","x0":2018.5,"x1":2019.5,"xref":"x","y0":0,"y1":1,"yref":"y domain"}],"annotations":[{"showarrow":false,"text":"Tasa global: 29,9 %","x":0,"xanchor":"left","xref":"x domain","y":29.914754098360657,"yanchor":"bottom","yref":"y"},{"font":{"color":"#6B7280","size":10},"showarrow":false,"text":"Fuente: vb_matches.csv (BigTimeStats v\u00eda TidyTuesday). Elaboraci\u00f3n propia.","x":0,"xanchor":"left","xref":"paper","y":0,"yanchor":"top","yref":"paper","yshift":-70}],"xaxis":{"dtick":1,"tickangle":-45,"title":{"text":"A\u00f1o"},"gridcolor":"#ECEEF1","showticklabels":true,"automargin":true},"yaxis":{"range":[15,45],"ticksuffix":" %","title":{"text":"% de sorpresas"},"gridcolor":"#ECEEF1","showticklabels":true,"automargin":true},"title":{"text":"Tasa de sorpresas por a\u00f1o y circuito","x":0,"y":0.97},"font":{"family":"Arial","size":13,"color":"#1F2937"},"legend":{"orientation":"h","x":0,"y":1.02,"xanchor":"left","yanchor":"bottom"},"margin":{"t":90,"b":100,"l":70,"r":20},"separators":",.","plot_bgcolor":"white","paper_bgcolor":"white"},                        {"responsive": true}                    ).then(function(){
+                            
+var gd = document.getElementById('d07f78da-3edc-4f78-86a9-2db56c71d2d3');
+var x = new MutationObserver(function (mutations, observer) {{
+        var display = window.getComputedStyle(gd).display;
+        if (!display || display === 'none') {{
+            console.log([gd, 'removed!']);
+            Plotly.purge(gd);
+            observer.disconnect();
+        }}
+}});
+
+// Listen for the removal of the full notebook cells
+var notebookContainer = gd.closest('#notebook-container');
+if (notebookContainer) {{
+    x.observe(notebookContainer, {childList: true});
+}}
+
+// Listen for the clearing of the current output cell
+var outputEl = gd.closest('.output');
+if (outputEl) {{
+    x.observe(outputEl, {childList: true});
+}}
+
+                        })                };            </script>        </div></div></div>
+</div>
+<p>La tasa total de sorpresas se mueve entre <span class="output text_plain">25,3 %</span> y <span class="output text_plain">35,4 %</span> desde 2001, alrededor de la tasa global de <span class="output text_plain">29,9 %</span> (Figura 7.5), pero no de forma estable: pasa de un promedio de <span class="output text_plain">28,0 %</span> en 2001–2010 a <span class="output text_plain">31,4 %</span> en 2013–2016 y <span class="output text_plain">33,7 %</span> en 2017–2019. La FIVB tiene más sorpresas que la AVP en casi todos los años, coherente con la Figura 6.11. <span class="output text_plain">La AVP no tiene partidos con ranking de ambas parejas en 2011, por eso su línea se corta.</span> La prueba de tendencia está en la Tabla 7.1.</p>
+</section>
+<section id="prueba-de-tendencia">
+<h2><span class="section-number">7.4. </span>Prueba de tendencia<a class="headerlink" href="#prueba-de-tendencia" title="Link to this heading">#</a></h2>
+<p><strong>Tabla 7.1.</strong> Prueba de tendencia de Mann-Kendall y pendiente lineal por serie.</p>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<div class="output text_html"><div id="nccyagphho" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>
+#nccyagphho table {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+#nccyagphho thead, tbody, tfoot, tr, td, th { border-style: none; }
+ tr { background-color: transparent; }
+#nccyagphho p { margin: 0; padding: 0; }
+ #nccyagphho .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #000000; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #000000; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #nccyagphho .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #nccyagphho .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #nccyagphho .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #nccyagphho .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #nccyagphho .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
+ #nccyagphho .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #nccyagphho .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #nccyagphho .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #nccyagphho .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #nccyagphho .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #nccyagphho .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #nccyagphho .gt_spanner_row { border-bottom-style: hidden; }
+ #nccyagphho .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #nccyagphho .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: middle; }
+ #nccyagphho .gt_from_md> :first-child { margin-top: 0; }
+ #nccyagphho .gt_from_md> :last-child { margin-bottom: 0; }
+ #nccyagphho .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: none; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
+ #nccyagphho .gt_stub { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #5F5F5F; padding-left: 5px; padding-right: 5px; }
+ #nccyagphho .gt_indent_1 { text-indent: 5px; }
+ #nccyagphho .gt_indent_2 { text-indent: calc(5px * 2); }
+ #nccyagphho .gt_indent_3 { text-indent: calc(5px * 3); }
+ #nccyagphho .gt_indent_4 { text-indent: calc(5px * 4); }
+ #nccyagphho .gt_indent_5 { text-indent: calc(5px * 5); }
+ #nccyagphho .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #nccyagphho .gt_row_group_first td { border-top-width: 2px; }
+ #nccyagphho .gt_row_group_first th { border-top-width: 2px; }
+ #nccyagphho .gt_striped { color: #333333; background-color: #F4F4F4; }
+ #nccyagphho .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
+ #nccyagphho .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #nccyagphho .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
+ #nccyagphho .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #nccyagphho .gt_grand_summary_row { color: #333333; background-color: #D5D5D5; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #nccyagphho .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
+ #nccyagphho .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
+ #nccyagphho .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #nccyagphho .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #nccyagphho .gt_left { text-align: left; }
+ #nccyagphho .gt_center { text-align: center; }
+ #nccyagphho .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #nccyagphho .gt_font_normal { font-weight: normal; }
+ #nccyagphho .gt_font_bold { font-weight: bold; }
+ #nccyagphho .gt_font_italic { font-style: italic; }
+ #nccyagphho .gt_super { font-size: 65%; }
+ #nccyagphho .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #nccyagphho .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
+ #nccyagphho .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #nccyagphho .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #nccyagphho .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #nccyagphho .gt_asterisk { font-size: 100%; vertical-align: 0; }
+ 
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+
+<tr class="gt_col_headings">
+  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Serie">Serie</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Años-usados">Años usados</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="n">n</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="tau-de-Kendall">tau de Kendall</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="p-valor">p-valor</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Pendiente">Pendiente</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Unidad">Unidad</th>
+  <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Tendencia">Tendencia</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+  <tr>
+    <td headers="Serie" class="gt_row gt_left">Partidos por torneo (FIVB)</td>
+    <td headers="Años-usados" class="gt_row gt_left">2001–2019</td>
+    <td headers="n" class="gt_row gt_center">19</td>
+    <td headers="tau-de-Kendall" class="gt_row gt_right">−0,018</td>
+    <td headers="p-valor" class="gt_row gt_left">0,945</td>
+    <td headers="Pendiente" class="gt_row gt_right">−1,740</td>
+    <td headers="Unidad" class="gt_row gt_left">partidos/año</td>
+    <td headers="Tendencia" class="gt_row gt_center">Sin tendencia</td>
+  </tr>
+  <tr>
+    <td headers="Serie" class="gt_row gt_left gt_striped">Partidos por torneo (AVP)</td>
+    <td headers="Años-usados" class="gt_row gt_left gt_striped">2002–2019 (sin 2011, 2012)</td>
+    <td headers="n" class="gt_row gt_center gt_striped">16</td>
+    <td headers="tau-de-Kendall" class="gt_row gt_right gt_striped">0,200</td>
+    <td headers="p-valor" class="gt_row gt_left gt_striped">0,306</td>
+    <td headers="Pendiente" class="gt_row gt_right gt_striped">1,229</td>
+    <td headers="Unidad" class="gt_row gt_left gt_striped">partidos/año</td>
+    <td headers="Tendencia" class="gt_row gt_center gt_striped">Sin tendencia</td>
+  </tr>
+  <tr>
+    <td headers="Serie" class="gt_row gt_left">Duración media (FIVB)</td>
+    <td headers="Años-usados" class="gt_row gt_left">2001–2019</td>
+    <td headers="n" class="gt_row gt_center">19</td>
+    <td headers="tau-de-Kendall" class="gt_row gt_right">−0,474</td>
+    <td headers="p-valor" class="gt_row gt_left">0,004</td>
+    <td headers="Pendiente" class="gt_row gt_right">−0,311</td>
+    <td headers="Unidad" class="gt_row gt_left">min/año</td>
+    <td headers="Tendencia" class="gt_row gt_center">Decreciente</td>
+  </tr>
+  <tr>
+    <td headers="Serie" class="gt_row gt_left gt_striped">Duración media (AVP)</td>
+    <td headers="Años-usados" class="gt_row gt_left gt_striped">2002–2019 (sin 2011, 2012)</td>
+    <td headers="n" class="gt_row gt_center gt_striped">16</td>
+    <td headers="tau-de-Kendall" class="gt_row gt_right gt_striped">−0,083</td>
+    <td headers="p-valor" class="gt_row gt_left gt_striped">0,690</td>
+    <td headers="Pendiente" class="gt_row gt_right gt_striped">−0,057</td>
+    <td headers="Unidad" class="gt_row gt_left gt_striped">min/año</td>
+    <td headers="Tendencia" class="gt_row gt_center gt_striped">Sin tendencia</td>
+  </tr>
+  <tr>
+    <td headers="Serie" class="gt_row gt_left">Edad media (hombres)</td>
+    <td headers="Años-usados" class="gt_row gt_left">2001–2019</td>
+    <td headers="n" class="gt_row gt_center">19</td>
+    <td headers="tau-de-Kendall" class="gt_row gt_right">−0,251</td>
+    <td headers="p-valor" class="gt_row gt_left">0,143</td>
+    <td headers="Pendiente" class="gt_row gt_right">−0,034</td>
+    <td headers="Unidad" class="gt_row gt_left">años/año</td>
+    <td headers="Tendencia" class="gt_row gt_center">Sin tendencia</td>
+  </tr>
+  <tr>
+    <td headers="Serie" class="gt_row gt_left gt_striped">Edad media (mujeres)</td>
+    <td headers="Años-usados" class="gt_row gt_left gt_striped">2001–2019</td>
+    <td headers="n" class="gt_row gt_center gt_striped">19</td>
+    <td headers="tau-de-Kendall" class="gt_row gt_right gt_striped">−0,474</td>
+    <td headers="p-valor" class="gt_row gt_left gt_striped">0,004</td>
+    <td headers="Pendiente" class="gt_row gt_right gt_striped">−0,089</td>
+    <td headers="Unidad" class="gt_row gt_left gt_striped">años/año</td>
+    <td headers="Tendencia" class="gt_row gt_center gt_striped">Decreciente</td>
+  </tr>
+  <tr>
+    <td headers="Serie" class="gt_row gt_left">Estatura media (hombres)</td>
+    <td headers="Años-usados" class="gt_row gt_left">2001–2019</td>
+    <td headers="n" class="gt_row gt_center">19</td>
+    <td headers="tau-de-Kendall" class="gt_row gt_right">0,544</td>
+    <td headers="p-valor" class="gt_row gt_left">&lt; 0,001</td>
+    <td headers="Pendiente" class="gt_row gt_right">0,093</td>
+    <td headers="Unidad" class="gt_row gt_left">cm/año</td>
+    <td headers="Tendencia" class="gt_row gt_center">Creciente</td>
+  </tr>
+  <tr>
+    <td headers="Serie" class="gt_row gt_left gt_striped">Estatura media (mujeres)</td>
+    <td headers="Años-usados" class="gt_row gt_left gt_striped">2001–2019</td>
+    <td headers="n" class="gt_row gt_center gt_striped">19</td>
+    <td headers="tau-de-Kendall" class="gt_row gt_right gt_striped">0,731</td>
+    <td headers="p-valor" class="gt_row gt_left gt_striped">&lt; 0,001</td>
+    <td headers="Pendiente" class="gt_row gt_right gt_striped">0,173</td>
+    <td headers="Unidad" class="gt_row gt_left gt_striped">cm/año</td>
+    <td headers="Tendencia" class="gt_row gt_center gt_striped">Creciente</td>
+  </tr>
+  <tr>
+    <td headers="Serie" class="gt_row gt_left">Tasa de sorpresas (total)</td>
+    <td headers="Años-usados" class="gt_row gt_left">2001–2019</td>
+    <td headers="n" class="gt_row gt_center">19</td>
+    <td headers="tau-de-Kendall" class="gt_row gt_right">0,673</td>
+    <td headers="p-valor" class="gt_row gt_left">&lt; 0,001</td>
+    <td headers="Pendiente" class="gt_row gt_right">0,341</td>
+    <td headers="Unidad" class="gt_row gt_left">pp/año</td>
+    <td headers="Tendencia" class="gt_row gt_center">Creciente</td>
+  </tr>
+  <tr>
+    <td headers="Serie" class="gt_row gt_left gt_striped">Tasa de sorpresas (FIVB)</td>
+    <td headers="Años-usados" class="gt_row gt_left gt_striped">2001–2019</td>
+    <td headers="n" class="gt_row gt_center gt_striped">19</td>
+    <td headers="tau-de-Kendall" class="gt_row gt_right gt_striped">0,520</td>
+    <td headers="p-valor" class="gt_row gt_left gt_striped">0,001</td>
+    <td headers="Pendiente" class="gt_row gt_right gt_striped">0,258</td>
+    <td headers="Unidad" class="gt_row gt_left gt_striped">pp/año</td>
+    <td headers="Tendencia" class="gt_row gt_center gt_striped">Creciente</td>
+  </tr>
+  <tr>
+    <td headers="Serie" class="gt_row gt_left">Tasa de sorpresas (AVP)</td>
+    <td headers="Años-usados" class="gt_row gt_left">2002–2019 (sin 2011, 2012)</td>
+    <td headers="n" class="gt_row gt_center">16</td>
+    <td headers="tau-de-Kendall" class="gt_row gt_right">0,417</td>
+    <td headers="p-valor" class="gt_row gt_left">0,026</td>
+    <td headers="Pendiente" class="gt_row gt_right">0,370</td>
+    <td headers="Unidad" class="gt_row gt_left">pp/año</td>
+    <td headers="Tendencia" class="gt_row gt_center">Creciente</td>
+  </tr>
+</tbody>
+
+</table>
+
+</div>
+</div></div>
+</div>
+<p>De las <span class="output text_plain">11</span> series, <span class="output text_plain">7</span> muestran una tendencia significativa con α = 0,05 (Tabla 7.1): <span class="output text_plain">duración media (fivb), decreciente (-0,31 min/año); edad media (mujeres), decreciente (-0,09 años/año); estatura media (hombres), creciente (0,09 cm/año); estatura media (mujeres), creciente (0,17 cm/año); tasa de sorpresas (total), creciente (0,34 pp/año); tasa de sorpresas (fivb), creciente (0,26 pp/año); tasa de sorpresas (avp), creciente (0,37 pp/año)</span>. El resultado más relevante es la tasa de sorpresas: crece en el total (tau = <span class="output text_plain">0,67</span>, p <span class="output text_plain">&lt; 0,001</span>), en la FIVB (tau = <span class="output text_plain">0,52</span>) y en la AVP (tau = <span class="output text_plain">0,42</span>). Como aparece en los dos circuitos y ya antes de 2017, no se explica solo por los torneos pequeños de la FIVB: el circuito profesional se ha vuelto más parejo y el ranking anticipa el resultado algo peor que hace 20 años. Con tan pocos años, la potencia de la prueba es baja: una serie «sin tendencia» no prueba que el deporte sea estable, solo que estos datos no alcanzan para afirmar un cambio. Esto confirma la decisión de no ajustar un modelo de series de tiempo: con <span class="output text_plain">16</span> a <span class="output text_plain">19</span> puntos por serie no hay información suficiente para pronosticar.</p>
+<div class="tip admonition">
+<p class="admonition-title">Para el entrenador</p>
+<p>El circuito es hoy más parejo que hace 20 años: las sorpresas pasaron de cerca del <span class="output text_plain">28 %</span> de los partidos a cerca del <span class="output text_plain">34 %</span>. Para preparar un partido, eso significa que una ventaja de ranking vale algo menos que antes y que conviene usar las probabilidades de los años recientes. La edad y la estatura cambian poco, con dos matices: las jugadoras son hoy algo más altas y más jóvenes, y desde 2017 la FIVB tiene muchos más torneos pequeños, con partidos más cortos.</p>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="06_eda.html"
+       title="página anterior">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">anterior</p>
+        <p class="prev-next-title"><span class="section-number">6. </span>Análisis exploratorio (EDA)</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="08_modelado.html"
+       title="siguiente página">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">siguiente</p>
+        <p class="prev-next-title"><span class="section-number">8. </span>Modelado</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+Por Nicolle Ramírez y Roger Daza
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2026.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
