@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 460" preserveAspectRatio="xMaxYMid slice">
+  <!-- Portada: playa con red; al cargar, un balón cruza la red de un saque -->
+  <style>
+    .olas { animation: olas 16s linear infinite; }
+    @keyframes olas { to { transform: translateX(-300px); } }
+    .vuelo-x { animation: vueloX 1.7s linear .5s both; }
+    @keyframes vueloX { from { transform: translateX(-560px); } to { transform: translateX(0); } }
+    .vuelo-y { animation: vueloY 1.7s .5s both; }
+    @keyframes vueloY {
+      0%   { transform: translateY(-60px);  animation-timing-function: cubic-bezier(.3, .7, .6, 1); }
+      48%  { transform: translateY(-322px); animation-timing-function: cubic-bezier(.4, 0, .8, .4); }
+      84%  { transform: translateY(0);      animation-timing-function: ease-out; }
+      92%  { transform: translateY(-26px);  animation-timing-function: ease-in; }
+      100% { transform: translateY(0); }
+    }
+    .giro { transform-box: fill-box; transform-origin: center; animation: giro 1.7s ease-out .5s both; }
+    @keyframes giro { from { transform: rotate(-540deg); } to { transform: rotate(0); } }
+    .sombra { transform-box: fill-box; transform-origin: center; animation: sombra 1.7s .5s both; }
+    @keyframes sombra {
+      0% { transform: translateX(-560px) scale(.8); opacity: .5; }
+      48% { transform: translateX(-270px) scale(.35); opacity: .15; }
+      84% { transform: translateX(-30px) scale(1); opacity: .45; }
+      100% { transform: translateX(0) scale(1); opacity: .45; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#BFE3E6"/>
+      <stop offset=".62" stop-color="#E7F2EE"/>
+      <stop offset="1" stop-color="#F6EFE2"/>
+    </linearGradient>
+    <linearGradient id="agua" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1A8A9A"/>
+      <stop offset="1" stop-color="#4FA3AE"/>
+    </linearGradient>
+    <linearGradient id="arena" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EFDCAF"/>
+      <stop offset="1" stop-color="#E2C084"/>
+    </linearGradient>
+    <pattern id="granos" width="11" height="11" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="3" r="1" fill="#B88A3A" opacity=".22"/>
+      <circle cx="8" cy="8.5" r=".8" fill="#FFFFFF" opacity=".45"/>
+    </pattern>
+    <pattern id="malla" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="skewY(-6)">
+      <path d="M0 0H9M0 0V9" stroke="#0B3B5C" stroke-width="1.1" opacity=".7"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="460" fill="url(#cielo)"/>
+  <circle cx="1060" cy="92" r="48" fill="#F3C969" opacity=".9"/>
+  <circle cx="1060" cy="92" r="70" fill="#F3C969" opacity=".18"/>
+
+  <!-- mar y olas -->
+  <rect y="238" width="1200" height="52" fill="url(#agua)"/>
+  <g class="olas">
+    <path d="M0 252 q37.5 -9 75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0"
+          fill="none" stroke="#FFFFFF" stroke-width="2.5" opacity=".55"/>
+    <path d="M-40 270 q37.5 -7 75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0 t75 0"
+          fill="none" stroke="#FFFFFF" stroke-width="2" opacity=".3"/>
+  </g>
+
+  <!-- arena -->
+  <path d="M0 286 C320 272 760 298 1200 280 L1200 460 L0 460 Z" fill="url(#arena)"/>
+  <path d="M0 286 C320 272 760 298 1200 280 L1200 460 L0 460 Z" fill="url(#granos)"/>
+  <!-- líneas de la cancha -->
+  <path d="M470 430 L1190 386" stroke="#FFFFFF" stroke-width="5" opacity=".9" stroke-linecap="round"/>
+  <path d="M600 330 L1150 306" stroke="#FFFFFF" stroke-width="3.5" opacity=".75" stroke-linecap="round"/>
+
+  <!-- sombra de la red -->
+  <path d="M760 424 L1012 362 L1060 368 L812 432 Z" fill="#7A5A22" opacity=".14"/>
+  <!-- red y postes -->
+  <rect x="1006" y="150" width="7" height="214" rx="3" fill="#0B3B5C" opacity=".75"/>
+  <path d="M764 196 L1010 160 L1010 214 L764 256 Z" fill="url(#malla)"/>
+  <path d="M764 196 L1010 160" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round"/>
+  <path d="M764 256 L1010 214" stroke="#FFFFFF" stroke-width="3" opacity=".9"/>
+  <rect x="757" y="180" width="10" height="248" rx="4" fill="#0B3B5C"/>
+  <rect x="757" y="186" width="10" height="14" fill="#D9A441"/>
+
+  <!-- sombra del balón -->
+  <ellipse class="sombra" cx="1100" cy="412" rx="26" ry="6" fill="#5A4318"/>
+  <!-- balón: queda en reposo junto a la línea; al cargar, viene volando desde el saque -->
+  <g class="vuelo-x">
+    <g class="vuelo-y">
+      <g class="giro">
+        <circle cx="1100" cy="388" r="22" fill="#FFF8E7" stroke="#0B3B5C" stroke-width="2.5"/>
+        <path d="M1100 366 c-4 8 -3.5 15.5 1.5 22" fill="none" stroke="#D9A441" stroke-width="3"/>
+        <path d="M1101.5 388 c8 .8 14.6 4.6 19 10.4" fill="none" stroke="#1A8A9A" stroke-width="3"/>
+        <path d="M1101.5 388 c-4.8 6.6 -11.6 10.8 -20 11.8" fill="none" stroke="#E4572E" stroke-width="3"/>
+        <path d="M1083.5 373 c7.4 -1.2 14.4 1.4 18 15" fill="none" stroke="#0B3B5C" stroke-width="2.5"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,341 @@
+{
+ "generado": "2026-11-01 04:09:59",
+ "segundos": 53.2,
+ "politica": {
+  "semilla": 2026,
+  "unidad": "Un partido = una fila. De las dos filas de cada partido (ganador y perdedor) se conserva una al azar con numpy.random.default_rng(semilla) sobre la tabla ordenada por match_id y resultado. La variable respuesta es 'gana' (1 si esa pareja ganó).",
+  "division": "Temporal, como en el libro: entrenamiento con los partidos de 2000–2016 y prueba con los de 2017–2019, que el modelo nunca ve al entrenar.",
+  "validacion_cruzada": "StratifiedKFold de 5 pliegues dentro del entrenamiento. El modelo recomendado se elige con esta AUC, no con la prueba.",
+  "preprocesamiento": "Pipeline de scikit-learn ajustado solo con entrenamiento: estandarización (solo regresión logística) y variables indicadoras de circuito, género y etapa.",
+  "predictores": [
+   "ventaja_rank",
+   "ventaja_edad",
+   "ventaja_estatura_cm",
+   "dif_clasif",
+   "circuit",
+   "gender",
+   "etapa"
+  ],
+  "etiquetas_predictores": {
+   "ventaja_rank": "Ventaja de ranking",
+   "ventaja_edad": "Ventaja de edad",
+   "ventaja_estatura_cm": "Ventaja de estatura",
+   "dif_clasif": "Diferencia en clasificatoria",
+   "circuit": "Circuito",
+   "gender": "Género",
+   "etapa": "Etapa del torneo"
+  },
+  "excluidas_por_fuga": [
+   "aces",
+   "attacks",
+   "blocks",
+   "digs",
+   "duracion_min",
+   "errors",
+   "es_forfeit",
+   "es_retirado",
+   "es_upset",
+   "hitpct",
+   "kills",
+   "l_rank",
+   "n_sets",
+   "puntos_totales",
+   "rank_diff",
+   "resultado",
+   "serve_errors",
+   "tiene_stats_completas",
+   "w_rank"
+  ],
+  "descartes": {
+   "partidos_iniciales": 76749,
+   "partidos_forfeit": 909,
+   "partidos_sin_datos_completos": 28078,
+   "partidos_modelo": 47762
+  },
+  "n_entrenamiento": 40522,
+  "n_prueba": 7240,
+  "pct_gana_entrenamiento": 50.086373,
+  "pct_gana_prueba": 49.198895,
+  "alcance": "Partidos FIVB y AVP de 2000 a 2019. Asociaciones observacionales, no causales."
+ },
+ "modelos": {
+  "Regresión logística": {
+   "auc_cv_media": 0.765992,
+   "auc_cv_de": 0.004875,
+   "auc_cv_pliegues": [
+    0.767683,
+    0.764822,
+    0.766561,
+    0.758741,
+    0.772152
+   ],
+   "prueba": {
+    "accuracy": 0.657873,
+    "precision": 0.649161,
+    "recall": 0.66283,
+    "f1": 0.655924,
+    "roc_auc": 0.711802,
+    "n": 7240
+   },
+   "prueba_con_ranking": {
+    "accuracy": 0.657873,
+    "precision": 0.649161,
+    "recall": 0.66283,
+    "f1": 0.655924,
+    "roc_auc": 0.711802,
+    "n": 7240
+   },
+   "matriz_confusion": {
+    "etiquetas": [
+     "Gana",
+     "Pierde"
+    ],
+    "valores": [
+     [
+      2361,
+      1201
+     ],
+     [
+      1276,
+      2402
+     ]
+    ]
+   },
+   "hiperparametros": "L2, C = 1, max_iter = 2000; predictores numéricos estandarizados"
+  },
+  "Random Forest": {
+   "auc_cv_media": 0.771206,
+   "auc_cv_de": 0.00445,
+   "auc_cv_pliegues": [
+    0.776446,
+    0.768745,
+    0.770855,
+    0.765375,
+    0.77461
+   ],
+   "prueba": {
+    "accuracy": 0.652348,
+    "precision": 0.644938,
+    "recall": 0.652723,
+    "f1": 0.648807,
+    "roc_auc": 0.704704,
+    "n": 7240
+   },
+   "prueba_con_ranking": {
+    "accuracy": 0.652348,
+    "precision": 0.644938,
+    "recall": 0.652723,
+    "f1": 0.648807,
+    "roc_auc": 0.704704,
+    "n": 7240
+   },
+   "matriz_confusion": {
+    "etiquetas": [
+     "Gana",
+     "Pierde"
+    ],
+    "valores": [
+     [
+      2325,
+      1237
+     ],
+     [
+      1280,
+      2398
+     ]
+    ]
+   },
+   "hiperparametros": "500 árboles, max_features = 3, min_samples_split = 50"
+  },
+  "XGBoost": {
+   "auc_cv_media": 0.774232,
+   "auc_cv_de": 0.004072,
+   "auc_cv_pliegues": [
+    0.778689,
+    0.77257,
+    0.773626,
+    0.768612,
+    0.777662
+   ],
+   "prueba": {
+    "accuracy": 0.659116,
+    "precision": 0.651189,
+    "recall": 0.661426,
+    "f1": 0.656267,
+    "roc_auc": 0.713154,
+    "n": 7240
+   },
+   "prueba_con_ranking": {
+    "accuracy": 0.659116,
+    "precision": 0.651189,
+    "recall": 0.661426,
+    "f1": 0.656267,
+    "roc_auc": 0.713154,
+    "n": 7240
+   },
+   "matriz_confusion": {
+    "etiquetas": [
+     "Gana",
+     "Pierde"
+    ],
+    "valores": [
+     [
+      2356,
+      1206
+     ],
+     [
+      1262,
+      2416
+     ]
+    ]
+   },
+   "hiperparametros": "200 árboles, max_depth = 5, learning_rate = 0,05"
+  }
+ },
+ "regla": {
+  "accuracy": 0.658011,
+  "precision": 0.650499,
+  "recall": 0.658899,
+  "f1": 0.654672,
+  "roc_auc": 0.706578,
+  "n": 7240,
+  "cobertura_prueba_pct": 100.0,
+  "partidos_con_empate_de_ranking_pct": 0.0
+ },
+ "recomendado": "XGBoost",
+ "razon": "XGBoost tiene la mayor AUC media en la validación cruzada de entrenamiento (0,774 ± 0,004; Regresión logística 0,766, Random Forest 0,771). La regresión logística, más fácil de interpretar, queda a más de una desviación estándar, así que no se prefiere. La elección no usa el conjunto de prueba.",
+ "importancias": {
+  "Regresión logística": [
+   {
+    "variable": "ventaja_rank",
+    "etiqueta": "Ventaja de ranking",
+    "media": 0.201333,
+    "de": 0.003547
+   },
+   {
+    "variable": "ventaja_estatura_cm",
+    "etiqueta": "Ventaja de estatura",
+    "media": 0.006056,
+    "de": 0.000743
+   },
+   {
+    "variable": "dif_clasif",
+    "etiqueta": "Diferencia en clasificatoria",
+    "media": 0.002211,
+    "de": 0.000314
+   },
+   {
+    "variable": "ventaja_edad",
+    "etiqueta": "Ventaja de edad",
+    "media": 0.000466,
+    "de": 0.000238
+   },
+   {
+    "variable": "circuit",
+    "etiqueta": "Circuito",
+    "media": 6e-05,
+    "de": 0.000116
+   },
+   {
+    "variable": "etapa",
+    "etiqueta": "Etapa del torneo",
+    "media": -4.9e-05,
+    "de": 7.1e-05
+   },
+   {
+    "variable": "gender",
+    "etiqueta": "Género",
+    "media": -8.4e-05,
+    "de": 7.4e-05
+   }
+  ],
+  "Random Forest": [
+   {
+    "variable": "ventaja_rank",
+    "etiqueta": "Ventaja de ranking",
+    "media": 0.18339,
+    "de": 0.003174
+   },
+   {
+    "variable": "ventaja_estatura_cm",
+    "etiqueta": "Ventaja de estatura",
+    "media": 0.005272,
+    "de": 0.001697
+   },
+   {
+    "variable": "dif_clasif",
+    "etiqueta": "Diferencia en clasificatoria",
+    "media": 0.002204,
+    "de": 0.001147
+   },
+   {
+    "variable": "circuit",
+    "etiqueta": "Circuito",
+    "media": 0.001693,
+    "de": 0.001349
+   },
+   {
+    "variable": "etapa",
+    "etiqueta": "Etapa del torneo",
+    "media": 0.001061,
+    "de": 0.000684
+   },
+   {
+    "variable": "ventaja_edad",
+    "etiqueta": "Ventaja de edad",
+    "media": 0.000167,
+    "de": 0.001001
+   },
+   {
+    "variable": "gender",
+    "etiqueta": "Género",
+    "media": -0.00142,
+    "de": 0.000733
+   }
+  ],
+  "XGBoost": [
+   {
+    "variable": "ventaja_rank",
+    "etiqueta": "Ventaja de ranking",
+    "media": 0.199615,
+    "de": 0.003956
+   },
+   {
+    "variable": "ventaja_estatura_cm",
+    "etiqueta": "Ventaja de estatura",
+    "media": 0.005622,
+    "de": 0.000374
+   },
+   {
+    "variable": "circuit",
+    "etiqueta": "Circuito",
+    "media": 0.005171,
+    "de": 0.001471
+   },
+   {
+    "variable": "dif_clasif",
+    "etiqueta": "Diferencia en clasificatoria",
+    "media": 0.002827,
+    "de": 0.000437
+   },
+   {
+    "variable": "ventaja_edad",
+    "etiqueta": "Ventaja de edad",
+    "media": 0.001158,
+    "de": 0.000181
+   },
+   {
+    "variable": "etapa",
+    "etiqueta": "Etapa del torneo",
+    "media": 0.000457,
+    "de": 0.000178
+   },
+   {
+    "variable": "gender",
+    "etiqueta": "Género",
+    "media": 0.000322,
+    "de": 0.000444
+   }
+  ]
+ }
+}
