@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es" xml:lang="es">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Capítulo 7 Análisis temporal | ¿Qué hace ganar a una pareja de voleibol de playa?</title>
+  <meta name="description" content="Libro de análisis exploratorio de datos sobre 76.749 partidos de voleibol de playa (FIVB y AVP, 2000-2019), pensado para un entrenador que arma parejas y prepara partidos. Versión en R (bookdown)." />
+  <meta name="generator" content="bookdown 0.48 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Capítulo 7 Análisis temporal | ¿Qué hace ganar a una pareja de voleibol de playa?" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Libro de análisis exploratorio de datos sobre 76.749 partidos de voleibol de playa (FIVB y AVP, 2000-2019), pensado para un entrenador que arma parejas y prepara partidos. Versión en R (bookdown)." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Capítulo 7 Análisis temporal | ¿Qué hace ganar a una pareja de voleibol de playa?" />
+  
+  <meta name="twitter:description" content="Libro de análisis exploratorio de datos sobre 76.749 partidos de voleibol de playa (FIVB y AVP, 2000-2019), pensado para un entrenador que arma parejas y prepara partidos. Versión en R (bookdown)." />
+  
+
+<meta name="author" content="Nicolle Ramírez y Roger Daza" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="eda.html"/>
+<link rel="next" href="modelado.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link href="libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="libs/datatables-binding-0.34.0/datatables.js"></script>
+<link href="libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+
+
+<style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./"><strong>¿Qué hace ganar a una pareja de voleibol de playa?</strong></a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Prefacio</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#c%C3%B3mo-leer-este-libro"><i class="fa fa-check"></i>Cómo leer este libro</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="contexto.html"><a href="contexto.html"><i class="fa fa-check"></i><b>1</b> Contexto</a>
+<ul>
+<li class="chapter" data-level="" data-path="contexto.html"><a href="contexto.html#el-voleibol-de-playa-y-los-circuitos-fivb-y-avp"><i class="fa fa-check"></i>El voleibol de playa y los circuitos FIVB y AVP</a></li>
+<li class="chapter" data-level="" data-path="contexto.html"><a href="contexto.html#pregunta-de-investigaci%C3%B3n-y-usuario-del-an%C3%A1lisis"><i class="fa fa-check"></i>Pregunta de investigación y usuario del análisis</a></li>
+<li class="chapter" data-level="" data-path="contexto.html"><a href="contexto.html#planteamiento-del-problema"><i class="fa fa-check"></i>Planteamiento del problema</a></li>
+<li class="chapter" data-level="" data-path="contexto.html"><a href="contexto.html#justificaci%C3%B3n"><i class="fa fa-check"></i>Justificación</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="objetivos.html"><a href="objetivos.html"><i class="fa fa-check"></i><b>2</b> Objetivos</a>
+<ul>
+<li class="chapter" data-level="" data-path="objetivos.html"><a href="objetivos.html#objetivo-general"><i class="fa fa-check"></i>Objetivo general</a></li>
+<li class="chapter" data-level="" data-path="objetivos.html"><a href="objetivos.html#objetivos-espec%C3%ADficos"><i class="fa fa-check"></i>Objetivos específicos</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="metodologia.html"><a href="metodologia.html"><i class="fa fa-check"></i><b>3</b> Metodología</a>
+<ul>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#marco-te%C3%B3rico"><i class="fa fa-check"></i>Marco teórico</a>
+<ul>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#enfoque-del-estudio"><i class="fa fa-check"></i>Enfoque del estudio</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#tratamiento-estad%C3%ADstico-y-pruebas-no-param%C3%A9tricas"><i class="fa fa-check"></i>Tratamiento estadístico y pruebas no paramétricas</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#an%C3%A1lisis-de-solapamiento"><i class="fa fa-check"></i>Análisis de solapamiento</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#an%C3%A1lisis-multivariado-y-redundancia"><i class="fa fa-check"></i>Análisis multivariado y redundancia</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#tendencias-en-el-tiempo-prueba-de-mann-kendall"><i class="fa fa-check"></i>Tendencias en el tiempo: prueba de Mann-Kendall</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#clasificaci%C3%B3n-supervisada"><i class="fa fa-check"></i>Clasificación supervisada</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#m%C3%A9tricas-de-evaluaci%C3%B3n"><i class="fa fa-check"></i>Métricas de evaluación</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#fases-del-procesamiento"><i class="fa fa-check"></i>Fases del procesamiento</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="datos.html"><a href="datos.html"><i class="fa fa-check"></i><b>4</b> Descripción del conjunto de datos</a>
+<ul>
+<li class="chapter" data-level="" data-path="datos.html"><a href="datos.html#estructura-y-variables"><i class="fa fa-check"></i>Estructura y variables</a></li>
+<li class="chapter" data-level="" data-path="datos.html"><a href="datos.html#cobertura-por-circuito-g%C3%A9nero-y-etapa"><i class="fa fa-check"></i>Cobertura por circuito, género y etapa</a></li>
+<li class="chapter" data-level="" data-path="datos.html"><a href="datos.html#pa%C3%ADses-sede-y-de-procedencia"><i class="fa fa-check"></i>Países sede y de procedencia</a></li>
+<li class="chapter" data-level="" data-path="datos.html"><a href="datos.html#datos-at%C3%ADpicos"><i class="fa fa-check"></i>Datos atípicos</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="limpieza.html"><a href="limpieza.html"><i class="fa fa-check"></i><b>5</b> Limpieza y preparación</a>
+<ul>
+<li class="chapter" data-level="" data-path="limpieza.html"><a href="limpieza.html#duplicados-y-llave-del-partido"><i class="fa fa-check"></i>Duplicados y llave del partido</a></li>
+<li class="chapter" data-level="" data-path="limpieza.html"><a href="limpieza.html#valores-faltantes"><i class="fa fa-check"></i>Valores faltantes</a></li>
+<li class="chapter" data-level="" data-path="limpieza.html"><a href="limpieza.html#correcciones-de-calidad"><i class="fa fa-check"></i>Correcciones de calidad</a></li>
+<li class="chapter" data-level="" data-path="limpieza.html"><a href="limpieza.html#formato-largo-y-archivos-limpios"><i class="fa fa-check"></i>Formato largo y archivos limpios</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="eda.html"><a href="eda.html"><i class="fa fa-check"></i><b>6</b> Análisis exploratorio (EDA)</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="eda.html"><a href="eda.html#an%C3%A1lisis-univariado"><i class="fa fa-check"></i><b>6.1</b> Análisis univariado</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="eda.html"><a href="eda.html#el-partido"><i class="fa fa-check"></i><b>6.1.1</b> El partido</a></li>
+<li class="chapter" data-level="6.1.2" data-path="eda.html"><a href="eda.html#los-jugadores-y-las-parejas"><i class="fa fa-check"></i><b>6.1.2</b> Los jugadores y las parejas</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="eda.html"><a href="eda.html#an%C3%A1lisis-bivariado"><i class="fa fa-check"></i><b>6.2</b> Análisis bivariado</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="eda.html"><a href="eda.html#parejas-ganadoras-frente-a-perdedoras"><i class="fa fa-check"></i><b>6.2.1</b> Parejas ganadoras frente a perdedoras</a></li>
+<li class="chapter" data-level="6.2.2" data-path="eda.html"><a href="eda.html#cu%C3%A1ndo-el-ranking-anticipa-el-resultado"><i class="fa fa-check"></i><b>6.2.2</b> Cuándo el ranking anticipa el resultado</a></li>
+<li class="chapter" data-level="6.2.3" data-path="eda.html"><a href="eda.html#estad%C3%ADsticas-de-juego-solo-para-una-parte-de-los-partidos"><i class="fa fa-check"></i><b>6.2.3</b> Estadísticas de juego (solo para una parte de los partidos)</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="eda.html"><a href="eda.html#an%C3%A1lisis-multivariado"><i class="fa fa-check"></i><b>6.3</b> Análisis multivariado</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="eda.html"><a href="eda.html#redundancia-entre-factores"><i class="fa fa-check"></i><b>6.3.1</b> Redundancia entre factores</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="temporal.html"><a href="temporal.html"><i class="fa fa-check"></i><b>7</b> Análisis temporal</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="temporal.html"><a href="temporal.html#partidos-por-a%C3%B1o-y-por-torneo"><i class="fa fa-check"></i><b>7.1</b> Partidos por año y por torneo</a></li>
+<li class="chapter" data-level="7.2" data-path="temporal.html"><a href="temporal.html#duraci%C3%B3n-de-los-partidos"><i class="fa fa-check"></i><b>7.2</b> Duración de los partidos</a></li>
+<li class="chapter" data-level="7.3" data-path="temporal.html"><a href="temporal.html#edad-y-estatura-de-los-jugadores"><i class="fa fa-check"></i><b>7.3</b> Edad y estatura de los jugadores</a></li>
+<li class="chapter" data-level="7.4" data-path="temporal.html"><a href="temporal.html#tasa-de-sorpresas"><i class="fa fa-check"></i><b>7.4</b> Tasa de sorpresas</a></li>
+<li class="chapter" data-level="7.5" data-path="temporal.html"><a href="temporal.html#tendencias-prueba-de-mann-kendall"><i class="fa fa-check"></i><b>7.5</b> Tendencias: prueba de Mann-Kendall</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="modelado.html"><a href="modelado.html"><i class="fa fa-check"></i><b>8</b> Modelado</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="modelado.html"><a href="modelado.html#variable-respuesta-y-partici%C3%B3n-de-los-datos"><i class="fa fa-check"></i><b>8.1</b> Variable respuesta y partición de los datos</a></li>
+<li class="chapter" data-level="8.2" data-path="modelado.html"><a href="modelado.html#hiperpar%C3%A1metros-y-validaci%C3%B3n-cruzada"><i class="fa fa-check"></i><b>8.2</b> Hiperparámetros y validación cruzada</a></li>
+<li class="chapter" data-level="8.3" data-path="modelado.html"><a href="modelado.html#comparaci%C3%B3n-de-los-modelos"><i class="fa fa-check"></i><b>8.3</b> Comparación de los modelos</a></li>
+<li class="chapter" data-level="8.4" data-path="modelado.html"><a href="modelado.html#razones-de-odds-de-la-regresi%C3%B3n-log%C3%ADstica"><i class="fa fa-check"></i><b>8.4</b> Razones de odds de la regresión logística</a></li>
+<li class="chapter" data-level="8.5" data-path="modelado.html"><a href="modelado.html#modelo-secundario-de-la-avp-estad%C3%ADsticas-de-juego"><i class="fa fa-check"></i><b>8.5</b> Modelo secundario de la AVP: estadísticas de juego</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="conclusiones.html"><a href="conclusiones.html"><i class="fa fa-check"></i><b>9</b> Conclusiones</a>
+<ul>
+<li class="chapter" data-level="" data-path="conclusiones.html"><a href="conclusiones.html#hallazgos-principales"><i class="fa fa-check"></i>Hallazgos principales</a></li>
+<li class="chapter" data-level="" data-path="conclusiones.html"><a href="conclusiones.html#recomendaciones-para-el-entrenador"><i class="fa fa-check"></i>Recomendaciones para el entrenador</a></li>
+<li class="chapter" data-level="" data-path="conclusiones.html"><a href="conclusiones.html#limitaciones"><i class="fa fa-check"></i>Limitaciones</a></li>
+<li class="chapter" data-level="" data-path="conclusiones.html"><a href="conclusiones.html#pr%C3%B3ximos-pasos-el-dashboard"><i class="fa fa-check"></i>Próximos pasos: el dashboard</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="referencias.html"><a href="referencias.html"><i class="fa fa-check"></i>Referencias</a></li>
+<li class="divider"></li>
+<li><a>Nicolle Ramírez y Roger Daza</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">¿Qué hace ganar a una pareja de voleibol de playa?</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="temporal" class="section level1 hasAnchor" number="7">
+<h1><span class="header-section-number">Capítulo 7</span> Análisis temporal<a href="temporal.html#temporal" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Este capítulo mira cómo cambian en el tiempo la cobertura del archivo, la duración de los partidos, la edad y la estatura de los jugadores y la tasa de sorpresas. Es un análisis descriptivo: cada serie tiene un valor por año y la tendencia se resume con la prueba de Mann-Kendall, sin modelos de series de tiempo.</p>
+<p>Tres años quedan marcados en gris en todos los gráficos porque su cobertura es incompleta: <strong>2000</strong> (muy pocos partidos, todos de la FIVB), <strong>2011–2012</strong> (la AVP casi desaparece, como se vio en el capítulo 4) y <strong>2019</strong>. Esos años <strong>se excluyen de las pruebas de tendencia</strong>: 2000 y 2019 en todas las series, y 2011–2012 en las series que incluyen a la AVP.</p>
+<div id="partidos-por-año-y-por-torneo" class="section level2 hasAnchor" number="7.1">
+<h2><span class="header-section-number">7.1</span> Partidos por año y por torneo<a href="temporal.html#partidos-por-a%C3%B1o-y-por-torneo" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="temporal.html#cb51-1" tabindex="-1"></a><span class="fu">ggplot</span>(pa, <span class="fu">aes</span>(year, valor, <span class="at">color =</span> circuit)) <span class="sc">+</span></span>
+<span id="cb51-2"><a href="temporal.html#cb51-2" tabindex="-1"></a>  bandas <span class="sc">+</span></span>
+<span id="cb51-3"><a href="temporal.html#cb51-3" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb51-4"><a href="temporal.html#cb51-4" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> col_circ) <span class="sc">+</span></span>
+<span id="cb51-5"><a href="temporal.html#cb51-5" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">2000</span>, <span class="dv">2019</span>, <span class="dv">3</span>)) <span class="sc">+</span></span>
+<span id="cb51-6"><a href="temporal.html#cb51-6" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="cf">function</span>(x) <span class="fu">fmt</span>(x)) <span class="sc">+</span></span>
+<span id="cb51-7"><a href="temporal.html#cb51-7" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Año&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Número de partidos&quot;</span>, <span class="at">color =</span> <span class="st">&quot;Circuito&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-t-partidos"></span>
+<img src="voleibol_playa_files/figure-html/fig-t-partidos-1.png" alt="Partidos por año y circuito. Las bandas grises marcan los años de cobertura incompleta (2000, 2011–2012 y 2019)." width="100%" />
+<p class="caption">
+Figura 7.1: Partidos por año y circuito. Las bandas grises marcan los años de cobertura incompleta (2000, 2011–2012 y 2019).
+</p>
+</div>
+<p>El número de partidos por año de la FIVB tiene una tendencia sin tendencia clara y el de la AVP, sin tendencia clara (Tabla <a href="temporal.html#tab:tab-t-mk">7.1</a>).</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="temporal.html#cb52-1" tabindex="-1"></a><span class="fu">ggplot</span>(ptn, <span class="fu">aes</span>(year, valor, <span class="at">color =</span> circuit)) <span class="sc">+</span></span>
+<span id="cb52-2"><a href="temporal.html#cb52-2" tabindex="-1"></a>  bandas <span class="sc">+</span></span>
+<span id="cb52-3"><a href="temporal.html#cb52-3" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb52-4"><a href="temporal.html#cb52-4" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> col_circ) <span class="sc">+</span></span>
+<span id="cb52-5"><a href="temporal.html#cb52-5" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">2000</span>, <span class="dv">2019</span>, <span class="dv">3</span>)) <span class="sc">+</span></span>
+<span id="cb52-6"><a href="temporal.html#cb52-6" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Año&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Partidos por torneo (media)&quot;</span>, <span class="at">color =</span> <span class="st">&quot;Circuito&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-t-torneo"></span>
+<img src="voleibol_playa_files/figure-html/fig-t-torneo-1.png" alt="Partidos por torneo (promedio por año y circuito). Las bandas grises marcan los años de cobertura incompleta." width="100%" />
+<p class="caption">
+Figura 7.2: Partidos por torneo (promedio por año y circuito). Las bandas grises marcan los años de cobertura incompleta.
+</p>
+</div>
+<p>Los partidos por torneo tienen una tendencia sin tendencia clara en la FIVB y sin tendencia clara en la AVP. Un torneo es cada combinación de nombre, año y evento (capítulo 5).</p>
+</div>
+<div id="duración-de-los-partidos" class="section level2 hasAnchor" number="7.2">
+<h2><span class="header-section-number">7.2</span> Duración de los partidos<a href="temporal.html#duraci%C3%B3n-de-los-partidos" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="temporal.html#cb53-1" tabindex="-1"></a>dur_mm <span class="ot">&lt;-</span> dur <span class="sc">%&gt;%</span> <span class="fu">select</span>(circuit, year, valor) <span class="sc">%&gt;%</span></span>
+<span id="cb53-2"><a href="temporal.html#cb53-2" tabindex="-1"></a>  <span class="fu">complete</span>(circuit, <span class="at">year =</span> <span class="dv">2000</span><span class="sc">:</span><span class="dv">2019</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb53-3"><a href="temporal.html#cb53-3" tabindex="-1"></a>  <span class="fu">group_by</span>(circuit) <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(year) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">mm =</span> <span class="fu">mm3</span>(valor)) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
+<span id="cb53-4"><a href="temporal.html#cb53-4" tabindex="-1"></a></span>
+<span id="cb53-5"><a href="temporal.html#cb53-5" tabindex="-1"></a><span class="fu">ggplot</span>(dur_mm, <span class="fu">aes</span>(year, <span class="at">color =</span> circuit)) <span class="sc">+</span></span>
+<span id="cb53-6"><a href="temporal.html#cb53-6" tabindex="-1"></a>  bandas <span class="sc">+</span></span>
+<span id="cb53-7"><a href="temporal.html#cb53-7" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> valor), <span class="at">size =</span> <span class="fl">1.8</span>, <span class="at">alpha =</span> .<span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb53-8"><a href="temporal.html#cb53-8" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> mm), <span class="at">linewidth =</span> <span class="fl">1.1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb53-9"><a href="temporal.html#cb53-9" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> col_circ) <span class="sc">+</span></span>
+<span id="cb53-10"><a href="temporal.html#cb53-10" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">2000</span>, <span class="dv">2019</span>, <span class="dv">3</span>)) <span class="sc">+</span></span>
+<span id="cb53-11"><a href="temporal.html#cb53-11" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Año&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Duración media (minutos)&quot;</span>, <span class="at">color =</span> <span class="st">&quot;Circuito&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-t-duracion"></span>
+<img src="voleibol_playa_files/figure-html/fig-t-duracion-1.png" alt="Duración media de los partidos por año y circuito (puntos) y media móvil de 3 años (línea)." width="100%" />
+<p class="caption">
+Figura 7.3: Duración media de los partidos por año y circuito (puntos) y media móvil de 3 años (línea).
+</p>
+</div>
+<p>La duración media tiene una tendencia decreciente en la FIVB (pendiente de -0,33 minutos por año) y sin tendencia clara en la AVP (-0,07 minutos por año). La media móvil suaviza las oscilaciones de un año a otro, pero no es un modelo.</p>
+</div>
+<div id="edad-y-estatura-de-los-jugadores" class="section level2 hasAnchor" number="7.3">
+<h2><span class="header-section-number">7.3</span> Edad y estatura de los jugadores<a href="temporal.html#edad-y-estatura-de-los-jugadores" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="temporal.html#cb54-1" tabindex="-1"></a><span class="fu">bind_rows</span>(ed, es) <span class="sc">%&gt;%</span></span>
+<span id="cb54-2"><a href="temporal.html#cb54-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fam =</span> <span class="fu">ifelse</span>(fam <span class="sc">==</span> <span class="st">&quot;Edad&quot;</span>, <span class="st">&quot;Edad media (años)&quot;</span>, <span class="st">&quot;Estatura media (cm)&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb54-3"><a href="temporal.html#cb54-3" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(year, valor, <span class="at">color =</span> gender)) <span class="sc">+</span></span>
+<span id="cb54-4"><a href="temporal.html#cb54-4" tabindex="-1"></a>  bandas <span class="sc">+</span></span>
+<span id="cb54-5"><a href="temporal.html#cb54-5" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">1.8</span>) <span class="sc">+</span></span>
+<span id="cb54-6"><a href="temporal.html#cb54-6" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> col_gen) <span class="sc">+</span></span>
+<span id="cb54-7"><a href="temporal.html#cb54-7" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">2000</span>, <span class="dv">2019</span>, <span class="dv">3</span>)) <span class="sc">+</span></span>
+<span id="cb54-8"><a href="temporal.html#cb54-8" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>fam, <span class="at">scales =</span> <span class="st">&quot;free_y&quot;</span>) <span class="sc">+</span></span>
+<span id="cb54-9"><a href="temporal.html#cb54-9" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Año&quot;</span>, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">color =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-t-edad-est"></span>
+<img src="voleibol_playa_files/figure-html/fig-t-edad-est-1.png" alt="Edad y estatura medias de los jugadores por año y género. Las bandas grises marcan los años de cobertura incompleta." width="100%" />
+<p class="caption">
+Figura 7.4: Edad y estatura medias de los jugadores por año y género. Las bandas grises marcan los años de cobertura incompleta.
+</p>
+</div>
+<p>La edad media tiene una tendencia sin tendencia clara en los hombres y decreciente en las mujeres. La estatura media es creciente en los hombres y creciente en las mujeres.</p>
+</div>
+<div id="tasa-de-sorpresas" class="section level2 hasAnchor" number="7.4">
+<h2><span class="header-section-number">7.4</span> Tasa de sorpresas<a href="temporal.html#tasa-de-sorpresas" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Se llama sorpresa al partido que gana la pareja peor rankeada (capítulo 6). Solo se muestran los años con al menos 200 partidos con ranking numérico en ambas parejas.</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="temporal.html#cb55-1" tabindex="-1"></a><span class="fu">ggplot</span>(so, <span class="fu">aes</span>(year, valor)) <span class="sc">+</span></span>
+<span id="cb55-2"><a href="temporal.html#cb55-2" tabindex="-1"></a>  bandas <span class="sc">+</span></span>
+<span id="cb55-3"><a href="temporal.html#cb55-3" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">&quot;#E4572E&quot;</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb55-4"><a href="temporal.html#cb55-4" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">&quot;#E4572E&quot;</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb55-5"><a href="temporal.html#cb55-5" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">2000</span>, <span class="dv">2019</span>, <span class="dv">3</span>)) <span class="sc">+</span></span>
+<span id="cb55-6"><a href="temporal.html#cb55-6" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Año&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Sorpresas (%)&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-t-sorpresas"></span>
+<img src="voleibol_playa_files/figure-html/fig-t-sorpresas-1.png" alt="Tasa de sorpresas por año. Las bandas grises marcan los años de cobertura incompleta." width="100%" />
+<p class="caption">
+Figura 7.5: Tasa de sorpresas por año. Las bandas grises marcan los años de cobertura incompleta.
+</p>
+</div>
+<p>La tasa de sorpresas tiene una tendencia creciente (tau = 0,57; pendiente de 0,32 puntos porcentuales por año).</p>
+</div>
+<div id="tendencias-prueba-de-mann-kendall" class="section level2 hasAnchor" number="7.5">
+<h2><span class="header-section-number">7.5</span> Tendencias: prueba de Mann-Kendall<a href="temporal.html#tendencias-prueba-de-mann-kendall" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>La prueba de Mann-Kendall mide si una serie tiende a subir o a bajar con los años, sin suponer que la tendencia sea una recta. Se resume con el <strong>tau de Kendall</strong>, que va de −1 (siempre baja) a 1 (siempre sube), y con su valor p. La <strong>pendiente</strong> es la de Theil-Sen, la mediana de las pendientes entre todos los pares de años, que resiste los valores extremos. La tabla reúne las 11 series; las pruebas no se corrigen por hacer varias a la vez y cada serie tiene pocos años, así que se leen como descripciones del periodo, no como pruebas definitivas.</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="temporal.html#cb56-1" tabindex="-1"></a>mk_tab <span class="sc">%&gt;%</span></span>
+<span id="cb56-2"><a href="temporal.html#cb56-2" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">Serie =</span> serie, <span class="st">`</span><span class="at">Años usados</span><span class="st">`</span> <span class="ot">=</span> anios, <span class="st">`</span><span class="at">tau de Kendall</span><span class="st">`</span> <span class="ot">=</span> tau, <span class="at">p =</span> <span class="fu">fp7</span>(p),</span>
+<span id="cb56-3"><a href="temporal.html#cb56-3" tabindex="-1"></a>            <span class="at">Pendiente =</span> pend, <span class="st">`</span><span class="at">Unidad (por año)</span><span class="st">`</span> <span class="ot">=</span> unidad, <span class="at">Tendencia =</span> tend) <span class="sc">%&gt;%</span></span>
+<span id="cb56-4"><a href="temporal.html#cb56-4" tabindex="-1"></a>  <span class="fu">tabla</span>(<span class="at">caption =</span> <span class="st">&quot;Prueba de Mann-Kendall y pendiente de Theil-Sen para las 11 series (se excluyen los años de cobertura incompleta).&quot;</span>, <span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div>
+<table>
+<caption><span id="tab:tab-t-mk">Tabla 7.1: </span>Prueba de Mann-Kendall y pendiente de Theil-Sen para las 11 series (se excluyen los años de cobertura incompleta).</caption>
+<colgroup>
+<col width="24%" />
+<col width="11%" />
+<col width="13%" />
+<col width="7%" />
+<col width="9%" />
+<col width="15%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Serie</th>
+<th align="right">Años usados</th>
+<th align="right">tau de Kendall</th>
+<th align="left">p</th>
+<th align="right">Pendiente</th>
+<th align="left">Unidad (por año)</th>
+<th align="left">Tendencia</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Partidos por año, AVP</td>
+<td align="right">15</td>
+<td align="right">-0,124</td>
+<td align="left">0,520</td>
+<td align="right">-38,615</td>
+<td align="left">partidos</td>
+<td align="left">sin tendencia clara</td>
+</tr>
+<tr class="even">
+<td align="left">Partidos por año, FIVB</td>
+<td align="right">18</td>
+<td align="right">0,176</td>
+<td align="left">0,306</td>
+<td align="right">20,750</td>
+<td align="left">partidos</td>
+<td align="left">sin tendencia clara</td>
+</tr>
+<tr class="odd">
+<td align="left">Partidos por torneo, AVP</td>
+<td align="right">15</td>
+<td align="right">0,105</td>
+<td align="left">0,586</td>
+<td align="right">1,127</td>
+<td align="left">partidos</td>
+<td align="left">sin tendencia clara</td>
+</tr>
+<tr class="even">
+<td align="left">Partidos por torneo, FIVB</td>
+<td align="right">18</td>
+<td align="right">0,085</td>
+<td align="left">0,622</td>
+<td align="right">0,681</td>
+<td align="left">partidos</td>
+<td align="left">sin tendencia clara</td>
+</tr>
+<tr class="odd">
+<td align="left">Duración media, AVP</td>
+<td align="right">15</td>
+<td align="right">-0,219</td>
+<td align="left">0,255</td>
+<td align="right">-0,065</td>
+<td align="left">min</td>
+<td align="left">sin tendencia clara</td>
+</tr>
+<tr class="even">
+<td align="left">Duración media, FIVB</td>
+<td align="right">18</td>
+<td align="right">-0,451</td>
+<td align="left">0,009</td>
+<td align="right">-0,334</td>
+<td align="left">min</td>
+<td align="left">decreciente</td>
+</tr>
+<tr class="odd">
+<td align="left">Edad media, hombres</td>
+<td align="right">16</td>
+<td align="right">-0,117</td>
+<td align="left">0,528</td>
+<td align="right">-0,024</td>
+<td align="left">años</td>
+<td align="left">sin tendencia clara</td>
+</tr>
+<tr class="even">
+<td align="left">Edad media, mujeres</td>
+<td align="right">16</td>
+<td align="right">-0,383</td>
+<td align="left">0,038</td>
+<td align="right">-0,068</td>
+<td align="left">años</td>
+<td align="left">decreciente</td>
+</tr>
+<tr class="odd">
+<td align="left">Estatura media, hombres</td>
+<td align="right">16</td>
+<td align="right">0,700</td>
+<td align="left">&lt; 0,001</td>
+<td align="right">0,103</td>
+<td align="left">cm</td>
+<td align="left">creciente</td>
+</tr>
+<tr class="even">
+<td align="left">Estatura media, mujeres</td>
+<td align="right">16</td>
+<td align="right">0,767</td>
+<td align="left">&lt; 0,001</td>
+<td align="right">0,208</td>
+<td align="left">cm</td>
+<td align="left">creciente</td>
+</tr>
+<tr class="odd">
+<td align="left">Tasa de sorpresas</td>
+<td align="right">16</td>
+<td align="right">0,567</td>
+<td align="left">0,002</td>
+<td align="right">0,315</td>
+<td align="left">p. p.</td>
+<td align="left">creciente</td>
+</tr>
+</tbody>
+</table>
+<div class="entrenador">
+<p><strong>Para el entrenador</strong></p>
+<ul>
+<li>La tasa de sorpresas tiene una tendencia creciente en el periodo: no dé por hecho que el ranking de hoy anticipa tanto como el de hace unos años sin mirar esa tendencia.</li>
+<li>La duración media de los partidos tiene una tendencia decreciente en la FIVB y sin tendencia clara en la AVP: sirve para dimensionar la carga física de un partido típico.</li>
+<li>Son tendencias descriptivas del circuito profesional. Los años 2000, 2011–2012 (AVP) y 2019 tienen cobertura incompleta y no entran en las pruebas.</li>
+</ul>
+</div>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="eda.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="modelado.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": null,
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "section",
+    "scroll_highlight": true
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
