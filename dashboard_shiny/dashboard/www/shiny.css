@@ -1,0 +1,44 @@
+/* Ajustes para que los componentes de Shiny/Bootstrap 5 se vean como el dashboard de Dash */
+#tablero { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.kpis.shiny-html-output { display: grid; }
+.perfiles.shiny-html-output { display: grid; }
+.app, body { margin: 0; }
+.shiny-html-output.resultado { display: block; }
+
+/* Pestañas internas */
+.nav-tabs { border-bottom: 2px solid var(--borde); gap: 2px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; margin-bottom: 18px; }
+.nav-tabs .nav-link { color: var(--tinta-suave); font-weight: 700; border: none; border-bottom: 3px solid transparent;
+                      background: transparent; border-radius: 0; font-family: var(--letra-titulo); font-size: 19px; white-space: nowrap; }
+.nav-tabs .nav-link:hover { color: var(--mar); border-bottom-color: var(--arena-media); }
+.nav-tabs .nav-link.active { color: var(--mar); background: transparent; border-bottom: 3px solid var(--arena); }
+.tab-content > .tab-pane { padding-top: 4px; }
+
+/* Control deslizante en turquesa */
+.irs--shiny .irs-bar { background: var(--turquesa); border-top-color: var(--turquesa); border-bottom-color: var(--turquesa); }
+.irs--shiny .irs-handle { border-color: var(--turquesa); }
+.irs--shiny .irs-single, .irs--shiny .irs-from, .irs--shiny .irs-to { background: var(--turquesa); }
+.filtro-anios .form-group { margin-bottom: 0; }
+.filtro-anios .irs { height: 40px; }
+
+/* Botón de restablecer */
+.filtro-reset.btn { border: none; background: transparent; color: var(--tinta-suave); font-size: 13px; }
+.filtro-reset.btn:hover { background: var(--arena-media); color: var(--mar); }
+
+/* Tablas */
+table.table { font-size: 13px; margin-bottom: 0; }
+.shiny-html-output.kpis, .shiny-html-output.perfiles { gap: 12px; }
+
+/* Entradas numéricas y selectores */
+.form-group { margin-bottom: 10px; }
+.lado .form-control { background: rgba(255, 255, 255, .9); }
+.lado .shiny-input-container { width: 100%; }
+.lado .form-check-label { font-size: 14px; }
+
+/* Mensajes de validación de los gráficos */
+.shiny-output-error-validation { color: var(--tinta-suave); font-size: 13px; padding: 20px 4px; }
+
+.plotly.html-widget { max-width: 100%; }
+.perfil-tarjeta { cursor: default; }
+.card.tarjeta { background: #fff; }
+.card.tarjeta .card-header { background: #fff; }
+.alert.aviso-solape { padding: 12px 16px; }
