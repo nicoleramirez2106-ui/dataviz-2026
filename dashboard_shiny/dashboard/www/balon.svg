@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Balón del proyecto: el mismo de la portada (costuras en arena, turquesa y coral) -->
+  <defs>
+    <radialGradient id="luz" cx=".35" cy=".3" r=".75">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset=".6" stop-color="#FFF8E7"/>
+      <stop offset="1" stop-color="#F1E2BE"/>
+    </radialGradient>
+    <clipPath id="borde"><circle cx="24" cy="24" r="20.5"/></clipPath>
+  </defs>
+  <circle cx="24" cy="24" r="21" fill="url(#luz)"/>
+  <g clip-path="url(#borde)" fill="none" stroke-width="3.2" stroke-linecap="round">
+    <path d="M24 2 c-4 8 -3.5 15.5 1.5 22" stroke="#D9A441"/>
+    <path d="M25.5 24 c8 .8 14.6 4.6 19 10.4" stroke="#1A8A9A"/>
+    <path d="M25.5 24 c-4.8 6.6 -11.6 10.8 -20 11.8" stroke="#E4572E"/>
+    <path d="M7.5 9 c7.4 -1.2 14.4 1.4 18 15" stroke="#0B3B5C" stroke-width="2.6"/>
+  </g>
+  <circle cx="24" cy="24" r="21" fill="none" stroke="#0B3B5C" stroke-width="2.5"/>
+</svg>
