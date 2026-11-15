@@ -12,12 +12,15 @@ import dash_bootstrap_components as dbc
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from dash import ALL, Dash, Input, Output, dcc, html
+from plotly.subplots import make_subplots
+from dash import ALL, Dash, Input, Output, State, ctx, dcc, html, no_update
 
 import datos as D
+import ia as IA
+import plan as PL
 import prediccion as M
-from estilo import (ARENA, CORAL, ESCALA_CORR, ESCALA_SEC, ETAPAS, FUENTE, GENERO, GRIS, MAR, NEUTRO,
-                    PAL, PAL_ETAPA, PAL_MODELO, PAL_PERFIL, PAL_PODER, TURQUESA, fmt, fmt_p, fmt_pct,
+from estilo import (ARENA, CORAL, ELEGIDO, ESCALA_CORR, ESCALA_SEC, ETAPAS, FUENTE, GENERO, GRIS, MAR, NEUTRO,
+                    PAL, PAL_ETAPA, PAL_MODELO, PAL_PERFIL, PAL_PODER, PIZARRA, TURQUESA, fmt, fmt_p, fmt_pct,
                     vacia)
 
 LIBRO = "https://nicoleramirez2106-ui.github.io/dataviz-2026/"
@@ -25,8 +28,8 @@ REPO = "https://github.com/nicoleramirez2106-ui/dataviz-2026"
 
 app = Dash(__name__, title="Voleibol de playa · Dashboard",
            external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP,
-                                 "https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400"
-                                 "&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&display=swap"],
+                                 "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800"
+                                 "&display=swap"],
            suppress_callback_exceptions=True,
            meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
 server = app.server
@@ -45,10 +48,22 @@ def tarjeta(titulo, cuerpo, subtitulo=None, fuente=True, clase=""):
     ], className=f"tarjeta mb-4 {clase}")
 
 
-def kpi(valor, etiqueta, nota=None, id_=None, tono=""):
-    """Casilla de marcador: número grande con dígitos tabulares."""
+# Ícono por defecto de cada tono (el color dice QUÉ es; el ícono lo refuerza)
+ICONO_TONO = {"tono-mar": "trofeo", "tono-coral": "rayo", "tono-turquesa": "balon", "tono-arena": "balon"}
+
+
+def ico(nombre, clase=""):
+    return html.Span(className=f"ico ico-{nombre} {clase}")
+
+
+def kpi(valor, etiqueta, nota=None, id_=None, tono="", icono=None):
+    """Indicador: ícono en un círculo del color del tono, etiqueta y número grande.
+    Sin tono, el indicador es neutro (gris): solo se colorea cuando el color significa algo."""
     extra = {"id": id_} if id_ else {}
-    return html.Div([html.Div(etiqueta, className="kpi-etiqueta"),
+    tono = tono or "tono-gris"
+    icono = icono or ICONO_TONO.get(tono, "datos")
+    return html.Div([html.Div([html.Div(ico(icono), className="kpi-icono"),
+                               html.Div(etiqueta, className="kpi-etiqueta")], className="kpi-cabeza"),
                      html.Div(valor, className="kpi-valor", **extra),
                      html.Div(nota, className="kpi-nota") if nota else None], className=f"kpi {tono}")
 
@@ -89,9 +104,10 @@ def entrenador(texto):
                      html.Strong("Para el entrenador. "), texto], className="entrenador mb-4")
 
 
-def encabezado(titulo, texto, saque=None):
-    return html.Div([html.Div(saque, className="pagina-saque") if saque else None,
-                     html.H2(titulo, className="pagina-titulo"),
+def encabezado(titulo, texto, subtitulo=None):
+    """Título de la página; el subtítulo (opcional) va debajo, en el mismo color del título."""
+    return html.Div([html.H2(titulo, className="pagina-titulo"),
+                     html.Div(subtitulo, className="pagina-subtitulo") if subtitulo else None,
                      html.P(texto, className="pagina-intro")], className="mb-4")
 
 
@@ -113,29 +129,51 @@ def sin_modelos():
 # ==========================================================================
 # Estructura: riel de navegación (línea de banda), marcador y filtros rápidos
 # ==========================================================================
-# Íconos propios de voleibol (assets/iconos): balón, marcador, pizarra de estrategia, saque y pareja
-PAGINAS = [("/", "Inicio", "balon"),
-           ("/dashboard", "Dashboard", "tablero"),
-           ("/analisis", "Análisis", "pizarra"),
-           ("/prediccion", "Predicción", "saque"),
+# Íconos sólidos propios (assets/iconos)
+PAGINAS = [("/", "Inicio", "inicio"),
+           ("/dashboard", "Dashboard", "dashboard"),
+           ("/analisis", "Análisis", "analisis"),
+           ("/prediccion", "Predicción", "prediccion"),
+           ("/entrenamiento", "Entrenar", "silbato"),
            ("/equipo", "Equipo", "equipo")]
 
 riel = html.Nav([
     dcc.Link([html.Img(src="/assets/balon.svg", className="balon-logo", alt=""),
-              html.Span("VP", className="riel-sigla")], href="/", className="riel-marca", title="Inicio"),
-    dbc.Nav([dbc.NavLink([html.Span(className=f"ico ico-{ico}"), html.Span(txt)], href=ruta, active="exact",
-                         className="riel-item", id=f"nav-{i}")
-             for i, (ruta, txt, ico) in enumerate(PAGINAS)], vertical=True, className="riel-menu"),
-    html.Div([html.A(html.I(className="bi bi-book"), href=LIBRO, target="_blank", title="Leer el libro"),
-              html.A(html.I(className="bi bi-github"), href=REPO, target="_blank", title="Repositorio")],
-             className="riel-enlaces"),
+              html.Div([html.Div("Panel del entrenador", className="marca-nombre"),
+                        html.Div("Voleibol de playa", className="marca-sub")])],
+             href="/", className="riel-marca", title="Inicio"),
+    dbc.Nav([dbc.NavLink([ico(i), html.Span(txt)], href=ruta, active="exact", className="riel-item", id=f"nav-{n}")
+             for n, (ruta, txt, i) in enumerate(PAGINAS)], vertical=True, className="riel-menu"),
+    html.Div([ico("libro"), html.H6("Lea el libro"),
+              html.P("El análisis completo, con el código y la metodología de cada gráfico."),
+              html.A(["Abrir el libro", html.I(className="bi bi-arrow-right")], href=LIBRO, target="_blank")],
+             className="riel-promo"),
+    html.A([html.I(className="bi bi-github me-2"), "Repositorio del proyecto"], href=REPO, target="_blank",
+           className="riel-repo"),
+    html.Div([html.Div(id="coach-avatar", className="avatar"),
+              html.Div([html.Div(id="coach-nombre", className="usuario-nombre"),
+                        html.Div("Entrenador", className="usuario-rol")]),
+              html.Button(ico("editar"), id="coach-editar", n_clicks=0, className="usuario-editar",
+                          title="Cambiar el nombre")], className="riel-usuario"),
 ], className="riel", **{"aria-label": "Navegación principal"})
 
 marcador = html.Header([
-    html.Div([html.Div("Voleibol de playa", className="marcador-titulo"),
-              html.Div("¿Qué hace ganar a una pareja?", className="marcador-sub")], className="marcador-marca"),
+    html.Div([html.H1(id="saludo", className="saludo"),
+              html.Div(f"Datos de {fmt(D.CIFRAS['n_partidos'], 0)} partidos de los circuitos FIVB y AVP, "
+                       f"{D.ANIOS[0]}–{D.ANIOS[1]}.", className="saludo-sub")]),
     html.Div(id="marcador-tablero", className="tablero", **{"aria-live": "polite"}),
 ], className="marcador")
+
+# Personalización: el nombre del coach se guarda en el navegador (no sale del computador)
+ventana_coach = dbc.Modal(dbc.ModalBody([
+    html.Img(src="/assets/balon.svg", className="balon-logo", alt=""),
+    html.H5("¡Bienvenido al panel del entrenador!"),
+    html.P("¿Cómo quiere que le llamemos? El nombre solo se guarda en este navegador."),
+    dbc.Input(id="coach-input", placeholder="Nombre o apodo", maxLength=30, debounce=False),
+    html.Div([html.Button("Ahora no", id="coach-omitir", n_clicks=0, className="boton-secundario"),
+              html.Button("Guardar", id="coach-guardar", n_clicks=0, className="boton-principal")],
+             className="modal-botones"),
+]), id="coach-modal", is_open=False, centered=True, className="modal-coach")
 
 filtros = html.Section([
     html.Div([html.Span("Circuito", className="filtro-etq"),
@@ -157,9 +195,32 @@ filtros = html.Section([
 ], id="filtros", className="filtros-banda")
 
 app.layout = html.Div([
-    dcc.Location(id="url"), riel,
+    dcc.Location(id="url"), dcc.Store(id="coach", storage_type="local"), ventana_coach, riel,
     html.Div([marcador, filtros, html.Main(id="contenido", className="contenido")], className="principal"),
 ], className="app")
+
+@app.callback(Output("coach-modal", "is_open"), Output("coach", "data"), Output("coach-input", "value"),
+              Input("coach-editar", "n_clicks"), Input("coach-guardar", "n_clicks"), Input("coach-omitir", "n_clicks"),
+              Input("url", "pathname"), State("coach", "data"), State("coach-input", "value"))
+def ventana_nombre(_e, _g, _o, _ruta, datos, escrito):
+    """Pide el nombre la primera vez; después solo se abre con el lápiz del menú."""
+    datos = datos or {}
+    if ctx.triggered_id == "coach-editar":
+        return True, no_update, datos.get("nombre", "")
+    if ctx.triggered_id == "coach-guardar":
+        return False, {"nombre": (escrito or "").strip()[:30], "visto": True}, no_update
+    if ctx.triggered_id == "coach-omitir":
+        return False, {**datos, "visto": True}, no_update
+    return not datos.get("visto"), no_update, no_update
+
+
+@app.callback(Output("saludo", "children"), Output("coach-nombre", "children"), Output("coach-avatar", "children"),
+              Input("coach", "data"))
+def saludar(datos):
+    nombre = ((datos or {}).get("nombre") or "").strip()
+    iniciales = "".join(p[0] for p in nombre.split()[:2]).upper() or "C"
+    return (f"¡Hola, Coach {nombre}! 👋" if nombre else "¡Hola, Coach! 👋"), (nombre or "Coach"), iniciales
+
 
 FILTROS = [Input("f-circuito", "value"), Input("f-genero", "value"), Input("f-anios", "value"),
            Input("f-etapa", "value")]
@@ -218,11 +279,11 @@ def pagina_inicio():
         ("Juego (AVP)", fmt(_poder.rbc["hitpct"]), "es la correlación rango-biserial del % de ataque: "
          "la variable que más separa al ganador del perdedor."),
     ]
-    jugadas = [("/dashboard", "tablero", "Dashboard",
+    jugadas = [("/dashboard", "dashboard", "Dashboard",
                 "Partidos por año, circuito y etapa, sorpresas y cobertura de datos con filtros rápidos."),
-               ("/analisis", "pizarra", "Análisis",
+               ("/analisis", "analisis", "Análisis",
                 "Univariado, bivariado, multivariado, estilos de juego de la AVP, metodología y conclusiones."),
-               ("/prediccion", "saque", "Predicción",
+               ("/prediccion", "prediccion", "Predicción",
                 "Modelos previos al partido, simulador ¿Quién gana? y la calculadora histórica.")]
 
     def contador(valor, dec=0, sufijo=""):
@@ -252,7 +313,7 @@ def pagina_inicio():
                 html.Div([dcc.Link("Simular un partido", href="/prediccion", className="boton-principal"),
                           html.A("Leer el libro", href=LIBRO, target="_blank", className="boton-secundario")],
                          className="hero-botones"),
-                html.Div("Nicolle Ramírez y Roger Daza", className="hero-autores"),
+                html.Div("Nicole Ramírez y Roger Daza", className="hero-autores"),
             ], className="portada-texto-caja"),
         ], className="portada"),
         html.Div([html.Div([html.Div(v, className=f"portada-dato-valor {tono}"),
@@ -263,13 +324,14 @@ def pagina_inicio():
         html.Div(html.Div(piezas + piezas, className="cinta-pista"), className="cinta mb-4",
                  **{"aria-label": " · ".join(cinta)}),
         html.H5("Elija su jugada", className="seccion-titulo"),
-        html.Div([dcc.Link([html.Span(className=f"ico ico-{ico} jugada-icono"), html.H6(t), html.P(x),
+        html.Div([dcc.Link([html.Div(ico(icono), className="jugada-icono"), html.H6(t), html.P(x),
                             html.Span(f"Ir a {t}", className="jugada-ir")],
                            href=ruta, className="jugada")
-                  for ruta, ico, t, x in jugadas] +
-                 [html.Div([html.Span(className="ico ico-video jugada-icono"), html.H6("Video del proyecto"),
-                            html.Div("Próximamente", className="proximamente")],
-                           className="jugada jugada-video", id="video-proximamente")],
+                  for ruta, icono, t, x in jugadas] +
+                 [html.Button([html.Div(ico("video"), className="jugada-icono"), html.H6("Video del proyecto"),
+                               html.P("Recorrido de 11 minutos por el panel, contado por sus autores."),
+                               html.Span("Ver el video", className="jugada-ir")],
+                              className="jugada jugada-video", id="video-abrir", n_clicks=0)],
                  className="jugadas mb-4"),
         html.H5("Tres hallazgos para empezar", className="seccion-titulo"),
         html.Div([html.Div([html.Div(f"Set {i}", className="set-num"),
@@ -319,7 +381,7 @@ def pagina_dashboard():
         columns=["Problema", "Alcance", "Decisión"])
     return html.Div([
         encabezado("Dashboard", "Panorama de los partidos con los filtros de arriba: un clic en circuito, "
-                   "género, etapa o años actualiza el marcador y todos los gráficos.", "Datos y limpieza"),
+                   "género, etapa o años actualiza el marcador y todos los gráficos.", subtitulo="Datos y limpieza"),
         html.Div(id="d-kpis", className="kpis mb-4"),
         dbc.Row([dbc.Col(tarjeta("Partidos por año y circuito", grafico("d-anio", 340),
                                  "La caída de la AVP en 2011–2012 coincide con su crisis financiera · "
@@ -351,13 +413,13 @@ def actualizar_datos(circuito, genero, anios, etapa):
         return [kpi("0", "Partidos con los filtros actuales")], vacia(), vacia(), vacia(), vacia(), vacia()
     r = d[d.rank_diff.notna()]
     jug = D.filtrar(D.J, circuito, genero, anios, etapa).player_id.nunique()
-    kpis = [kpi(fmt(len(d), 0), "Partidos con los filtros actuales", id_="d-n"),
-            kpi(fmt(jug, 0), "Jugadores distintos"),
+    kpis = [kpi(fmt(len(d), 0), "Partidos con los filtros actuales", id_="d-n", icono="balon"),
+            kpi(fmt(jug, 0), "Jugadores distintos", icono="equipo"),
             kpi(fmt_pct(100 * (1 - r.es_upset.mean())) if len(r) else "—", "Gana el favorito",
                 f"{fmt(len(r), 0)} partidos con ranking de ambas", tono="tono-mar"),
             kpi(fmt_pct(100 * r.es_upset.mean()) if len(r) else "—", "Sorpresas", tono="tono-coral"),
-            kpi(f"{fmt(d[d.es_forfeit == 0].duracion_min.median(), 0)} min", "Duración mediana"),
-            kpi(fmt_pct(100 * d.tiene_stats_completas.mean()), "Con estadísticas de juego")]
+            kpi(f"{fmt(d[d.es_forfeit == 0].duracion_min.median(), 0)} min", "Duración mediana", icono="reloj"),
+            kpi(fmt_pct(100 * d.tiene_stats_completas.mean()), "Con estadísticas de juego", icono="analisis")]
 
     t = d.groupby(["circuit", "gender"], observed=True).size().reset_index(name="n")
     t["circuit"] = pd.Categorical(t.circuit.astype(str), ["FIVB", "AVP"])
@@ -428,7 +490,7 @@ def detalle_anio(click, circuito, genero, anios, etapa):
     paises = y.country.astype(str).value_counts().head(3)
     return html.Div([
         html.Div(str(anio), className="detalle-anio"),
-        html.Div([kpi(fmt(len(y), 0), "Partidos"),
+        html.Div([kpi(fmt(len(y), 0), "Partidos", icono="balon"),
                   kpi(fmt(n.get("FIVB", 0), 0), "FIVB", tono="tono-turquesa"),
                   kpi(fmt(n.get("AVP", 0), 0), "AVP", tono="tono-arena"),
                   kpi(fmt_pct(100 * r.es_upset.mean()) if len(r) >= 30 else "—", "Sorpresas", tono="tono-coral")],
@@ -494,124 +556,170 @@ def contenido_multi():
     ])
 
 
+# Perfiles de juego: se reconstruye a qué perfil pertenece cada fila (centroide más cercano del K-means
+# guardado). Da exactamente los mismos grupos que el entrenamiento y permite graficar las variables reales.
+if M.PERF is not None:
+    _VP = M.PERF["variables"]
+    _REFP = PL.REF[_VP + ["resultado"]].copy()
+    _zp = (_REFP[_VP] - pd.Series(M.PERF["media_global"])[_VP]) / pd.Series(M.PERF["de_global"])[_VP]
+    _cen = np.array([[r["z"][v] for v in _VP] for r in M.PERF["perfiles"]])
+    _REFP["perfil"] = ((_zp.values[:, None, :] - _cen[None]) ** 2).sum(axis=2).argmin(axis=1)
+    _MUESTRA_P = _REFP.sample(3000, random_state=2026)
+    _OPC_P = [{"label": M.PERF["etiquetas"][v].capitalize() + ("" if v == "hitpct" else " por set"), "value": v}
+              for v in _VP]
+
+
+def etq_perfil(v):
+    e = M.PERF["etiquetas"][v]
+    return e.capitalize() + ("" if v == "hitpct" else " por set")
+
+
+def rasgos_nombre(z):
+    """Los rasgos que dieron el nombre al perfil (misma regla de entrenar_modelos.py:
+    los dos más alejados del promedio, si superan 0,25 DE)."""
+    orden = sorted(z, key=lambda v: -abs(z[v]))[:2]
+    return {v for v in orden if abs(z[v]) >= 0.25}
+
+
 def contenido_perfiles():
-    """Estilos de juego de la AVP: K-means sobre estadísticas por set (resultados guardados)."""
+    """Los 4 estilos de juego de la AVP (K-means sobre 8 acciones de juego por set)."""
     if M.PERF is None:
         return sin_modelos()
     PF = M.PERF
     perf = PF["perfiles"]
     etq = PF["etiquetas"]
-    sil = PF["silueta"]
+    vs = PF["variables"]
 
     def rasgos(z):
         orden = sorted(z, key=lambda v: -abs(z[v]))[:3]
         return html.Ul([html.Li([html.I(className=f"bi bi-arrow-{'up' if z[v] > 0 else 'down'}-short"),
-                                 f"{etq[v].capitalize()}: {fmt(z[v], 2)} DE"]) for v in orden],
-                       className="perfil-rasgos")
+                                 f"{'Más' if z[v] > 0 else 'Menos'} {etq[v]} que el promedio"])
+                        for v in orden], className="perfil-rasgos")
     tarjetas = [html.Div([
-        html.Div(f"Perfil {i + 1}", className="perfil-num"),
+        html.Div(f"Estilo {i + 1}", className="perfil-num"),
         html.H6(r["nombre"], className="perfil-nombre"),
         html.Div(fmt_pct(r["pct_victorias"]), className="perfil-valor"),
-        html.Div(f"de victorias · IC 95 % ± {fmt(r['ic95'], 1)} pp", className="kpi-nota"),
-        html.Div(f"{fmt(r['n'], 0)} filas ({fmt_pct(r['pct_filas'])})", className="kpi-nota"),
+        html.Div(f"de partidos ganados · {fmt_pct(r['pct_filas'], 0)} de las actuaciones", className="kpi-nota"),
         rasgos(r["z"]),
-    ], id={"type": "perfil-tarjeta", "index": i}, n_clicks=0, className="perfil-tarjeta perfil-activo",
-        style={"--perfil": PAL_PERFIL[i]}, role="button", title="Clic para mostrar u ocultar en el radar")
-        for i, r in enumerate(perf)]
+    ], className="perfil-tarjeta perfil-activo", style={"--perfil": PAL_PERFIL[i]}) for i, r in enumerate(perf)]
+
+    acciones = html.Div([html.Span("Se agrupó con 8 acciones de juego por set:", className="acciones-etq")] +
+                        [html.Span(etq[v].capitalize(), className="accion") for v in vs], className="acciones mb-4")
+
+    # Huella de cada estilo: cuánto se aleja del promedio en cada una de las 8 acciones
+    fig_z = make_subplots(rows=1, cols=len(perf), shared_yaxes=True, horizontal_spacing=0.025,
+                          subplot_titles=[f"E{i + 1}" for i in range(len(perf))])
+    for i, r in enumerate(perf):
+        z = [r["z"][v] for v in vs]
+        clave = rasgos_nombre(r["z"])
+        fig_z.add_bar(x=z, y=[etq_perfil(v) for v in vs], orientation="h", showlegend=False, row=1, col=i + 1,
+                      marker_color=[PAL_PERFIL[i] if v in clave else PIZARRA[1] for v in vs],
+                      text=[("+" if x > 0 else "") + fmt(x, 1) for x in z], textposition="outside", cliponaxis=False,
+                      hovertemplate="%{y}: %{x:+.2f} desviaciones estándar frente al promedio<extra></extra>")
+        fig_z.add_vline(x=0, line_color=GRIS, row=1, col=i + 1)
+    fig_z.update_xaxes(range=[-1.7, 1.7], tickvals=[-1, 0, 1], ticktext=["Menos", "Prom.", "Más"])
+    fig_z.update_yaxes(autorange="reversed")
+    fig_z.update_layout(margin=dict(l=10, r=10, t=30, b=10))
+
+    # Las 8 acciones en cada estilo (cajas con los cuartiles ya calculados)
+    fig_d = make_subplots(rows=2, cols=4, subplot_titles=[etq_perfil(v) for v in vs],
+                          horizontal_spacing=0.06, vertical_spacing=0.18)
+    for j, v in enumerate(vs):
+        for i, r in enumerate(perf):
+            sv = _REFP.loc[_REFP.perfil == i, v]
+            q1, med, q3 = sv.quantile([.25, .5, .75])
+            iqr = q3 - q1
+            fig_d.add_box(x=[f"E{i + 1}"], q1=[q1], median=[med], q3=[q3],
+                          lowerfence=[sv[sv >= q1 - 1.5 * iqr].min()], upperfence=[sv[sv <= q3 + 1.5 * iqr].max()],
+                          marker_color=PAL_PERFIL[i], fillcolor=PAL_PERFIL[i], line=dict(width=1.3), opacity=0.85,
+                          showlegend=False, row=j // 4 + 1, col=j % 4 + 1, hoverinfo="y")
+    fig_d.update_annotations(font=dict(size=12.5))
+    fig_d.update_layout(margin=dict(l=10, r=10, t=30, b=10))
 
     fig_v = go.Figure(go.Bar(
-        x=[r["pct_victorias"] for r in perf], y=[f"P{i + 1}. {r['nombre']}" for i, r in enumerate(perf)],
+        x=[r["pct_victorias"] for r in perf], y=[f"E{i + 1}. {r['nombre']}" for i, r in enumerate(perf)],
         orientation="h", marker_color=PAL_PERFIL[:len(perf)],
-        error_x=dict(type="data", array=[r["ic95"] for r in perf], color=GRIS),
         text=[fmt_pct(r["pct_victorias"]) for r in perf], textposition="outside", cliponaxis=False,
         customdata=[r["n"] for r in perf],
-        hovertemplate="%{y}<br>Victorias: %{x:.1f} %<br>n = %{customdata:,}<extra></extra>"))
+        hovertemplate="%{y}<br>Ganó el %{x:.1f} % de sus partidos<br>n = %{customdata:,}<extra></extra>"))
     fig_v.add_vline(x=50, line_dash="dash", line_color=GRIS)
     fig_v.update_layout(xaxis=dict(range=[0, 100], ticksuffix=" %"), yaxis=dict(autorange="reversed"),
-                        margin=dict(l=10, r=20, t=20, b=10))
+                        margin=dict(l=10, r=40, t=10, b=10))
 
-    ks = sorted(PF["silueta_por_k"], key=int)
-    fig_k = go.Figure(go.Scatter(x=[int(k) for k in ks], y=[PF["silueta_por_k"][k] for k in ks],
-                                 mode="lines+markers", line=dict(color=MAR, width=2),
-                                 marker=dict(size=[14 if int(k) == PF["k"] else 8 for k in ks],
-                                             color=[ARENA if int(k) == PF["k"] else MAR for k in ks]),
-                                 hovertemplate="k = %{x}<br>Silueta: %{y:.3f}<extra></extra>"))
-    fig_k.update_layout(xaxis=dict(title="Número de perfiles (k)", dtick=1),
-                        yaxis=dict(title="Silueta media", rangemode="tozero"))
+    medias = pd.DataFrame([{"Estilo": f"E{i + 1}. {r['nombre']}",
+                            **{etq_perfil(v): fmt(r["medias"][v], 3 if v == "hitpct" else 2) for v in vs}}
+                           for i, r in enumerate(perf)])
 
-    mu = PF["muestra"]
-    fig_p = go.Figure()
-    for i, r in enumerate(perf):
-        sel = [j for j, o in enumerate(mu["orden"]) if o == i]
-        fig_p.add_scattergl(x=[mu["x"][j] for j in sel], y=[mu["y"][j] for j in sel], mode="markers",
-                            name=f"P{i + 1}", marker=dict(color=PAL_PERFIL[i], size=5, opacity=0.45),
-                            hovertemplate=f"P{i + 1}. {r['nombre']}<extra></extra>")
-    vx, vy = PF["pca_varianza"]
-    fig_p.update_layout(xaxis_title=f"Componente 1 ({fmt_pct(100 * vx)} de la varianza)",
-                        yaxis_title=f"Componente 2 ({fmt_pct(100 * vy)})")
-
-    medias = pd.DataFrame([{"Perfil": f"P{i + 1}. {r['nombre']}",
-                            **{etq[v].capitalize(): fmt(r["medias"][v], 3 if v == "hitpct" else 2)
-                               for v in PF["variables"]}} for i, r in enumerate(perf)])
     return html.Div([
-        html.P([f"K-means con k = {PF['k']} sobre {fmt(PF['filas'], 0)} filas pareja-partido de la AVP "
-                f"({fmt(PF['partidos'], 0)} partidos, {PF['anios'][0]}–{PF['anios'][1]}). Variables por set y "
-                "estandarizadas: ", ", ".join(etq[v] for v in PF["variables"]), ". ",
-                html.Strong("Los filtros de arriba no aplican a esta pestaña.")], className="nota mb-3"),
-        dbc.Alert([html.I(className="bi bi-info-circle me-2"),
-                   html.Strong(f"Silueta media = {fmt(sil, 3)}. "),
-                   f"Los perfiles se superponen mucho (una silueta cercana a 0 indica grupos poco separados; "
-                   f"el {fmt_pct(PF['pct_silueta_negativa'])} de una muestra de filas queda más cerca de otro "
-                   "perfil que del suyo). Son descripciones de estilos frecuentes, no tipos de pareja bien "
-                   "definidos. Además, las estadísticas se producen durante el propio partido: el % de victorias "
-                   "de cada perfil es una asociación observacional, no un efecto causal ni una predicción."],
-                  color="light", className="aviso-solape"),
-        html.Div(tarjetas, className="perfiles mb-4"),
-        dbc.Row([dbc.Col(tarjeta("Radar de perfiles", grafico("p-radar", 420),
-                                 "Centroides en desviaciones estándar respecto a la media de la AVP · "
-                                 "clic en las tarjetas para elegir"), lg=6),
-                 dbc.Col(tarjeta("% de victorias observado por perfil",
-                                 dcc.Graph(figure=fig_v, config=CONFIG, style={"height": "420px"}),
-                                 "Con intervalo de confianza del 95 %; línea en 50 %"), lg=6)]),
-        dbc.Row([dbc.Col(tarjeta("Separación de los perfiles (PCA de una muestra de 2.000 filas)",
-                                 dcc.Graph(figure=fig_p, config=CONFIG, style={"height": "380px"}),
-                                 "Los colores se mezclan: hay solapamiento entre perfiles"), lg=7),
-                 dbc.Col(tarjeta("Silueta según el número de perfiles",
-                                 dcc.Graph(figure=fig_k, config=CONFIG, style={"height": "380px"}),
-                                 f"El punto arena marca k = {PF['k']}, el que se describe"), lg=5)]),
-        tarjeta("Promedio por set de cada perfil",
+        html.P([f"Cuatro formas frecuentes de jugar un partido en la AVP, encontradas con K-means en "
+                f"{fmt(PF['filas'], 0)} actuaciones (una pareja en un partido, {PF['anios'][0]}–{PF['anios'][1]}). "
+                "Están ordenadas de la que más gana a la que menos. ",
+                html.Strong("Los filtros de arriba no aplican a esta pestaña.")], className="pagina-intro mb-3"),
+        html.Div(tarjetas, className="perfiles mb-3"),
+        acciones,
+        tarjeta("La huella de cada estilo en las 8 acciones",
+                dcc.Graph(figure=fig_z, config=CONFIG, style={"height": "370px"}),
+                "Cuánto hace cada estilo de cada acción frente a la pareja promedio · en color, las dos acciones que "
+                "le dan el nombre"),
+        dbc.Row([
+            dbc.Col(tarjeta("Dónde cae cada estilo", [
+                dbc.Row([dbc.Col([html.Label("Eje horizontal", className="control-etq"),
+                                  dcc.Dropdown(id="pf-x", options=_OPC_P, value="hitpct", clearable=False)], sm=6),
+                         dbc.Col([html.Label("Eje vertical", className="control-etq"),
+                                  dcc.Dropdown(id="pf-y", options=_OPC_P, value="kills_set", clearable=False)], sm=6)],
+                        className="mb-2"),
+                html.Div([html.Label("Resaltar", className="control-etq me-2 d-inline"),
+                          chips("pf-resaltar", "todos", [("todos", "Todos")] +
+                                [(str(i), f"E{i + 1}") for i in range(len(perf))])], className="mb-1"),
+                grafico("pf-disp", 380),
+                html.Div([html.Span([html.Span(className="leyenda-punto", style={"background": PAL_PERFIL[i]}),
+                                     f"E{i + 1}"], className="leyenda-item") for i in range(len(perf))] +
+                         [html.Span([html.Span("✕", className="leyenda-x"), "Centro del estilo"],
+                                    className="leyenda-item")], className="leyenda-html"),
+            ], "Cada punto es una actuación (muestra de 3.000) · elija dos de las 8 acciones · en las zonas donde "
+               "los colores se tocan, una actuación podría parecerse a dos estilos"), lg=7),
+            dbc.Col(tarjeta("% de partidos ganados por estilo",
+                            dcc.Graph(figure=fig_v, config=CONFIG, style={"height": "440px"}),
+                            "Línea en 50 % · asociación observada, no causa: las acciones ocurren en el mismo partido"),
+                    lg=5),
+        ]),
+        tarjeta("Las 8 acciones en cada estilo", dcc.Graph(figure=fig_d, config=CONFIG, style={"height": "520px"}),
+                "Caja: el 50 % central de las actuaciones de cada estilo; línea: mediana"),
+        tarjeta("Promedio por set de cada estilo",
                 dbc.Table.from_dataframe(medias, striped=True, hover=True, size="sm",
                                          className="tabla tabla-desplazable"), fuente=True),
-        entrenador("Use los perfiles como lenguaje común para describir cómo juega una pareja, no como una receta: "
-                   "las diferencias de victoria entre perfiles reflejan, sobre todo, la eficacia en ataque que ya "
-                   "mostraba el análisis bivariado."),
+        entrenador("Use los estilos como lenguaje común para describir cómo jugó su pareja (\"hoy jugamos tipo E3\"), "
+                   "no como una receta: lo que más separa al estilo que gana del que pierde es la eficacia en ataque, "
+                   "la misma conclusión del análisis bivariado. En Entrenar, el diagnóstico le dice a qué estilo se "
+                   "parece su pareja."),
     ])
 
 
-@app.callback(Output({"type": "perfil-tarjeta", "index": ALL}, "className"), Output("p-radar", "figure"),
-              Input({"type": "perfil-tarjeta", "index": ALL}, "n_clicks"))
-def radar_perfiles(clics):
-    PF = M.PERF
-    if PF is None or not clics:
-        return [], vacia()
-    activos = [(c or 0) % 2 == 0 for c in clics]          # cada clic alterna mostrar / ocultar
-    if not any(activos):
-        activos = [True] * len(clics)
-    etq = PF["etiquetas"]
-    ejes = [etq[v] for v in PF["variables"]]
+@app.callback(Output("pf-disp", "figure"), Input("pf-x", "value"), Input("pf-y", "value"),
+              Input("pf-resaltar", "value"))
+def dispersion_perfiles(vx, vy, resaltar):
+    """Cada actuación coloreada por el estilo que le asignó K-means, con el centro de cada estilo."""
+    perf = M.PERF["perfiles"]
+    m = _MUESTRA_P
     fig = go.Figure()
-    for i, r in enumerate(PF["perfiles"]):
-        if activos[i]:
-            z = [r["z"][v] for v in PF["variables"]]
-            fig.add_scatterpolar(r=z + z[:1], theta=ejes + ejes[:1], name=f"P{i + 1}. {r['nombre']}",
-                                 fill="toself", opacity=0.75, line=dict(color=PAL_PERFIL[i], width=2),
-                                 hovertemplate="%{theta}: %{r:.2f} DE<extra>P" + str(i + 1) + "</extra>")
-    lim = max(abs(r["z"][v]) for r in PF["perfiles"] for v in PF["variables"])
-    fig.update_layout(polar=dict(radialaxis=dict(range=[-lim * 1.1, lim * 1.1], tickfont=dict(size=10)),
-                                 bgcolor="rgba(0,0,0,0)"), legend=dict(y=-0.25, yanchor="top"),
-                      margin=dict(l=30, r=30, t=30, b=10))
-    clases = ["perfil-tarjeta" + (" perfil-activo" if a else "") for a in activos]
-    return clases, fig
+    for i, r in enumerate(perf):
+        sel = m[m.perfil == i]
+        activo = resaltar in ("todos", str(i))
+        fig.add_scatter(x=sel[vx], y=sel[vy], mode="markers", name=f"E{i + 1}",
+                        marker=dict(color=PAL_PERFIL[i] if activo else PIZARRA[0], size=5,
+                                    opacity=0.6 if activo else 0.25),
+                        hovertemplate=f"E{i + 1}. {r['nombre']}<br>{etq_perfil(vx)}: %{{x:.2f}}"
+                                      f"<br>{etq_perfil(vy)}: %{{y:.2f}}<extra></extra>")
+    for i, r in enumerate(perf):
+        if resaltar in ("todos", str(i)):
+            fig.add_scatter(x=[r["medias"][vx]], y=[r["medias"][vy]], mode="markers+text", showlegend=False,
+                            text=[f"E{i + 1}"], textfont=dict(size=13, color=ELEGIDO),
+                            textposition=["top right", "bottom right", "top left", "bottom left"][i % 4],
+                            marker=dict(symbol="x", size=18, color=PAL_PERFIL[i], line=dict(color="white", width=2)),
+                            hovertemplate=f"Centro de E{i + 1}<extra></extra>")
+    fig.update_layout(showlegend=False, xaxis_title=etq_perfil(vx), yaxis_title=etq_perfil(vy),
+                      margin=dict(l=10, r=10, t=10, b=10))
+    return fig
 
 
 def contenido_metodologia():
@@ -726,10 +834,10 @@ def contenido_conclusiones():
         return html.Div([html.Div([html.Div(str(i), className="num"),
                                    html.Div([html.Strong(t), html.Div(x, className="texto")])], className="hallazgo-item")
                          for i, (t, x) in enumerate(items, inicio)])
-    recs = [("bi-trophy", "Preparar un partido", "Use la diferencia de ranking con el rival (calculadora). Con 1–2 posiciones el partido está abierto; solo con más de 20 el favorito es claro."),
-            ("bi-stopwatch", "Exigencia física", f"Un partido típico dura {fmt(C['dur_med'], 0)} minutos, pero uno de cada tres se va a tercer set y se acerca a {fmt(C['dur_3'], 0)}."),
-            ("bi-people", "Armar parejas", "Estatura y edad inclinan poco la balanza; no deben pesar más que el nivel reflejado en el ranking."),
-            ("bi-bullseye", "Priorizar el entrenamiento", "Referencia AVP: convertir los ataques y reducir errores separa más al ganador que atacar más veces.")]
+    recs = [("trofeo", "Preparar un partido", "Use la diferencia de ranking con el rival (calculadora). Con 1–2 posiciones el partido está abierto; solo con más de 20 el favorito es claro."),
+            ("reloj", "Exigencia física", f"Un partido típico dura {fmt(C['dur_med'], 0)} minutos, pero uno de cada tres se va a tercer set y se acerca a {fmt(C['dur_3'], 0)}."),
+            ("equipo", "Armar parejas", "Estatura y edad inclinan poco la balanza; no deben pesar más que el nivel reflejado en el ranking."),
+            ("silbato", "Priorizar el entrenamiento", "Referencia AVP: convertir los ataques y reducir errores separa más al ganador que atacar más veces.")]
     return html.Div([
         html.Div([html.Div("Respuesta a la pregunta", className="hero-eyebrow"),
                   html.P("Antes del partido, el factor medible que más se asocia con ganar es la ventaja de ranking sobre "
@@ -739,8 +847,8 @@ def contenido_conclusiones():
         dbc.Row([dbc.Col(tarjeta("Sobre los datos", lista(datos_, 1), fuente=False), lg=5),
                  dbc.Col(tarjeta("Sobre qué hace ganar a una pareja", lista(ganar, 5), fuente=False), lg=7)]),
         html.H5("Recomendaciones para el entrenador", className="seccion-titulo"),
-        dbc.Row([dbc.Col(html.Div([html.I(className=f"bi {ico} rec-icono"), html.H6(t), html.P(x)], className="rec"), md=6, lg=3)
-                 for ico, t, x in recs], className="mb-4 g-3"),
+        dbc.Row([dbc.Col(html.Div([html.Div(ico(icono), className="jugada-icono"), html.H6(t), html.P(x)], className="rec"), md=6, lg=3)
+                 for icono, t, x in recs], className="mb-4 g-3"),
         dbc.Row([
             dbc.Col(tarjeta("Qué no se puede concluir", html.Ul([
                 html.Li("Que las estadísticas de juego describan a la FIVB."),
@@ -762,9 +870,9 @@ PESTANAS_ANALISIS = [("uni", "Univariado", contenido_uni), ("bi", "Bivariado", c
 
 def pagina_analisis(pestana="uni"):
     return html.Div([
-        encabezado("Análisis", "Explore las variables una por una, compare ganadores con perdedores, vea qué "
+        encabezado("Análisis exploratorio", "Explore las variables una por una, compare ganadores con perdedores, vea qué "
                    "variables se mueven juntas y qué estilos de juego hay en la AVP. Los filtros de arriba aplican "
-                   "a las pestañas univariada, bivariada y multivariada.", "Análisis exploratorio"),
+                   "a las pestañas univariada, bivariada y multivariada."),
         dbc.Tabs([dbc.Tab(f(), label=etq, tab_id=k) for k, etq, f in PESTANAS_ANALISIS],
                  active_tab=pestana, className="pestanas mb-4", id="a-pestanas"),
     ])
@@ -935,12 +1043,51 @@ METRICAS = [("accuracy", "Accuracy"), ("precision", "Precisión"), ("recall", "E
 
 
 def contenido_modelos():
+    """El modelo que usa el dashboard, explicado para el entrenador; el detalle técnico va plegado."""
     if M.MET is None or M.CUR is None:
         return sin_modelos()
     MET, rec = M.MET, M.MET["recomendado"]
     pol, regla = MET["politica"], MET["regla"]
     res = MET["modelos"]
+    r = res[rec]["prueba"]
+    n_prueba = pol["n_prueba"]
 
+    # ¿En qué se fija? (importancia por permutación)
+    imp = pd.DataFrame(MET["importancias"][rec]).sort_values("media")
+    imp["pct"] = 100 * imp.media.clip(lower=0) / imp.media.clip(lower=0).sum()
+    fimp = go.Figure(go.Bar(x=imp.pct, y=imp.etiqueta, orientation="h", marker_color=NEUTRO,
+                            text=[fmt_pct(x, 0) if x >= 1 else "< 1 %" for x in imp.pct], textposition="outside",
+                            cliponaxis=False, customdata=imp.media,
+                            hovertemplate="%{y}<br>%{x:.1f} % de lo que usa el modelo"
+                                          "<br>(caída de AUC al desordenarla: %{customdata:.4f})<extra></extra>"))
+    fimp.update_layout(xaxis=dict(title="Peso en las predicciones", ticksuffix=" %", range=[0, 105]),
+                       margin=dict(l=10, r=30, t=10, b=10))
+
+    # ¿Se puede confiar en el porcentaje? (calibración con los partidos de prueba)
+    dist = M.CUR[rec]["distribucion"]
+    bb = np.array(dist["bordes"])
+    cen = (bb[:-1] + bb[1:]) / 2
+    g, pdr = np.array(dist["gana"]), np.array(dist["pierde"])
+    filas_c = []
+    for lo in np.arange(0, 1, 0.1):
+        m = (cen >= lo) & (cen < lo + 0.1)
+        n = g[m].sum() + pdr[m].sum()
+        if n >= 50:
+            filas_c.append((lo + 0.05, 100 * g[m].sum() / n, int(n), f"{int(round(lo * 100))}–{int(round(lo * 100)) + 10} %"))
+    cal = pd.DataFrame(filas_c, columns=["x", "real", "n", "rango"])
+    fcal = go.Figure()
+    fcal.add_scatter(x=[0, 100], y=[0, 100], mode="lines", line=dict(color=GRIS, dash="dash"), hoverinfo="skip",
+                     showlegend=False)
+    fcal.add_bar(x=100 * cal.x, y=cal.real, width=8, marker_color=MAR, customdata=np.stack([cal.n, cal.rango], axis=1),
+                 text=[fmt_pct(v, 0) for v in cal.real], textposition="outside", cliponaxis=False, showlegend=False,
+                 hovertemplate="El modelo dijo %{customdata[1]}<br>Ganaron de verdad: %{y:.1f} %"
+                               "<br>%{customdata[0]:,} partidos<extra></extra>")
+    fcal.update_layout(xaxis=dict(title="Probabilidad de ganar que dio el modelo", range=[0, 100], ticksuffix=" %",
+                                  dtick=10),
+                       yaxis=dict(title="% que de verdad ganó", range=[0, 105], ticksuffix=" %"),
+                       margin=dict(l=10, r=10, t=10, b=10))
+
+    # --- Detalle técnico (plegado) ---
     filas = [{"Modelo": n + (" ★" if n == rec else ""),
               "AUC validación cruzada": f"{fmt(res[n]['auc_cv_media'], 3)} ± {fmt(res[n]['auc_cv_de'], 3)}",
               "AUC prueba": fmt(res[n]["prueba"]["roc_auc"], 3),
@@ -953,151 +1100,125 @@ def contenido_modelos():
                   "F1": fmt(regla["f1"], 3)})
     tabla = pd.DataFrame(filas)
 
-    comp = go.Figure()
-    for col, etq, clave in [("roc_auc", "ROC-AUC", "roc_auc"), ("accuracy", "Accuracy", "accuracy")]:
-        comp.add_bar(x=M.NOMBRES + ["Regla del ranking"],
-                     y=[res[n]["prueba"][clave] for n in M.NOMBRES] + [regla[clave]],
-                     name=etq, marker_color=[PAL_MODELO[n] for n in M.NOMBRES + ["Regla del ranking"]],
-                     marker_pattern_shape="" if col == "roc_auc" else "/", offsetgroup=col,
-                     text=[fmt(v, 3) for v in [res[n]["prueba"][clave] for n in M.NOMBRES] + [regla[clave]]],
-                     textposition="outside", cliponaxis=False,
-                     hovertemplate="%{x}<br>" + etq + ": %{y:.3f}<extra></extra>")
-    comp.update_layout(barmode="group", yaxis=dict(range=[0.5, 1], title="Métrica en la prueba (2017–2019)"),
-                       legend=dict(y=1.08))
-
-    mejor_auc = max(res[n]["prueba"]["roc_auc"] for n in M.NOMBRES)
-    gan = res[rec]["prueba"]["roc_auc"] - regla["roc_auc"]
-    gan_acc = res[rec]["prueba"]["accuracy"] - regla["accuracy"]
-    top_imp = MET["importancias"][rec][0]
-    conclusiones = [
-        f"El modelo recomendado ({rec}) obtuvo en la prueba una ROC-AUC de {fmt(res[rec]['prueba']['roc_auc'], 3)} "
-        f"y una accuracy de {fmt_pct(100 * res[rec]['prueba']['accuracy'])}. Las tres AUC de prueba quedan entre "
-        f"{fmt(min(res[n]['prueba']['roc_auc'] for n in M.NOMBRES), 3)} y {fmt(mejor_auc, 3)}.",
-        f"Frente a la regla \"gana el mejor rankeado\", el modelo cambia la AUC en {fmt(gan, 3)} y la accuracy "
-        f"en {fmt(100 * gan_acc, 1)} puntos porcentuales: la diferencia de ranking concentra casi toda la "
-        "información disponible antes del partido, igual que en el capítulo 8 del libro.",
-        f"La variable más importante (por permutación) es «{top_imp['etiqueta']}»: al desordenarla, la AUC cae "
-        f"{fmt(top_imp['media'], 3)}.",
-        f"La AUC de prueba ({fmt(res[rec]['prueba']['roc_auc'], 3)}) es menor que la de validación cruzada "
-        f"({fmt(res[rec]['auc_cv_media'], 3)}). No es sobreajuste: en 2017–2019 hubo más sorpresas y el ranking "
-        "anticipa peor que antes.",
-    ]
-    limitaciones = [
-        "Solo usa información previa al partido: ventaja de ranking, edad, estatura, clasificatoria, circuito, género y "
-        "etapa. No hay datos de forma reciente, lesiones, viento ni historial entre rivales.",
-        f"Solo incluye partidos con ranking, edad y estatura de las dos parejas "
-        f"({fmt(pol['descartes']['partidos_modelo'], 0)} de {fmt(pol['descartes']['partidos_iniciales'], 0)}); "
-        "muchas parejas de clasificatoria no tienen ranking numérico y quedan por fuera.",
-        "Los datos van de 2000 a 2019 y agrupan dos circuitos con reglas y coberturas distintas; las relaciones pueden "
-        "haber cambiado.",
-        "Son asociaciones observacionales: el modelo no dice que cambiar una variable cause la victoria.",
-        "Las cifras son las de la prueba 2017–2019; con otros años pueden variar.",
-    ]
-    return html.Div([
-        html.Div([html.Div([html.I(className="bi bi-award"), " Modelo recomendado"], className="recomendado-etq"),
-                  html.Div(rec, className="recomendado-nombre"),
-                  html.P(MET["razon"], className="recomendado-razon")], className="recomendado mb-4"),
-        html.Div([html.Span("Modelo", className="filtro-etq"),
-                  chips("p-modelo", rec, [(n, n) for n in M.NOMBRES])], className="filtro-grupo mb-3"),
-        html.Div(id="p-kpis", className="kpis mb-4"),
-        dbc.Row([dbc.Col(tarjeta("Matriz de confusión (prueba, umbral 0,5)", grafico("p-cm", 340),
-                                 "Filas: resultado real · columnas: predicción"), lg=5),
-                 dbc.Col(tarjeta("Importancia de las variables", grafico("p-imp", 340),
-                                 "Caída de la ROC-AUC en prueba al desordenar cada variable (5 repeticiones)"), lg=7)]),
-        dbc.Row([
-            dbc.Col(tarjeta("Curvas de desempeño", [
-                html.Div([chips("p-curva", "roc", [("roc", "ROC"), ("pr", "Precisión-exhaustividad")])],
-                         className="controles-fila"),
-                grafico("p-curvas", 380)],
-                "Prueba 2017–2019 · la línea punteada es la regla del ranking"), lg=6),
-            dbc.Col(tarjeta("Probabilidad predicha según el resultado real", grafico("p-dist", 420),
-                            "Distribución en la prueba: cuanto menos se mezclan, mejor separa el modelo"), lg=6)]),
-        tarjeta("Umbral de decisión", [
-            dcc.Slider(id="p-umbral", min=0.05, max=0.95, step=0.01, value=0.5,
-                       marks={v: fmt(v, 1) for v in [0.1, 0.3, 0.5, 0.7, 0.9]},
-                       tooltip={"placement": "top", "always_visible": True}),
-            html.Div(id="p-umbral-txt", className="nota mb-2"),
-            grafico("p-umbral-fig", 320)],
-            "Con un umbral más alto el modelo solo dice \"gana\" cuando está más seguro: sube la precisión y baja la exhaustividad"),
-        dbc.Row([dbc.Col(tarjeta("Comparación de modelos",
-                                 dbc.Table.from_dataframe(tabla, striped=True, hover=True, size="sm",
-                                                          className="tabla tabla-desplazable"),
-                                 "★ recomendado · prueba 2017–2019", fuente=False), lg=7),
-                 dbc.Col(tarjeta("Modelos frente a la regla del ranking",
-                                 dcc.Graph(figure=comp, config=CONFIG, style={"height": "360px"}),
-                                 f"Prueba 2017–2019: {fmt(regla['n'], 0)} partidos"), lg=5)]),
-        dbc.Row([
-            dbc.Col(tarjeta("Conclusiones", html.Ul([html.Li(x) for x in conclusiones]), fuente=False), lg=6),
-            dbc.Col(tarjeta("Limitaciones", html.Ul([html.Li(x) for x in limitaciones]), fuente=False), lg=6)]),
-        tarjeta("Cómo se entrenó", html.Ul([
-            html.Li([html.Strong("Alcance: "), pol["alcance"]]),
-            html.Li([html.Strong("Unidad: "), pol["unidad"]]),
-            html.Li([html.Strong("División: "), pol["division"],
-                     f" Entrenamiento: {fmt(pol['n_entrenamiento'], 0)} partidos ({fmt_pct(pol['pct_gana_entrenamiento'])} con gana = 1); "
-                     f"prueba: {fmt(pol['n_prueba'], 0)} ({fmt_pct(pol['pct_gana_prueba'])})."]),
-            html.Li([html.Strong("Validación cruzada: "), pol["validacion_cruzada"]]),
-            html.Li([html.Strong("Preprocesamiento: "), pol["preprocesamiento"]]),
-            html.Li([html.Strong("Predictores: "), ", ".join(pol["etiquetas_predictores"][p] for p in pol["predictores"]),
-                     ". Excluidas por fuga de información: ", ", ".join(pol["excluidas_por_fuga"]), "."]),
-            html.Li([html.Strong("Descartes: "),
-                     f"{fmt(pol['descartes']['partidos_forfeit'], 0)} forfeits y "
-                     f"{fmt(pol['descartes']['partidos_sin_datos_completos'], 0)} partidos sin ranking, edad o estatura "
-                     f"de alguna pareja; quedan {fmt(pol['descartes']['partidos_modelo'], 0)}."]),
-            html.Li([html.Strong("Semilla: "), f"{pol['semilla']}, la misma del libro."]),
-        ], className="lista-politica"), fuente=True),
-    ])
-
-
-@app.callback(Output("p-kpis", "children"), Output("p-cm", "figure"), Output("p-imp", "figure"),
-              Output("p-dist", "figure"), Input("p-modelo", "value"))
-def actualizar_modelo(nombre):
-    r = M.MET["modelos"][nombre]
-    kpis = [kpi(fmt(r["prueba"][k], 3), etq, tono="tono-mar" if k == "roc_auc" else "") for k, etq in METRICAS]
-    kpis.append(kpi(f"{fmt(r['auc_cv_media'], 3)} ± {fmt(r['auc_cv_de'], 3)}", "AUC validación cruzada",
-                    "5 pliegues en entrenamiento"))
-    cm = np.array(r["matriz_confusion"]["valores"])
+    cm = np.array(res[rec]["matriz_confusion"]["valores"])
     total = cm.sum()
     fcm = go.Figure(go.Heatmap(z=cm, x=["Predice: gana", "Predice: pierde"], y=["Real: gana", "Real: pierde"],
                                colorscale=ESCALA_SEC, showscale=False, xgap=3, ygap=3,
-                               text=[[f"{fmt(v, 0)}<br>{fmt_pct(100 * v / total)}" for v in fila] for fila in cm],
+                               text=[[f"{fmt(v, 0)}<br>{fmt_pct(100 * v / total)}" for v in f] for f in cm],
                                texttemplate="%{text}", textfont=dict(size=15),
                                hovertemplate="%{y} · %{x}<br>%{z:,} partidos<extra></extra>"))
     fcm.update_yaxes(autorange="reversed", showgrid=False)
     fcm.update_xaxes(showgrid=False, side="top")
 
-    imp = pd.DataFrame(M.MET["importancias"][nombre]).sort_values("media")
-    fimp = go.Figure(go.Bar(x=imp.media, y=imp.etiqueta, orientation="h", marker_color=PAL_MODELO[nombre],
-                            error_x=dict(type="data", array=imp.de, color=GRIS),
-                            hovertemplate="%{y}<br>Caída de AUC: %{x:.4f}<extra></extra>"))
-    fimp.update_layout(xaxis_title="Caída de la ROC-AUC", margin=dict(l=10, r=20, t=20, b=10))
-
-    dist = M.CUR[nombre]["distribucion"]
-    b = np.array(dist["bordes"])
-    c = (b[:-1] + b[1:]) / 2
     fd = go.Figure()
     for clave, etq, color in [("gana", "Real: gana", PAL["Ganador"]), ("pierde", "Real: pierde", PAL["Perdedor"])]:
-        fd.add_bar(x=c, y=dist[clave], width=b[1] - b[0], name=etq, marker_color=color, opacity=0.65,
+        fd.add_bar(x=cen, y=dist[clave], width=bb[1] - bb[0], name=etq, marker_color=color, opacity=0.65,
                    hovertemplate=etq + "<br>Probabilidad %{x:.3f}<br>%{y:,} partidos<extra></extra>")
     fd.add_vline(x=0.5, line_dash="dash", line_color=GRIS)
     fd.update_layout(barmode="overlay", bargap=0, xaxis=dict(range=[0, 1], title="Probabilidad predicha de ganar"),
                      yaxis=dict(title="Partidos de prueba", tickformat=",d"))
-    return kpis, fcm, fimp, fd
+
+    kpis_tec = [kpi(fmt(r[k], 3), etq) for k, etq in METRICAS] + [
+        kpi(f"{fmt(res[rec]['auc_cv_media'], 3)} ± {fmt(res[rec]['auc_cv_de'], 3)}", "AUC validación cruzada",
+            "5 pliegues en entrenamiento")]
+    limitaciones = [
+        "Solo usa información previa al partido. No hay datos de forma reciente, lesiones, viento ni historial "
+        "entre rivales.",
+        f"Solo incluye partidos con ranking, edad y estatura de las dos parejas "
+        f"({fmt(pol['descartes']['partidos_modelo'], 0)} de {fmt(pol['descartes']['partidos_iniciales'], 0)}).",
+        "Son asociaciones observacionales: el modelo no dice que cambiar una variable cause la victoria.",
+        f"La AUC de prueba ({fmt(r['roc_auc'], 3)}) es menor que la de validación cruzada "
+        f"({fmt(res[rec]['auc_cv_media'], 3)}): en 2017–2019 hubo más sorpresas y el ranking anticipa peor.",
+    ]
+    tecnico = dbc.Accordion([
+        dbc.AccordionItem([
+            html.P(MET["razon"], className="mb-2"),
+            dbc.Table.from_dataframe(tabla, striped=True, hover=True, size="sm", className="tabla tabla-desplazable"),
+            html.Div(f"★ modelo usado · prueba 2017–2019 ({fmt(n_prueba, 0)} partidos). Se compararon tres modelos y "
+                     "se eligió el de mejor AUC en validación cruzada; los otros dos no se usan en el dashboard.",
+                     className="nota")], title="¿Por qué XGBoost? Comparación con los otros modelos"),
+        dbc.AccordionItem([
+            html.Div(kpis_tec, className="kpis mb-3"),
+            dbc.Row([dbc.Col([html.Div("Matriz de confusión (umbral 0,5)", className="control-etq"),
+                              dcc.Graph(figure=fcm, config=CONFIG, style={"height": "300px"})], lg=5),
+                     dbc.Col([html.Div("Probabilidad predicha según el resultado real", className="control-etq"),
+                              dcc.Graph(figure=fd, config=CONFIG, style={"height": "300px"})], lg=7)]),
+            dbc.Row([dbc.Col([html.Div("Curvas de desempeño frente a la regla del ranking", className="control-etq"),
+                              chips("p-curva", "roc", [("roc", "ROC"), ("pr", "Precisión-exhaustividad")]),
+                              grafico("p-curvas", 340)], lg=6),
+                     dbc.Col([html.Div("Umbral de decisión", className="control-etq"),
+                              dcc.Slider(id="p-umbral", min=0.05, max=0.95, step=0.01, value=0.5,
+                                         marks={v: fmt(v, 1) for v in [0.1, 0.3, 0.5, 0.7, 0.9]},
+                                         tooltip={"placement": "top", "always_visible": False}),
+                              html.Div(id="p-umbral-txt", className="nota mb-2"),
+                              grafico("p-umbral-fig", 280)], lg=6)]),
+        ], title="Métricas completas en la prueba 2017–2019"),
+        dbc.AccordionItem(html.Ul([
+            html.Li([html.Strong("Alcance: "), pol["alcance"]]),
+            html.Li([html.Strong("Unidad: "), pol["unidad"]]),
+            html.Li([html.Strong("División: "), pol["division"],
+                     f" Entrenamiento: {fmt(pol['n_entrenamiento'], 0)} partidos; prueba: {fmt(n_prueba, 0)}."]),
+            html.Li([html.Strong("Validación cruzada: "), pol["validacion_cruzada"]]),
+            html.Li([html.Strong("Preprocesamiento: "), pol["preprocesamiento"]]),
+            html.Li([html.Strong("Excluidas por fuga de información: "), ", ".join(pol["excluidas_por_fuga"]), "."]),
+            html.Li([html.Strong("Hiperparámetros: "), str(res[rec]["hiperparametros"])]),
+            html.Li([html.Strong("Semilla: "), f"{pol['semilla']}, la misma del libro."]),
+        ], className="lista-politica"), title="Cómo se entrenó"),
+        dbc.AccordionItem(html.Ul([html.Li(x) for x in limitaciones]), title="Limitaciones"),
+    ], start_collapsed=True, always_open=True, className="tecnico")
+
+    predictores = [pol["etiquetas_predictores"][p_] for p_ in pol["predictores"]]
+    return html.Div([
+        html.Div([
+            html.Div("El modelo que usa el dashboard", className="recomendado-etq"),
+            html.Div(rec, className="recomendado-nombre"),
+            html.P("Combina cientos de árboles de decisión pequeños. Cada árbol hace preguntas sencillas sobre el "
+                   "partido (por ejemplo, \"¿la ventaja de ranking es mayor que 5?\") y cada árbol nuevo corrige los "
+                   "errores de los anteriores. Solo usa lo que se sabe antes de empezar:", className="recomendado-razon"),
+            html.Div([html.Span(t, className="accion") for t in predictores], className="acciones mt-2"),
+        ], className="recomendado mb-4"),
+        html.Div([
+            kpi(f"{fmt(100 * r['accuracy'], 0)} de 100", "Partidos en los que acierta el ganador", icono="trofeo",
+                tono="tono-mar"),
+            kpi(f"{fmt(100 * regla['accuracy'], 0)} de 100", "Aciertos de la regla \"gana el mejor rankeado\"",
+                icono="analisis"),
+            kpi(f"{fmt(100 * r['roc_auc'], 0)} de 100", "Veces que le da más probabilidad al ganador que al perdedor",
+                f"AUC = {fmt(r['roc_auc'], 3)}", icono="prediccion"),
+            kpi(fmt(n_prueba, 0), "Partidos de 2017–2019 con los que se probó", "el modelo no los vio al aprender",
+                icono="balon"),
+        ], className="kpis mb-4"),
+        html.Div([html.Div("Entonces, ¿para qué sirve si acierta casi lo mismo que el ranking?", className="hero-eyebrow"),
+                  html.P(["Porque además de decir quién es el favorito dice ", html.Strong("qué tan favorito es"),
+                          ": no es lo mismo un 52 % que un 85 %. Con eso el entrenador sabe si una ventaja es sólida o "
+                          "frágil. Es lo que usa la pestaña ", html.Strong("¿Quién gana?"), "."], className="respuesta")],
+                 className="respuesta-caja mb-4"),
+        dbc.Row([
+            dbc.Col(tarjeta("¿En qué se fija el modelo?", dcc.Graph(figure=fimp, config=CONFIG, style={"height": "330px"}),
+                            "Cuánto pesa cada dato en sus predicciones: casi todo es la ventaja de ranking"), lg=6),
+            dbc.Col(tarjeta("¿Se puede confiar en el porcentaje?", dcc.Graph(figure=fcal, config=CONFIG,
+                                                                             style={"height": "330px"}),
+                            "Partidos de prueba agrupados por la probabilidad que dio el modelo · si las barras tocan la "
+                            "línea punteada, el porcentaje es confiable"), lg=6)]),
+        entrenador("Cuando el modelo dice 70 %, las parejas ganaron cerca del 70 % de esos partidos: el porcentaje se "
+                   "puede leer tal cual. Úselo para medir qué tan sólida es una ventaja, no como una certeza: incluso "
+                   "con 85 %, una de cada siete veces gana el rival."),
+        html.H5("Detalle técnico", className="seccion-titulo mt-2"),
+        tecnico,
+    ])
 
 
-@app.callback(Output("p-curvas", "figure"), Input("p-curva", "value"), Input("p-modelo", "value"))
-def actualizar_curvas(tipo, elegido):
+@app.callback(Output("p-curvas", "figure"), Input("p-curva", "value"))
+def actualizar_curvas(tipo):
+    rec = M.MET["recomendado"]
     fig = go.Figure()
-    for n in M.NOMBRES + ["Regla del ranking"]:
+    for n, color, guion in [(rec, PAL_MODELO[rec], "solid"), ("Regla del ranking", PAL_MODELO["Regla del ranking"], "dash")]:
         cur = M.CUR[n]["con_ranking" if n == "Regla del ranking" else "todos"][tipo]
         x, y = (cur["fpr"], cur["tpr"]) if tipo == "roc" else (cur["recall"], cur["precision"])
-        fig.add_scatter(x=x, y=y, mode="lines", name=n,
-                        line=dict(color=PAL_MODELO[n], width=4 if n == elegido else 2,
-                                  dash="dash" if n == "Regla del ranking" else "solid"),
-                        opacity=1 if n in (elegido, "Regla del ranking") else 0.6,
+        fig.add_scatter(x=x, y=y, mode="lines", name=n, line=dict(color=color, width=3, dash=guion),
                         hovertemplate=n + "<br>%{x:.2f} · %{y:.2f}<extra></extra>")
     if tipo == "roc":
         fig.add_scatter(x=[0, 1], y=[0, 1], mode="lines", showlegend=False, hoverinfo="skip",
-                        line=dict(color="#C9D6E3", dash="dot"))
+                        line=dict(color=PIZARRA[0], dash="dot"))
         fig.update_layout(xaxis=dict(range=[0, 1], title="Tasa de falsos positivos"),
                           yaxis=dict(range=[0, 1], title="Tasa de verdaderos positivos"))
     else:
@@ -1106,16 +1227,16 @@ def actualizar_curvas(tipo, elegido):
     return fig
 
 
-@app.callback(Output("p-umbral-fig", "figure"), Output("p-umbral-txt", "children"),
-              Input("p-modelo", "value"), Input("p-umbral", "value"))
-def actualizar_umbral(nombre, u):
-    t = M.CUR[nombre]["umbrales"]
+@app.callback(Output("p-umbral-fig", "figure"), Output("p-umbral-txt", "children"), Input("p-umbral", "value"))
+def actualizar_umbral(u):
+    t = M.CUR[M.MET["recomendado"]]["umbrales"]
     fig = go.Figure()
-    for clave, etq, color, guion in [("accuracy", "Accuracy", MAR, "solid"), ("precision", "Precisión", TURQUESA, "solid"),
-                                     ("recall", "Exhaustividad", CORAL, "solid"), ("f1", "F1", ARENA, "dash")]:
+    # Métricas del mismo modelo: un solo tono (pizarra) y se distinguen por el tipo de línea
+    for clave, etq, color, guion in [("accuracy", "Accuracy", PIZARRA[4], "solid"), ("precision", "Precisión", PIZARRA[3], "dash"),
+                                     ("recall", "Exhaustividad", PIZARRA[2], "dot"), ("f1", "F1", PIZARRA[4], "dashdot")]:
         fig.add_scatter(x=t["umbral"], y=t[clave], name=etq, mode="lines", line=dict(color=color, width=2, dash=guion),
                         hovertemplate="Umbral %{x:.2f}<br>" + etq + ": %{y:.3f}<extra></extra>")
-    fig.add_vline(x=u, line_color=GRIS)
+    fig.add_vline(x=u, line_color=ELEGIDO)
     fig.update_layout(xaxis=dict(range=[0, 1], title="Umbral"), yaxis=dict(range=[0, 1]), hovermode="x unified")
     i = int(np.argmin(np.abs(np.array(t["umbral"]) - u)))
     prec = "no definida (no predice ningún \"gana\")" if t["precision"][i] is None else fmt(t["precision"][i], 3)
@@ -1237,9 +1358,8 @@ def contenido_calculadora():
 
 def pagina_prediccion(pestana="modelos"):
     return html.Div([
-        encabezado("Predicción", "¿Se puede anticipar quién gana con lo que se sabe antes del partido? Compare tres "
-                   "modelos con la regla \"gana el mejor rankeado\", simule un partido o consulte la calculadora "
-                   "histórica.", "Modelado"),
+        encabezado("Predicción del partido", "¿Se puede anticipar quién gana con lo que se sabe antes del partido? Vea qué "
+                   "tan bien lo hace el modelo, simule un partido o consulte la calculadora histórica."),
         dbc.Tabs([dbc.Tab(contenido_modelos(), label="Modelos", tab_id="modelos"),
                   dbc.Tab(contenido_simulador(), label="¿Quién gana?", tab_id="simulador"),
                   dbc.Tab(contenido_calculadora(), label="Calculadora histórica", tab_id="calculadora")],
@@ -1307,7 +1427,7 @@ def calcular(propio, rival, circuito, genero, etapa, estatura):
     f1.add_hline(y=50, line_dash="dash", line_color=GRIS)
     f1.add_vline(x=0, line_color="#D1D5DB")
     f1.add_scatter(x=[v], y=[pct], mode="markers", name="Su partido", showlegend=False,
-                   marker=dict(size=14, color=PAL["Ganador"], line=dict(color="white", width=3)),
+                   marker=dict(size=14, color=ELEGIDO, line=dict(color="white", width=3)),
                    hovertemplate="Su partido<br>Ventaja %{x:+d}<br>%{y:.1f} %<extra></extra>")
     f1.update_layout(showlegend=False, yaxis=dict(range=[0, 100], ticksuffix=" %", title="% de victorias"),
                      xaxis_title="Ventaja de ranking (ranking del rival − ranking propio)")
@@ -1320,7 +1440,7 @@ def calcular(propio, rival, circuito, genero, etapa, estatura):
     t["pct"] *= 100
     suyo = etqs[int(np.searchsorted(cortes[1:-1], estatura, side="right"))]
     f2 = go.Figure(go.Bar(x=t.index.astype(str), y=t.pct, customdata=t.n,
-                          marker_color=[PAL["Ganador"] if k == suyo else "#C9D6E8" for k in t.index],
+                          marker_color=[ELEGIDO if k == suyo else PIZARRA[1] for k in t.index],
                           text=[fmt_pct(x) for x in t.pct], textposition="outside", cliponaxis=False,
                           hovertemplate="Ventaja %{x} cm<br>Victorias: %{y:.1f} %<br>n = %{customdata:,}<extra></extra>"))
     f2.add_hline(y=50, line_dash="dash", line_color=GRIS, layer="below")
@@ -1331,15 +1451,399 @@ def calcular(propio, rival, circuito, genero, etapa, estatura):
 # ==========================================================================
 # Página: Equipo (por ahora solo la pestaña, sin contenido)
 # ==========================================================================
+# ==========================================================================
+# Página: Plan de entrenamiento (diagnóstico con los datos de la AVP)
+# ==========================================================================
+CAMPOS_PLAN = [("sets", "Sets jugados", "si suma varios partidos, el total de sets"),
+               ("kills", "Kills", "ataques que terminan en punto"),
+               ("attacks", "Ataques", "todos los ataques intentados"),
+               ("errors", "Errores de ataque", "ataques que se van fuera, a la red o bloqueados"),
+               ("aces", "Aces", "saques que terminan en punto directo"),
+               ("serve_errors", "Errores de saque", "saques fuera o a la red"),
+               ("blocks", "Bloqueos", "bloqueos que terminan en punto"),
+               ("digs", "Defensas", "balones defendidos")]
+
+
+def pagina_entrenamiento():
+    campos = [dbc.Col([html.Label(etq, className="control-etq", htmlFor=f"e-{c}"),
+                       dbc.Input(id=f"e-{c}", type="number", min=1 if c == "sets" else 0, step=1,
+                                 inputMode="numeric", value=PL.EJEMPLOS["tipico"][c]),
+                       html.Div(ayuda, className="campo-ayuda")], xs=6, md=4, lg=6, xl=4, className="mb-3")
+              for c, etq, ayuda in CAMPOS_PLAN]
+    formulario = tarjeta("Estadísticas de su pareja", [
+        html.P("Escriba los totales de la pareja (sume los dos jugadores) en uno o varios partidos, y cuántos sets "
+               "jugaron. Solo números enteros; el promedio por set y el % de ataque se calculan solos. "
+               "Si no las tiene a mano, cargue un ejemplo.",
+               className="nota mb-2"),
+        html.Div([html.Span("Ejemplos", className="filtro-etq me-2"),
+                  chips("e-ejemplo", "tipico", [("tipico", "Pareja típica AVP"), ("pierde", "Pareja que suele perder")])],
+                 className="mb-3"),
+        dbc.Row(campos),
+        html.Button("Diagnosticar", id="e-diagnosticar", n_clicks=0, className="boton-principal mt-1"),
+    ], "Una fila por pareja, no por jugador", fuente=False)
+    return html.Div([
+        encabezado("Plan de entrenamiento",
+                   "Compare las estadísticas de su pareja con las de las parejas que ganan en la AVP, vea a qué estilo "
+                   "de juego se parece, qué conviene priorizar y llévese un plan para la semana."),
+        dbc.Row([dbc.Col(formulario, lg=5),
+                 dbc.Col(dcc.Loading(html.Div(id="e-resultado"), custom_spinner=html.Div(
+                     html.Img(src="/assets/balon.svg", className="balon-carga", alt=""), className="carga")), lg=7)]),
+        dcc.Store(id="e-datos"),
+        html.Section([
+            html.Div([html.Div([html.H5("Plan para la semana", className="seccion-titulo mb-1"),
+                                html.Div("Armado con los datos del diagnóstico: cada prioridad tiene ejercicios y una "
+                                         "meta medible.", className="nota mt-0")]),
+                      html.Div([html.Span("Días por semana", className="filtro-etq me-2"),
+                                chips("e-dias", 3, [(3, "3"), (4, "4"), (5, "5")]),
+                                html.Button([html.I(className="bi bi-download me-2"), "Descargar plan"],
+                                            id="e-descargar", n_clicks=0, className="boton-secundario ms-2"),
+                                dcc.Download(id="e-descarga")], className="plan-controles")],
+                     className="plan-cabeza mb-3"),
+            dcc.Loading(html.Div(id="e-plan"), custom_spinner=html.Div(
+                html.Img(src="/assets/balon.svg", className="balon-carga", alt=""), className="carga")),
+            html.Div([
+                html.Div([html.Div([html.Span(className="ia-chispa"), "Redactar el plan con IA"], className="ia-titulo"),
+                          html.Div("Gemini convierte el plan de arriba en indicaciones listas para la cancha. No cambia "
+                                   "las metas ni los ejercicios, y solo recibe las estadísticas: nada personal.",
+                                   className="nota mt-0")]),
+                html.Button("Redactar con IA", id="e-redactar", n_clicks=0, className="boton-principal"),
+            ], className="ia-cabeza mt-4"),
+            dcc.Store(id="e-ia-texto"),
+            dcc.Loading(html.Div(id="e-ia"), custom_spinner=html.Div(
+                [html.Img(src="/assets/balon.svg", className="balon-carga", alt=""),
+                 html.Span("Redactando… puede tardar unos segundos", className="nota ms-2")], className="carga")),
+        ], id="e-plan-zona", className="oculto mb-4"),
+        entrenador(f"La comparación usa {fmt(len(PL.REF), 0)} filas pareja-partido de la AVP "
+                   f"({PL.REF.year.min()}–{PL.REF.year.max()}) con estadísticas completas; la FIVB no tiene estas "
+                   "estadísticas. Las brechas muestran asociaciones con ganar, no causas: el plan es una guía, no "
+                   "reemplaza el criterio del entrenador."),
+    ])
+
+
+@app.callback([Output(f"e-{c}", "value") for c, _, _ in CAMPOS_PLAN], Input("e-ejemplo", "value"),
+              prevent_initial_call=True)
+def cargar_ejemplo(ejemplo):
+    return [PL.EJEMPLOS[ejemplo][c] for c, _, _ in CAMPOS_PLAN]
+
+
+def figura_percentiles(diag):
+    t = diag["tabla"][diag["tabla"].sentido != 0].copy()
+    brechas = {b["var"] for b in diag["brechas"]}
+    fuertes = {f["var"] for f in diag["fortalezas"]}
+    t["color"] = [CORAL if v in brechas else MAR if v in fuertes else PIZARRA[0] for v in t["var"]]
+    t = t.iloc[::-1]
+    dec = [3 if v == "hitpct" else 1 for v in t["var"]]
+    fig = go.Figure(go.Bar(
+        x=t.percentil, y=t.etiqueta, orientation="h", marker_color=t.color,
+        text=[f"{fmt(p, 0)}" for p in t.percentil], textposition="outside", cliponaxis=False,
+        customdata=np.stack([[fmt(v, d) for v, d in zip(t.valor, dec)],
+                             [fmt(m, d) for m, d in zip(t.mediana_ganadores, dec)]], axis=1),
+        hovertemplate="%{y}<br>Su pareja: %{customdata[0]}<br>Mediana de las ganadoras: %{customdata[1]}"
+                      "<br>Supera al %{x:.0f} % de las ganadoras<extra></extra>"))
+    fig.add_vline(x=50, line_dash="dash", line_color=GRIS, annotation_text="Mediana de las ganadoras",
+                  annotation_position="top")
+    fig.update_layout(height=330, margin=dict(l=10, r=30, t=30, b=10), showlegend=False,
+                      xaxis=dict(range=[0, 105], title="Percentil frente a las parejas ganadoras (0–100)"))
+    return fig
+
+
+@app.callback(Output("e-resultado", "children"), Input("e-diagnosticar", "n_clicks"),
+              [State(f"e-{c}", "value") for c, _, _ in CAMPOS_PLAN])
+def diagnosticar(_, *valores):
+    datos = dict(zip([c for c, _, _ in CAMPOS_PLAN], valores))
+    error = PL.validar(datos)
+    if error:
+        return dbc.Alert(error, color="warning")
+    diag = PL.diagnosticar(datos)
+    per, par = diag["perfil"], diag["parecidas"]
+
+    def dato(v, var):
+        return fmt_pct(100 * v, 1) if var == "hitpct" else fmt(v, 1)
+
+    tarjetas_brecha = [html.Div([
+        html.Div(f"Prioridad {i}", className="brecha-num"),
+        html.Div(b["etiqueta"], className="brecha-titulo"),
+        html.Div([html.Span(dato(b["valor"], b["var"]), className="brecha-valor"),
+                  html.Span(f" frente a {dato(b['mediana_ganadores'], b['var'])} de la ganadora típica",
+                            className="brecha-ref")]),
+        html.Div(f"Supera solo al {fmt(b['percentil'], 0)} % de las parejas ganadoras.", className="brecha-nota"),
+    ], className="brecha") for i, b in enumerate(diag["brechas"], 1)]
+    if not tarjetas_brecha:
+        tarjetas_brecha = [html.Div("No hay brechas claras: en todas las estadísticas su pareja está en la mitad "
+                                    "alta de las ganadoras. Conviene mantener el nivel.", className="nota")]
+    fuertes = ", ".join(f"{f['etiqueta'].lower()} (supera al {fmt(f['percentil'], 0)} %)" for f in diag["fortalezas"])
+
+    return html.Div([
+        dbc.Row([
+            dbc.Col(kpi(per["nombre"] if per else "—", "Estilo de juego más parecido",
+                        f"Las parejas con este estilo ganaron el {fmt_pct(per['pct_victorias'])} de sus partidos"
+                        if per else None, tono="kpi-perfil tono-gris", icono="analisis"), md=7),
+            dbc.Col(kpi(fmt_pct(par["pct_victorias"], 0), "Ganaron las parejas que juegan parecido",
+                        f"Las {fmt(par['n'], 0)} parejas de la AVP con estadísticas más cercanas", tono="tono-mar"), md=5),
+        ], className="g-3 mb-3"),
+        tarjeta("Dónde está su pareja frente a las ganadoras",
+                dcc.Graph(figure=figura_percentiles(diag), config=CONFIG),
+                "Coral: brechas prioritarias · azul: fortalezas · en los errores, más a la derecha = menos errores"),
+        html.H5("Qué priorizar", className="seccion-titulo mb-2"),
+        html.Div(tarjetas_brecha, className="brechas mb-2"),
+        html.Div(f"Fortalezas: {fuertes}." if fuertes else "", className="nota mb-3"),
+        html.Div("La prioridad combina qué tan lejos está su pareja de la ganadora típica y cuánto separa esa "
+                 "estadística a ganadores de perdedores en la AVP (correlación rango-biserial).", className="nota"),
+    ])
+
+
+@app.callback(Output("e-datos", "data"), Output("e-plan-zona", "className"), Input("e-diagnosticar", "n_clicks"),
+              [State(f"e-{c}", "value") for c, _, _ in CAMPOS_PLAN])
+def guardar_datos_plan(_, *valores):
+    """Guarda los datos ya validados para armar el plan (y, en el paso siguiente, pasárselo a la IA)."""
+    datos = dict(zip([c for c, _, _ in CAMPOS_PLAN], valores))
+    if PL.validar(datos):
+        return None, "oculto"
+    return datos, "mb-4"
+
+
+@app.callback(Output("e-plan", "children"), Input("e-datos", "data"), Input("e-dias", "value"))
+def mostrar_plan(datos, dias):
+    if not datos:
+        return None
+    plan = PL.plantilla(PL.diagnosticar(datos), int(dias))
+    metas = html.Div([html.Div([html.Div(f"Meta {i}" if m["var"] else "Meta", className="meta-num"),
+                                html.Div(m["texto"], className="meta-texto"),
+                                html.Div(m["nota"][0].upper() + m["nota"][1:], className="meta-nota")], className="meta")
+                      for i, m in enumerate(plan["metas"], 1)], className="metas mb-3")
+    sesiones = html.Div([html.Div([
+        html.Div([html.Span(ss["titulo"], className="sesion-titulo"),
+                  html.Span(f"{ss['minutos']} min", className="sesion-min")], className="sesion-cabeza"),
+        html.Div(["Foco: ", html.Strong(ss["foco"].lower())], className="sesion-foco"),
+        html.Ol([html.Li([html.Span(f"{m}'", className="bloque-min"),
+                          html.Div([html.Div(t, className="bloque-titulo"), html.Div(x, className="bloque-texto")])],
+                         className="bloque") for m, t, x in ss["bloques"]], className="bloques"),
+    ], className="sesion") for ss in plan["sesiones"]], className="sesiones")
+    extra = []
+    if plan["fortalezas"]:
+        extra.append(html.Div("Fortalezas que conviene mantener: " +
+                              ", ".join(f.lower() for f in plan["fortalezas"]) + ".", className="nota mt-3"))
+    return [metas, sesiones] + extra
+
+
+@app.callback(Output("e-ia", "children"), Output("e-ia-texto", "data"), Input("e-redactar", "n_clicks"),
+              Input("e-datos", "data"), Input("e-dias", "value"), prevent_initial_call=True)
+def redactar_con_ia(_, datos, dias):
+    """Solo llama a la IA con el botón; si cambian los datos o los días, borra la redacción anterior."""
+    if ctx.triggered_id != "e-redactar" or not datos:
+        return None, None
+    diag = PL.diagnosticar(datos)
+    plan = PL.plantilla(diag, int(dias))
+    try:
+        texto, modelo = IA.redactar(diag, plan)
+    except RuntimeError as err:
+        return dbc.Alert([html.I(className="bi bi-info-circle me-2"), str(err)], color="light",
+                         className="aviso-solape mt-3"), None
+    return html.Div([
+        html.Div([html.Span("Redactado por IA", className="ia-sello"),
+                  html.Span(f"{modelo} · revise el texto antes de usarlo", className="nota m-0")], className="mb-2"),
+        dcc.Markdown(texto, className="ia-texto"),
+    ], className="ia-caja mt-3"), texto
+
+
+@app.callback(Output("e-descarga", "data"), Input("e-descargar", "n_clicks"), State("e-datos", "data"),
+              State("e-dias", "value"), State("e-ia-texto", "data"), prevent_initial_call=True)
+def descargar_plan(_, datos, dias, texto_ia):
+    """Descarga la redacción de la IA si existe; si no, la plantilla."""
+    if not datos:
+        return no_update
+    if texto_ia:
+        return dcc.send_string(texto_ia, "plan_de_entrenamiento_IA.md")
+    plan = PL.plantilla(PL.diagnosticar(datos), int(dias))
+    return dcc.send_string(PL.plan_texto(plan), "plan_de_entrenamiento.txt")
+
+
+EQUIPO = [
+    {"nombre": "Nicole Ramírez Álvarez", "iniciales": "NR",
+     "linea": "Ciencia de Datos · 6.º semestre · Universidad del Norte",
+     "rol": "Versión en Python",
+     "texto": "Desarrolló el análisis en Python: el libro en Jupyter Book, con la limpieza de los datos, el análisis "
+              "exploratorio, los estilos de juego y los modelos de predicción, y este dashboard en Dash, incluidos "
+              "el plan de entrenamiento y el asistente con IA.",
+     "github": "nicoleramirez2106-ui"},
+    {"nombre": "Roger Alberto Daza Polo", "iniciales": "RD",
+     "linea": "Ciencia de Datos · 6.º semestre · Universidad del Norte",
+     "rol": "Versión en R",
+     "texto": "Desarrolló el análisis en R: el libro en bookdown, con la limpieza, el análisis exploratorio y los "
+              "modelos, y la aplicación interactiva en Shiny, que replica el dashboard en ese lenguaje.",
+     "github": "RogerDaZa"},
+]
+
+
 def pagina_equipo():
-    return html.Div(id="pagina-equipo", className="pagina-vacia")
+    tarjetas = [html.Div([
+        html.Div(p["iniciales"], className="miembro-avatar"),
+        html.Div(p["rol"], className="miembro-rol"),
+        html.H5(p["nombre"], className="miembro-nombre"),
+        html.Div(p["linea"], className="miembro-linea"),
+        html.P(p["texto"], className="miembro-texto"),
+        html.A([html.I(className="bi bi-github me-2"), f"github.com/{p['github']}"],
+               href=f"https://github.com/{p['github']}", target="_blank", className="boton-secundario miembro-enlace"),
+    ], className="miembro") for p in EQUIPO]
+    return html.Div([
+        encabezado("Equipo", "Proyecto del curso Visualización de Datos y Toma de Decisiones, Universidad del Norte. "
+                   "El mismo análisis se hizo en dos lenguajes: Python y R."),
+        html.Div(tarjetas, className="equipo-grid mb-4"),
+        html.Div([html.A([ico("libro"), "Libro del proyecto (Python)"], href=LIBRO, target="_blank",
+                         className="boton-principal"),
+                  html.A([html.I(className="bi bi-github"), "Repositorio"], href=REPO, target="_blank",
+                         className="boton-secundario")], className="hero-botones"),
+    ])
+
+
+# ==========================================================================
+# Chatbot: asistente que responde con la ficha del proyecto (Gemini, ver ia.py)
+# ==========================================================================
+_FICHA = None
+
+
+def ficha_proyecto():
+    """Resumen en texto de las cifras del dashboard: es lo único que el asistente puede usar para responder."""
+    global _FICHA
+    if _FICHA is not None:
+        return _FICHA
+    t = D.tabla_poder("Todos", "Todos", D.ANIOS)
+    poder = "\n".join(f"- {r.Variable}: mediana ganadores {fmt(r.med_g, 3 if r['var'] == 'hitpct' else 1)}, "
+                      f"perdedores {fmt(r.med_p, 3 if r['var'] == 'hitpct' else 1)}, correlación rango-biserial "
+                      f"{fmt(r.rbc, 2)}, poder {r.poder.lower()}" for _, r in t.iterrows())
+    lineas = [
+        "DATOS: " + f"{fmt(C['n_partidos'], 0)} partidos de los circuitos FIVB ({fmt(_n_circ.get('FIVB', 0), 0)}) y AVP "
+        f"({fmt(_n_circ.get('AVP', 0), 0)}), {D.ANIOS[0]}–{D.ANIOS[1]}, {fmt(C['n_jugadores'], 0)} jugadores, "
+        f"{C['n_paises']} países sede. Fuente: vb_matches.csv (BigTimeStats vía TidyTuesday). Solo el "
+        f"{fmt_pct(C['pct_stats'], 0)} de los partidos tiene estadísticas de juego, casi todos de la AVP.",
+        f"RANKING: en los {fmt(C['n_rank'], 0)} partidos con ranking de las dos parejas, gana la mejor rankeada el "
+        f"{fmt_pct(C['pct_fav'])}; el {fmt_pct(100 - C['pct_fav'])} son sorpresas. Con 1–2 posiciones de diferencia "
+        f"gana el favorito el {fmt_pct(C['fav_cerca'], 0)}; con más de 20, el {fmt_pct(C['fav_lejos'], 0)}.",
+        f"DURACIÓN: un partido típico dura {fmt(C['dur_med'], 0)} minutos; los de tres sets, {fmt(C['dur_3'], 0)}.",
+        f"ESTATURA Y CLASIFICATORIA: con 10 cm o más de ventaja de estatura sobre el rival se gana el "
+        f"{fmt_pct(C['est10'])}. Las parejas que vienen de clasificatoria pierden el {fmt_pct(_perd[1])} frente al "
+        f"{fmt_pct(_perd[0])} del resto (asociación despreciable).",
+        "QUÉ SEPARA A GANADORES DE PERDEDORES (por pareja en cada partido; estadísticas de juego solo AVP):\n" + poder,
+    ]
+    if M.PERF:
+        est = "\n".join(f"- E{i + 1}. {r['nombre']}: gana el {fmt_pct(r['pct_victorias'])} de sus partidos, "
+                        f"{fmt_pct(r['pct_filas'], 0)} de las actuaciones" for i, r in enumerate(M.PERF["perfiles"]))
+        lineas.append("ESTILOS DE JUEGO (K-means, k = 4, sobre 8 acciones por set: kills, aces, bloqueos, defensas, "
+                      "ataques, errores de ataque, errores de saque y % de ataque; AVP; una fila = una pareja en un "
+                      "partido; los estilos se solapan):\n" + est)
+    if M.MET:
+        rec, r, regla = M.MET["recomendado"], M.MET["modelos"][M.MET["recomendado"]]["prueba"], M.MET["regla"]
+        imp = ", ".join(f"{x['etiqueta']}" for x in M.MET["importancias"][rec][:3])
+        lineas.append(f"MODELO DE PREDICCIÓN: {rec}, con datos previos al partido (ventaja de ranking, edad, estatura, "
+                      f"clasificatoria, circuito, género, etapa). Entrenado con 2000–2016 y probado con 2017–2019: "
+                      f"acierta el {fmt_pct(100 * r['accuracy'], 0)} de los partidos (la regla 'gana el mejor rankeado' "
+                      f"el {fmt_pct(100 * regla['accuracy'], 0)}), AUC {fmt(r['roc_auc'], 3)}. Lo que más pesa: {imp}. "
+                      "Sus porcentajes están bien calibrados: cuando dice 70 %, ganan cerca del 70 %. Su valor es "
+                      "decir qué tan favorita es una pareja, no solo quién.")
+    lineas.append("PÁGINAS DEL DASHBOARD: Inicio (resumen); Dashboard (partidos por año, circuito, etapa y sorpresas, "
+                  "con filtros); Análisis (univariado, bivariado, multivariado, estilos de juego, metodología, "
+                  "conclusiones); Predicción (el modelo, simulador '¿Quién gana?' y calculadora histórica por "
+                  "diferencia de ranking); Entrenar (diagnóstico de una pareja frente a las ganadoras de la AVP, "
+                  "prioridades, plan semanal con ejercicios y redacción con IA); Equipo.")
+    _FICHA = "\n\n".join(lineas)
+    return _FICHA
+
+
+SUGERENCIAS = ["¿Qué es lo que más separa a un ganador de un perdedor?",
+               "¿Qué tan confiable es el modelo de predicción?",
+               "Explíqueme los 4 estilos de juego",
+               "¿Cómo uso la página Entrenar?"]
+
+chat = html.Div([
+    html.Button([ico("chat"), html.Span("Pregúntele al asistente", className="chat-boton-txt")], id="chat-boton",
+                n_clicks=0, className="chat-boton", title="Asistente del coach"),
+    html.Div([
+        html.Div([html.Div([html.Img(src="/assets/balon.svg", className="chat-avatar", alt=""),
+                            html.Div([html.Div("Asistente del coach", className="chat-titulo"),
+                                      html.Div("Responde con los datos del proyecto · IA (Gemini)",
+                                               className="chat-sub")])], className="chat-cabeza-izq"),
+                  html.Button("×", id="chat-cerrar", n_clicks=0, className="chat-cerrar", title="Cerrar")],
+                 className="chat-cabeza"),
+        html.Div(id="chat-mensajes", className="chat-mensajes"),
+        html.Div(id="chat-estado", className="chat-estado"),
+        html.Div([dcc.Input(id="chat-input", placeholder="Escriba su pregunta…", maxLength=500, debounce=False,
+                            className="chat-input", n_submit=0, autoComplete="off"),
+                  html.Button(ico("enviar"), id="chat-enviar", n_clicks=0, className="chat-enviar", title="Enviar")],
+                 className="chat-pie"),
+    ], id="chat-panel", className="chat-panel oculto"),
+    dcc.Store(id="chat-historial", storage_type="session", data=[]),
+], className="chat")
+app.layout.children.append(chat)
+
+# ---------- Video del proyecto ----------
+ventana_video = dbc.Modal([
+    dbc.ModalHeader(dbc.ModalTitle("Video del proyecto"), close_button=True),
+    dbc.ModalBody(html.Video(src="/assets/video/video_proyecto.mp4", poster="/assets/video/portada.jpg",
+                             controls=True, preload="none", id="video-reproductor", className="video-reproductor")),
+], id="video-ventana", size="xl", centered=True, is_open=False, className="ventana-video")
+app.layout.children.append(ventana_video)
+
+
+@app.callback(Output("video-ventana", "is_open"), Input("video-abrir", "n_clicks"), prevent_initial_call=True)
+def abrir_video(n):
+    return bool(n)
+
+          # el asistente flota sobre todas las páginas
+
+# Al llegar un mensaje nuevo, la conversación baja sola hasta el final
+app.clientside_callback(
+    """function(hijos) {
+        setTimeout(function () { var c = document.getElementById("chat-mensajes");
+                                 if (c) { c.scrollTop = c.scrollHeight; } }, 60);
+        return window.dash_clientside.no_update;
+    }""", Output("chat-mensajes", "title"), Input("chat-mensajes", "children"))
+
+
+@app.callback(Output("chat-panel", "className"), Input("chat-boton", "n_clicks"), Input("chat-cerrar", "n_clicks"),
+              State("chat-panel", "className"), prevent_initial_call=True)
+def abrir_chat(_a, _c, clase):
+    if ctx.triggered_id == "chat-cerrar":
+        return "chat-panel oculto"
+    return "chat-panel" if "oculto" in (clase or "") else "chat-panel oculto"
+
+
+@app.callback(Output("chat-historial", "data"), Output("chat-input", "value"), Output("chat-estado", "children"),
+              Input("chat-enviar", "n_clicks"), Input("chat-input", "n_submit"),
+              Input({"type": "chat-sug", "index": ALL}, "n_clicks"),
+              State("chat-input", "value"), State("chat-historial", "data"), prevent_initial_call=True)
+def preguntar(_e, _s, sug, texto, historial):
+    historial = historial or []
+    if isinstance(ctx.triggered_id, dict):            # clic en una pregunta sugerida
+        if not any(sug):                              # (las sugerencias desaparecen al redibujar: no es un clic)
+            return no_update, no_update, no_update
+        texto = SUGERENCIAS[ctx.triggered_id["index"]]
+    texto = (texto or "").strip()
+    if not texto:
+        return no_update, no_update, no_update
+    try:
+        resp, _ = IA.conversar(ficha_proyecto(), historial, texto)
+    except RuntimeError as err:
+        resp = f"_No pude responder ahora: {err}_"
+    return historial + [{"rol": "user", "texto": texto}, {"rol": "model", "texto": resp}], "", ""
+
+
+@app.callback(Output("chat-mensajes", "children"), Input("chat-historial", "data"))
+def mostrar_chat(historial):
+    if not historial:
+        return [html.Div("Hola, Coach. Puedo explicarle los resultados del proyecto: qué pesa más para ganar, cómo "
+                         "leer el modelo o los estilos de juego. Pruebe con:", className="chat-msg chat-bot"),
+                html.Div([html.Button(t, id={"type": "chat-sug", "index": i}, n_clicks=0, className="chat-sug")
+                          for i, t in enumerate(SUGERENCIAS)], className="chat-sugerencias")]
+    return [html.Div(dcc.Markdown(h["texto"]) if h["rol"] == "model" else h["texto"],
+                     className=f"chat-msg {'chat-bot' if h['rol'] == 'model' else 'chat-yo'}") for h in historial] + \
+           [html.Div(id="chat-fin")]
 
 
 # ==========================================================================
 # Navegación entre páginas (las rutas antiguas llevan a su nuevo lugar)
 # ==========================================================================
 RUTAS = {"/": pagina_inicio, "/dashboard": pagina_dashboard, "/analisis": pagina_analisis,
-         "/prediccion": pagina_prediccion, "/equipo": pagina_equipo,
+         "/prediccion": pagina_prediccion, "/entrenamiento": pagina_entrenamiento, "/equipo": pagina_equipo,
          "/datos": pagina_dashboard,
          "/exploratorio": pagina_analisis,
          "/metodologia": lambda: pagina_analisis("metodologia"),

@@ -21,14 +21,30 @@ MET = _json("metricas.json")       # métricas, política de división, importan
 CUR = _json("curvas.json")         # curvas ROC / PR, umbrales y distribución de probabilidades
 PERF = _json("perfiles.json")      # perfiles de juego (K-means, AVP)
 
+def _reentrenar():
+    """Plan B: si el modelo guardado no abre (otra versión de scikit-learn o xgboost en este computador),
+    se vuelve a entrenar el modelo recomendado con la misma configuración, semilla y años de entrenamiento.
+    Tarda unos segundos y da el mismo modelo."""
+    import datos as D
+    import entrenar_modelos as EM
+    d, _ = EM.tabla_partidos(D.E, D.P)
+    tr = (d.year <= 2016).values
+    return EM.modelos()[MET["recomendado"]].fit(d.loc[tr, EM.PREDICTORES], d.gana.values[tr])
+
+
 MODELO = None
 if (CARPETA / "modelo_recomendado.joblib").exists():
     try:
         import joblib
         MODELO = joblib.load(CARPETA / "modelo_recomendado.joblib")
     except Exception as err:       # p. ej. otra versión de scikit-learn
-        print(f"Aviso: no se pudo cargar el modelo guardado ({err}). "
-              "Corra python dashboard/entrenar_modelos.py")
+        print(f"Aviso: no se pudo abrir el modelo guardado ({err}).")
+if MODELO is None and MET is not None:
+    try:
+        print("Entrenando de nuevo el modelo recomendado (unos segundos)…")
+        MODELO = _reentrenar()
+    except Exception as err:
+        print(f"Aviso: tampoco se pudo entrenar el modelo ({err}). Corra python dashboard/entrenar_modelos.py")
 
 
 def fila(rank_propio, rank_rival, edad_propia, edad_rival, est_propia, est_rival,

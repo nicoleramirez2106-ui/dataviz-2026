@@ -1,0 +1,10 @@
+/* Estilos del libro en Python. Mantener alineado con r-book/style.css */
+body { font-family: Arial, Helvetica, sans-serif; }
+
+/* Recuadro "Para el entrenador" (anexo A3) */
+.callout-tip.callout-titled .callout-header { background-color: #E8F1FA; }
+.callout-tip { border-left-color: #2166AC !important; }
+
+/* Tablas */
+table { font-size: 0.9rem; }
+.fuente { font-size: 0.8rem; color: #737373; }

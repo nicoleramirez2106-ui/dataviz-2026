@@ -16,35 +16,42 @@ RANDOM_STATE = 2026
 np.random.seed(RANDOM_STATE)
 
 # ---------------------------------------------------------------
-# 2. Paleta fija: la misma del dashboard. Cuatro colores de playa
-#    (mar, turquesa, arena y coral) y un color = una sola cosa.
+# 2. Paleta con significado: la MISMA del dashboard (dashboard/estilo.py).
+#    Cada familia de color representa una sola dimensión; si dos cosas
+#    comparten color, es porque significan lo mismo.
+#      Resultado -> MAR (gana / a favor) y CORAL (pierde / sorpresa)
+#      Circuito  -> TURQUESA (FIVB) y ARENA (AVP)
+#      Género    -> morados (solo hombres y mujeres)
+#      Cantidad u orden -> PIZARRA, de claro a oscuro = menos a más
+#      Dato sin categoría -> NEUTRO (un solo gris azulado)
 # ---------------------------------------------------------------
-MAR = "#0B3B5C"        # ganador
+MAR = "#0B3B5C"        # gana, ganador, a favor
+CORAL = "#E4572E"      # pierde, perdedor, sorpresa
 TURQUESA = "#1A8A9A"   # FIVB
 ARENA = "#D9A441"      # AVP
-CORAL = "#E4572E"      # perdedor y sorpresas
+PIZARRA = ["#DCE3EA", "#B4C1CF", "#8798AB", "#5B6F86", "#33475E"]   # menos -> más
+NEUTRO = "#5B6F86"     # una sola serie sin categoría (histogramas, conteos)
+GRIS_TOTAL = "#64748B" # totales y líneas de referencia
 
 PAL = {"FIVB": TURQUESA, "AVP": ARENA,
        "Ganador": MAR, "Perdedor": CORAL,
-       "M": "#2F6690", "W": "#C97B63"}
+       "M": "#5E548E", "W": "#A98BD1"}
 
 ETAPAS = ["Clasificatoria", "Fase de grupos", "Cuadro principal",
           "Semifinales", "Finales"]
 # Etapas: más oscuro = más avanzado en el torneo
-PAL_ETAPA = dict(zip(ETAPAS, ["#BFE3E6", "#86C7CE", "#4FA3AE", "#1F6F86", MAR]))
+PAL_ETAPA = dict(zip(ETAPAS, PIZARRA))
 
-# Poder discriminante: mismo tono, más intenso = más poder
-PAL_PODER = {"Alto": MAR, "Moderado": "#5B8DB0", "Bajo": "#C9D6E3"}
+# Poder discriminante: más oscuro = separa más a ganadores de perdedores
+PAL_PODER = {"Alto": PIZARRA[4], "Moderado": PIZARRA[2], "Bajo": PIZARRA[0]}
 # Modelos: más oscuro = más complejo; la regla de referencia en gris
-PAL_MODELO = {"Regresión logística": "#86C7CE", "Random Forest": "#1F6F86",
-              "XGBoost": MAR, "Regla del ranking": "#64748B"}
-NEUTRO = MAR
-GRIS_TOTAL = "#64748B"
+PAL_MODELO = {"Regresión logística": "#AEBFD0", "Random Forest": "#6B84A0",
+              "XGBoost": "#2C3E52", "Regla del ranking": "#9CA3AF"}
 
-# Correlación: coral (negativa) – blanco – mar (positiva)
-ESCALA_CORR = [[0, CORAL], [0.5, "#F7F7F7"], [1, MAR]]
-# Escala de una sola dirección (por ejemplo, matriz de confusión)
-ESCALA_SEC = [[0, "#F4EBDD"], [0.5, "#4FA3AE"], [1, MAR]]
+# Correlación entre variables: verde (negativa) – blanco – pizarra (positiva); colores exclusivos
+ESCALA_CORR = [[0, "#6E9A74"], [0.5, "#F7F7F7"], [1, "#33475E"]]
+# Escala de una sola dirección (por ejemplo, matriz de confusión): más oscuro = más casos
+ESCALA_SEC = [[0, "#F1F4F7"], [1, "#33475E"]]
 
 FUENTE = ("Fuente: vb_matches.csv (BigTimeStats vía TidyTuesday). "
           "Elaboración propia.")

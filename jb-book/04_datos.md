@@ -81,10 +81,10 @@ d["pct"] = 100 * d.n / d.n.sum()
 fig = go.Figure()
 for g in ["M", "W"]:
     dd = d[d.gender == g].set_index("circuit").loc[["FIVB", "AVP"]].reset_index()
-    fig.add_bar(x=dd.circuit, y=dd.n, name=g, marker_color=PAL[g],
+    fig.add_bar(x=dd.circuit, y=dd.n, name={"M": "Hombres", "W": "Mujeres"}[g], marker_color=PAL[g],
                 text=[fmt(v, 0) for v in dd.n], textposition="outside",
                 customdata=dd.pct,
-                hovertemplate="Circuito: %{x}<br>Género: " + g +
+                hovertemplate="Circuito: %{x}<br>Género: " + {"M": "Hombres", "W": "Mujeres"}[g] +
                 "<br>Partidos: %{y:,}<br>%{customdata:.1f} % del total<extra></extra>")
 fig.update_layout(barmode="group")
 fig.update_yaxes(range=[0, d.n.max() * 1.15], tickformat=",d")

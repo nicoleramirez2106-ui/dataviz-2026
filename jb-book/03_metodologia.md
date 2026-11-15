@@ -119,6 +119,38 @@ $$
 
 donde $R^2_j$ es el coeficiente de determinación de una regresión del predictor $j$ sobre todos los demás. Un VIF menor o igual a 5 se considera aceptable, entre 5 y 10 requiere revisión y mayor que 10 indica multicolinealidad grave.
 
+## Agrupamiento no supervisado: K-means
+
+Los modelos del capítulo 8 son **supervisados**: aprenden a predecir una respuesta conocida (quién gana). El agrupamiento es **no supervisado**: no hay respuesta que predecir, sino que se buscan grupos de observaciones que se parezcan entre sí. Aquí se usa para describir **estilos de juego**: formas frecuentes de jugar un partido según las estadísticas de juego de la AVP.
+
+**Unidad y variables.** Cada observación es una **actuación**: una pareja en un partido. La misma pareja aparece tantas veces como partidos jugó y puede caer en estilos distintos en días distintos. Se usan ocho acciones de juego: kills, ataques, errores de ataque, aces, errores de saque, bloqueos y defensas, divididas por el número de sets para que un partido a tres sets no parezca "mejor" que uno a dos, más el % de ataque, que ya es una proporción.
+
+**Estandarización.** K-means agrupa por distancia, así que una variable con números grandes (los ataques, unos 20 por set) pesaría mucho más que una con números pequeños (los aces, cerca de 1). Por eso cada variable se convierte a puntaje z, restándole su media y dividiéndola por su desviación estándar:
+
+$$
+z = \frac{x - \bar{x}}{s}
+$$
+
+Después de estandarizar, todas las variables tienen media 0 y desviación estándar 1, y una diferencia de "1" significa lo mismo en cualquiera de ellas.
+
+**Algoritmo.** K-means divide las observaciones en $k$ grupos minimizando la suma de las distancias al cuadrado de cada observación al centro (centroide) de su grupo:
+
+$$
+\min_{C_1, \dots, C_k} \sum_{j=1}^{k} \sum_{i \in C_j} \lVert z_i - \mu_j \rVert^2
+$$
+
+donde $\mu_j$ es el promedio de las observaciones del grupo $C_j$. El procedimiento es iterativo: (1) se ubican $k$ centros iniciales, con el método *k-means++*, que los separa entre sí; (2) cada observación se asigna al centro más cercano; (3) cada centro se mueve al promedio de las observaciones que recibió; y (4) se repiten los pasos 2 y 3 hasta que ninguna observación cambia de grupo. Como el resultado depende del punto de partida, el algoritmo se corre varias veces con distintos centros iniciales y se conserva la solución con menor suma de distancias.
+
+**Número de grupos.** K-means no decide cuántos grupos formar. Se prueba con $k$ de 2 a 6 y se mide el **coeficiente de silueta**, que compara, para cada observación $i$, la distancia media a las de su propio grupo ($a_i$) con la distancia media a las del grupo vecino más cercano ($b_i$):
+
+$$
+s_i = \frac{b_i - a_i}{\max(a_i, b_i)}
+$$
+
+La silueta va de −1 a 1: cerca de 1, la observación está bien dentro de su grupo; cerca de 0, está en la frontera entre dos grupos; negativa, estaría mejor en el grupo vecino. La silueta media resume qué tan separados están los grupos: por encima de 0,5 los grupos son claros y por debajo de 0,25 se solapan.
+
+**Interpretación.** Cada grupo se describe por su centroide en puntajes z: cuánto se aleja, en desviaciones estándar, de la actuación promedio en cada acción. El nombre del estilo se forma con sus dos rasgos más marcados (los que se alejan al menos 0,25 desviaciones estándar). Finalmente se compara el % de victorias de cada estilo. Esa comparación es una **asociación**, no un efecto: las estadísticas se producen durante el mismo partido que se gana o se pierde, así que el estilo describe cómo se jugó, no anticipa el resultado.
+
 ## Análisis de tendencias en el tiempo
 
 Para el análisis temporal (capítulo 7) no se ajusta un modelo de series de tiempo: hay como máximo 20 puntos anuales, varios con cobertura incompleta. En su lugar, cada serie se muestra con una media móvil de 3 años, la tendencia se evalúa con la **prueba de Mann-Kendall** {cite:p}`mann1945`, equivalente a la $\tau$ de Kendall {cite:p}`kendall1938` entre el año y el valor de la serie, y su magnitud con la pendiente de una recta ajustada por mínimos cuadrados.

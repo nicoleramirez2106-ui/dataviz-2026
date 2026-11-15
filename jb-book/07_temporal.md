@@ -26,7 +26,7 @@ ANIOS = pd.Index(range(2000, 2020), name="year")
 def bandas(fig, **kw):
     """Bandas grises en los años con cobertura incompleta."""
     for x0, x1 in [(1999.5, 2000.5), (2010.5, 2012.5), (2018.5, 2019.5)]:
-        fig.add_vrect(x0=x0, x1=x1, fillcolor="#C9D6E3", opacity=0.35, line_width=0, **kw)
+        fig.add_vrect(x0=x0, x1=x1, fillcolor=PIZARRA[0], opacity=0.35, line_width=0, **kw)
     return fig
 
 
