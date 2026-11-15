@@ -110,7 +110,7 @@ Este capítulo reúne lo que el libro encontró y lo traduce en decisiones para 
 **Sobre el tiempo y la predicción**
 
 11. **El circuito es cada vez más parejo.** Las sorpresas pasan del {glue}`c7_ups_antes` en 2001–2010 al {glue}`c7_ups_despues` en 2017–2019, con tendencia significativa (tau = {glue}`c7_tau_ups`). En la FIVB, la duración media baja de {glue}`c7_dur_2008` minutos en 2008 a unos {glue}`c7_dur_rec` en 2016–2019 (Figura 7.5 y Tabla 7.1).
-12. **Ningún modelo supera de forma apreciable a la regla del ranking.** El mejor, {glue}`c7_mejor_mod`, alcanza una AUC de {glue}`c7_mejor_auc` frente a {glue}`c7_regla_auc` de la regla "gana el mejor rankeado", que acierta el {glue}`c7_regla_acc` de los partidos de prueba. La diferencia de ranking es la variable más importante en los tres modelos: desordenarla baja la AUC entre {glue}`c7_imp_min` y {glue}`c7_imp_max` (Tabla 8.3 y Figura 8.5).
+12. **Ningún modelo supera de forma apreciable a la regla del ranking.** El mejor, {glue}`c7_mejor_mod`, alcanza una AUC de {glue}`c7_mejor_auc` frente a {glue}`c7_regla_auc` de la regla "gana el mejor rankeado", que acierta el {glue}`c7_regla_acc` de los partidos de prueba. La diferencia de ranking es la variable más importante en los tres modelos: desordenarla baja la AUC entre {glue}`c7_imp_min` y {glue}`c7_imp_max` (Tabla 8.3 y Figura 8.6).
 13. **Las estadísticas de juego explican, pero no predicen.** En la AVP, un modelo con las diferencias de kills, errores y % de ataque alcanza una AUC de {glue}`c7_auc_avp`, pero esas cifras se conocen al terminar el partido; sirven para orientar el entrenamiento, no para anticipar el resultado (Tabla 8.5).
 
 ## Recomendaciones para el entrenador

@@ -34,7 +34,7 @@
     <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=9c3e77be" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css?v=8cd3d715" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="_static/custom.css?v=b40b49cd" />
@@ -373,8 +373,9 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tratamiento-estadistico-y-pruebas-no-parametricas">3.2. Tratamiento estadístico y pruebas no paramétricas</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analisis-de-solapamiento">3.3. Análisis de solapamiento</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analisis-multivariado-y-multicolinealidad">3.4. Análisis multivariado y multicolinealidad</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analisis-de-tendencias-en-el-tiempo">3.5. Análisis de tendencias en el tiempo</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fases-del-procesamiento">3.6. Fases del procesamiento</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#agrupamiento-no-supervisado-k-means">3.5. Agrupamiento no supervisado: K-means</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analisis-de-tendencias-en-el-tiempo">3.6. Análisis de tendencias en el tiempo</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fases-del-procesamiento">3.7. Fases del procesamiento</a></li>
 </ul>
             </nav>
         </div>
@@ -508,12 +509,36 @@ VIF_j = \frac{1}{1 - R^2_j}
 \]</div>
 <p>donde <span class="math notranslate nohighlight">\(R^2_j\)</span> es el coeficiente de determinación de una regresión del predictor <span class="math notranslate nohighlight">\(j\)</span> sobre todos los demás. Un VIF menor o igual a 5 se considera aceptable, entre 5 y 10 requiere revisión y mayor que 10 indica multicolinealidad grave.</p>
 </section>
+<section id="agrupamiento-no-supervisado-k-means">
+<h2><span class="section-number">3.5. </span>Agrupamiento no supervisado: K-means<a class="headerlink" href="#agrupamiento-no-supervisado-k-means" title="Link to this heading">#</a></h2>
+<p>Los modelos del capítulo 8 son <strong>supervisados</strong>: aprenden a predecir una respuesta conocida (quién gana). El agrupamiento es <strong>no supervisado</strong>: no hay respuesta que predecir, sino que se buscan grupos de observaciones que se parezcan entre sí. Aquí se usa para describir <strong>estilos de juego</strong>: formas frecuentes de jugar un partido según las estadísticas de juego de la AVP.</p>
+<p><strong>Unidad y variables.</strong> Cada observación es una <strong>actuación</strong>: una pareja en un partido. La misma pareja aparece tantas veces como partidos jugó y puede caer en estilos distintos en días distintos. Se usan ocho acciones de juego: kills, ataques, errores de ataque, aces, errores de saque, bloqueos y defensas, divididas por el número de sets para que un partido a tres sets no parezca «mejor» que uno a dos, más el % de ataque, que ya es una proporción.</p>
+<p><strong>Estandarización.</strong> K-means agrupa por distancia, así que una variable con números grandes (los ataques, unos 20 por set) pesaría mucho más que una con números pequeños (los aces, cerca de 1). Por eso cada variable se convierte a puntaje z, restándole su media y dividiéndola por su desviación estándar:</p>
+<div class="math notranslate nohighlight">
+\[
+z = \frac{x - \bar{x}}{s}
+\]</div>
+<p>Después de estandarizar, todas las variables tienen media 0 y desviación estándar 1, y una diferencia de «1» significa lo mismo en cualquiera de ellas.</p>
+<p><strong>Algoritmo.</strong> K-means divide las observaciones en <span class="math notranslate nohighlight">\(k\)</span> grupos minimizando la suma de las distancias al cuadrado de cada observación al centro (centroide) de su grupo:</p>
+<div class="math notranslate nohighlight">
+\[
+\min_{C_1, \dots, C_k} \sum_{j=1}^{k} \sum_{i \in C_j} \lVert z_i - \mu_j \rVert^2
+\]</div>
+<p>donde <span class="math notranslate nohighlight">\(\mu_j\)</span> es el promedio de las observaciones del grupo <span class="math notranslate nohighlight">\(C_j\)</span>. El procedimiento es iterativo: (1) se ubican <span class="math notranslate nohighlight">\(k\)</span> centros iniciales, con el método <em>k-means++</em>, que los separa entre sí; (2) cada observación se asigna al centro más cercano; (3) cada centro se mueve al promedio de las observaciones que recibió; y (4) se repiten los pasos 2 y 3 hasta que ninguna observación cambia de grupo. Como el resultado depende del punto de partida, el algoritmo se corre varias veces con distintos centros iniciales y se conserva la solución con menor suma de distancias.</p>
+<p><strong>Número de grupos.</strong> K-means no decide cuántos grupos formar. Se prueba con <span class="math notranslate nohighlight">\(k\)</span> de 2 a 6 y se mide el <strong>coeficiente de silueta</strong>, que compara, para cada observación <span class="math notranslate nohighlight">\(i\)</span>, la distancia media a las de su propio grupo (<span class="math notranslate nohighlight">\(a_i\)</span>) con la distancia media a las del grupo vecino más cercano (<span class="math notranslate nohighlight">\(b_i\)</span>):</p>
+<div class="math notranslate nohighlight">
+\[
+s_i = \frac{b_i - a_i}{\max(a_i, b_i)}
+\]</div>
+<p>La silueta va de −1 a 1: cerca de 1, la observación está bien dentro de su grupo; cerca de 0, está en la frontera entre dos grupos; negativa, estaría mejor en el grupo vecino. La silueta media resume qué tan separados están los grupos: por encima de 0,5 los grupos son claros y por debajo de 0,25 se solapan.</p>
+<p><strong>Interpretación.</strong> Cada grupo se describe por su centroide en puntajes z: cuánto se aleja, en desviaciones estándar, de la actuación promedio en cada acción. El nombre del estilo se forma con sus dos rasgos más marcados (los que se alejan al menos 0,25 desviaciones estándar). Finalmente se compara el % de victorias de cada estilo. Esa comparación es una <strong>asociación</strong>, no un efecto: las estadísticas se producen durante el mismo partido que se gana o se pierde, así que el estilo describe cómo se jugó, no anticipa el resultado.</p>
+</section>
 <section id="analisis-de-tendencias-en-el-tiempo">
-<h2><span class="section-number">3.5. </span>Análisis de tendencias en el tiempo<a class="headerlink" href="#analisis-de-tendencias-en-el-tiempo" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">3.6. </span>Análisis de tendencias en el tiempo<a class="headerlink" href="#analisis-de-tendencias-en-el-tiempo" title="Link to this heading">#</a></h2>
 <p>Para el análisis temporal (capítulo 7) no se ajusta un modelo de series de tiempo: hay como máximo 20 puntos anuales, varios con cobertura incompleta. En su lugar, cada serie se muestra con una media móvil de 3 años, la tendencia se evalúa con la <strong>prueba de Mann-Kendall</strong> <span class="bibtex-citation" id="id9">[<a class="reference internal" href="10_referencias.html#id14" title="Henry B. Mann. Nonparametric tests against trend. Econometrica, 13(3):245–259, 1945. doi:10.2307/1907187.">Mann, 1945</a>]</span>, equivalente a la <span class="math notranslate nohighlight">\(\tau\)</span> de Kendall <span class="bibtex-citation" id="id10">[<a class="reference internal" href="10_referencias.html#id13" title="Maurice G. Kendall. A new measure of rank correlation. Biometrika, 30(1/2):81–93, 1938. doi:10.2307/2332226.">Kendall, 1938</a>]</span> entre el año y el valor de la serie, y su magnitud con la pendiente de una recta ajustada por mínimos cuadrados.</p>
 </section>
 <section id="fases-del-procesamiento">
-<h2><span class="section-number">3.6. </span>Fases del procesamiento<a class="headerlink" href="#fases-del-procesamiento" title="Link to this heading">#</a></h2>
+<h2><span class="section-number">3.7. </span>Fases del procesamiento<a class="headerlink" href="#fases-del-procesamiento" title="Link to this heading">#</a></h2>
 <p>El trabajo sigue cinco fases. Cada una produce un resultado que usa la siguiente (Tabla 3.2).</p>
 <p><strong>Tabla 3.2.</strong> Fases del procesamiento.</p>
 <div class="pst-scrollable-table-container"><table class="table">

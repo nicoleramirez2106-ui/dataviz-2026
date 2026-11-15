@@ -65,12 +65,12 @@ pegar("f60_sin", fmt_pct(pct_quien.iloc[2]))
 ```{code-cell} ipython3
 fig = make_subplots(rows=1, cols=2, column_widths=[0.4, 0.6], horizontal_spacing=0.14,
                     subplot_titles=["Resultado de la pareja A", "¿Gana el favorito?"])
-fig.add_bar(x=["Gana A", "Gana B"], y=a_gana.values, marker_color=[PAL["Ganador"], PAL["Perdedor"]],
+fig.add_bar(x=["A gana", "A pierde"], y=a_gana.values, marker_color=[PAL["Ganador"], PAL["Perdedor"]],
             text=[f"{fmt(n, 0)}<br>({fmt_pct(p)})" for n, p in zip(a_gana.values, pct_a.values)],
             textposition="outside", cliponaxis=False, showlegend=False,
             hovertemplate="%{x}<br>Partidos: %{y:,}<extra></extra>", row=1, col=1)
 fig.add_bar(x=quien.values, y=["Gana el mejor<br>rankeado", "Sorpresa", "Sin ranking<br>de ambas"],
-            orientation="h", marker_color=[PAL["Ganador"], PAL["Perdedor"], "#C9D6E3"],
+            orientation="h", marker_color=[PAL["Ganador"], PAL["Perdedor"], PIZARRA[0]],
             text=[f"{fmt(n, 0)} ({fmt_pct(p)})" for n, p in zip(quien.values, pct_quien.values)],
             textposition="outside", cliponaxis=False, showlegend=False,
             hovertemplate="%{y}<br>Partidos: %{x:,}<extra></extra>", row=1, col=2)
@@ -407,7 +407,7 @@ for nivel, color in PAL_PODER.items():
     filas = t.index[t.Poder == nivel].tolist()
     if filas:
         gt = gt.tab_style(style=[style.fill(color=color),
-                                 style.text(color="white" if nivel != "Bajo" else MAR, weight="bold")],
+                                 style.text(color="white" if nivel != "Bajo" else PIZARRA[4], weight="bold")],
                           locations=loc.body(columns="Poder", rows=filas))
 gt.opt_stylize(style=1, color="gray")
 ```
@@ -798,7 +798,7 @@ Antes del partido, lo que más informa es la **distancia de ranking con el rival
 
 ## Análisis multivariado
 
-Esta sección mira varias variables a la vez: qué variables se mueven juntas y si las variables que se conocen antes del partido aportan información distinta o son redundantes entre sí. Solo se usan variables disponibles en ambos circuitos; las estadísticas de juego quedan fuera para no mezclar la AVP con la FIVB.
+Esta sección mira varias variables a la vez: qué variables se mueven juntas, si las variables que se conocen antes del partido aportan información distinta o son redundantes entre sí y, al final, qué estilos de juego aparecen cuando se combinan las estadísticas de juego. Las dos primeras partes usan solo variables disponibles en ambos circuitos, para no mezclar la AVP con la FIVB; la de estilos de juego usa las estadísticas de juego y por eso describe solo a la AVP.
 
 ### Correlación de Spearman
 
@@ -950,4 +950,211 @@ Con los {glue}`t64_n` partidos que tienen ranking, edad y estatura de las dos pa
 ```{admonition} Para el entrenador
 :class: tip
 Las variables que se conocen antes del partido aportan información distinta y no se repiten entre sí: el ranking, la edad y la estatura pueden mirarse juntas sin contar dos veces lo mismo. Un dato útil para planificar: la duración de un partido depende sobre todo de **qué tan buena es la pareja que pierde**. Si su pareja enfrenta a un rival fuerte, prepárese para un partido largo aunque gane; si su pareja es la débil, alargar el partido es una señal de que está compitiendo bien.
+```
+
+### Estilos de juego (K-means, solo AVP)
+
+Los análisis anteriores miran las estadísticas de juego una por una. Aquí se miran las ocho a la vez para encontrar **estilos de juego**: combinaciones de acciones que aparecen juntas con frecuencia. Se usa K-means sobre las actuaciones (una pareja en un partido) de la AVP con estadísticas completas, siguiendo el procedimiento descrito en la sección de metodología: estadísticas por set, estandarización, elección de $k$ con la silueta y descripción de cada grupo por su centroide.
+
+```{code-cell} ipython3
+:tags: [remove-cell]
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, silhouette_samples
+from sklearn.preprocessing import StandardScaler
+
+SEMILLA_KM = 2026
+ACC = ["kills", "attacks", "errors", "aces", "serve_errors", "blocks", "digs"]
+VKM = [f"{x}_set" for x in ACC] + ["hitpct"]
+ETQ_KM = {"kills_set": "Kills", "attacks_set": "Ataques", "errors_set": "Errores de ataque",
+          "aces_set": "Aces", "serve_errors_set": "Errores de saque", "blocks_set": "Bloqueos",
+          "digs_set": "Defensas", "hitpct": "% de ataque"}
+
+# Actuaciones: AVP con estadísticas completas, sin forfeits; estadísticas por set
+km_df = lg[(lg.circuit == "AVP") & (lg.tiene_stats_completas == 1) & (lg.es_forfeit != 1) & (lg.n_sets > 0)].copy()
+for x in ACC:
+    km_df[f"{x}_set"] = km_df[x] / km_df.n_sets
+km_df = km_df.replace([np.inf, -np.inf], np.nan).dropna(subset=VKM).reset_index(drop=True)
+esc = StandardScaler().fit(km_df[VKM])
+Z = esc.transform(km_df[VKM])
+
+# Elección de k: silueta media (sobre una muestra de 10.000, para que sea rápido)
+n_sil = min(10000, len(km_df))
+sil_k = {}
+for k in range(2, 7):
+    lab = KMeans(k, n_init=10, random_state=SEMILLA_KM).fit_predict(Z)
+    sil_k[k] = silhouette_score(Z, lab, sample_size=n_sil, random_state=SEMILLA_KM)
+K_EST = 4
+km = KMeans(K_EST, n_init=20, random_state=SEMILLA_KM).fit(Z)
+km_df["grupo"] = km.labels_
+idx_s = np.random.default_rng(SEMILLA_KM).choice(len(km_df), n_sil, replace=False)
+s_ind = silhouette_samples(Z[idx_s], km.labels_[idx_s])
+
+# Centroides en puntajes z, nombre de cada estilo y orden por % de victorias
+cz = pd.DataFrame(km.cluster_centers_, columns=VKM)
+def nombre_estilo(z):
+    orden = z.abs().sort_values(ascending=False).index[:2]
+    rasgos = [f"{'más' if z[v] > 0 else 'menos'} {ETQ_KM[v].lower()}" for v in orden if abs(z[v]) >= 0.25]
+    t = " y ".join(rasgos) if rasgos else "estilo promedio"
+    return t[0].upper() + t[1:]
+resumen = []
+for g in range(K_EST):
+    d = km_df[km_df.grupo == g]
+    p = (d.resultado == "Ganador").mean()
+    resumen.append({"grupo": g, "Estilo": nombre_estilo(cz.loc[g]), "n": len(d),
+                    "% de actuaciones": 100 * len(d) / len(km_df), "% de victorias": 100 * p,
+                    "IC 95 %": 196 * np.sqrt(p * (1 - p) / len(d)),
+                    "Silueta media": s_ind[km.labels_[idx_s] == g].mean()})
+resumen = pd.DataFrame(resumen).sort_values("% de victorias", ascending=False).reset_index(drop=True)
+resumen.insert(0, "E", [f"E{i + 1}" for i in range(K_EST)])
+orden_e = {g: i for i, g in enumerate(resumen.grupo)}
+km_df["E"] = km_df.grupo.map(orden_e)
+COL_E = [MAR, "#5B8DB0", "#EFA58C", CORAL]          # de mar (el que más gana) a coral (el que más pierde)
+def rasgos_clave(z):
+    """Las dos acciones que dan nombre al estilo (las más alejadas del promedio, si pasan de 0,25 DE)."""
+    top = z.abs().sort_values(ascending=False)[:2]
+    return set(top[top >= 0.25].index)
+clave = {i: rasgos_clave(cz.loc[g]) for i, g in enumerate(resumen.grupo)}
+
+registrar("e6_km_n", len(km_df))
+registrar("e6_km_silueta", silhouette_score(Z, km.labels_, sample_size=n_sil, random_state=SEMILLA_KM))
+for i, f in resumen.iterrows():
+    registrar(f"e6_km_victorias_E{i + 1}", f["% de victorias"])
+pegar("km_n", fmt(len(km_df), 0))
+pegar("km_partidos", fmt(km_df.match_id.nunique(), 0))
+pegar("km_anios", f"{km_df.year.min()}–{km_df.year.max()}")
+pegar("km_ataques", fmt(km_df.attacks_set.mean(), 0))
+pegar("km_aces", fmt(km_df.aces_set.mean(), 1))
+pegar("km_sil2", fmt(sil_k[2], 3))
+pegar("km_sil4", fmt(sil_k[4], 3))
+pegar("km_sil6", fmt(sil_k[6], 3))
+pegar("km_sil", fmt(silhouette_score(Z, km.labels_, sample_size=n_sil, random_state=SEMILLA_KM), 2))
+pegar("km_neg", fmt_pct(100 * (s_ind < 0).mean(), 0))
+for i, f in resumen.iterrows():
+    pegar(f"km_e{i + 1}", f.Estilo)
+    pegar(f"km_e{i + 1}_v", fmt_pct(f["% de victorias"]))
+    pegar(f"km_e{i + 1}_n", fmt_pct(f["% de actuaciones"], 0))
+hit = {i: km_df.loc[km_df.E == i, "hitpct"].median() for i in range(K_EST)}
+pegar("km_hit_e1", fmt_pct(100 * hit[0], 0))
+pegar("km_hit_e4", fmt_pct(100 * hit[3], 0))
+```
+
+**Paso 1: los datos y la estandarización.** Se usaron {glue}`km_n` actuaciones de {glue}`km_partidos` partidos de la AVP ({glue}`km_anios`). Las ocho acciones están en escalas muy distintas: una pareja hace en promedio {glue}`km_ataques` ataques por set, pero solo {glue}`km_aces` aces. Sin estandarizar, los ataques dominarían las distancias; después de convertirlas a puntajes z, todas quedan centradas en 0 y con la misma dispersión (Figura 6.16).
+
+**Figura 6.16.** Las ocho acciones antes y después de estandarizar (puntajes z).
+
+```{code-cell} ipython3
+fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.14,
+                    subplot_titles=["Antes: cada acción en su unidad", "Después: puntajes z"])
+for col, datos in [(1, km_df[VKM]), (2, pd.DataFrame(Z, columns=VKM))]:
+    for v in VKM:
+        fig.add_trace(go.Box(x=datos[v], name=ETQ_KM[v], marker_color=NEUTRO, boxpoints=False,
+                             showlegend=False, orientation="h"), row=1, col=col)
+fig.update_yaxes(autorange="reversed")
+fig.update_yaxes(showticklabels=False, row=1, col=2)
+fig.update_layout(height=480)
+estilo_plotly(fig, "Las ocho acciones antes y después de estandarizar (AVP)", "", "")
+```
+
+**Paso 2: cuántos estilos.** La silueta media es parecida para dos, tres y cuatro grupos y baja desde cinco (Figura 6.17): {glue}`km_sil2` con dos grupos, {glue}`km_sil4` con cuatro y {glue}`km_sil6` con seis. Se eligió $k = 4$ porque da más detalle para describir el juego sin perder separación frente a $k = 2$ o $k = 3$. Todas las siluetas son bajas: los estilos se solapan y deben leerse como tendencias, no como tipos de pareja bien separados.
+
+**Figura 6.17.** Silueta media según el número de grupos $k$.
+
+```{code-cell} ipython3
+ks = list(sil_k)
+fig = go.Figure(go.Scatter(x=ks, y=[sil_k[k] for k in ks], mode="lines+markers+text",
+                           text=[fmt(sil_k[k], 3) for k in ks], textposition="top center",
+                           line=dict(color=NEUTRO, width=2),
+                           marker=dict(size=[16 if k == K_EST else 9 for k in ks],
+                                       color=["#111827" if k == K_EST else NEUTRO for k in ks]),
+                           hovertemplate="k = %{x}<br>Silueta: %{y:.3f}<extra></extra>"))
+fig.update_xaxes(dtick=1)
+fig.update_yaxes(rangemode="tozero")
+estilo_plotly(fig, "Silueta media según el número de grupos (k = 4 en negro)", "Número de grupos (k)", "Silueta media")
+```
+
+**Paso 3: la huella de cada estilo.** El centroide de cada grupo dice cuánto se aleja, en desviaciones estándar, de la actuación promedio en cada acción (Figura 6.18). Las barras en color son los dos rasgos que dan nombre al estilo. Los estilos se numeran de mayor a menor % de victorias:
+
+- **E1. {glue}`km_e1`** ({glue}`km_e1_n` de las actuaciones).
+- **E2. {glue}`km_e2`** ({glue}`km_e2_n`).
+- **E3. {glue}`km_e3`** ({glue}`km_e3_n`).
+- **E4. {glue}`km_e4`** ({glue}`km_e4_n`).
+
+**Figura 6.18.** Centroide de cada estilo: diferencia frente a la actuación promedio en cada acción (desviaciones estándar).
+
+```{code-cell} ipython3
+fig = make_subplots(rows=1, cols=K_EST, shared_yaxes=True, horizontal_spacing=0.03,
+                    subplot_titles=[f"E{i + 1}" for i in range(K_EST)])
+for i, g in enumerate(resumen.grupo):
+    z = cz.loc[g]
+    fig.add_bar(x=z.values, y=[ETQ_KM[v] for v in VKM], orientation="h", showlegend=False,
+                marker_color=[COL_E[i] if v in clave[i] else PIZARRA[1] for v in VKM],
+                text=[("+" if x > 0 else "") + fmt(x, 1) for x in z.values], textposition="outside",
+                cliponaxis=False, hovertemplate="%{y}: %{x:+.2f} DE<extra></extra>", row=1, col=i + 1)
+    fig.add_vline(x=0, line_color=GRIS_TOTAL, row=1, col=i + 1)
+fig.update_xaxes(range=[-1.8, 1.8], tickvals=[-1, 0, 1])
+fig.update_yaxes(autorange="reversed")
+fig.update_layout(height=470)
+estilo_plotly(fig, "Huella de cada estilo de juego en las ocho acciones (AVP)", "", "")
+```
+
+**Paso 4: dónde cae cada actuación.** Con dos de las acciones en los ejes se ve cómo K-means repartió las actuaciones (Figura 6.19). Con % de ataque y kills por set se separa el estilo 4, el de menos eficacia; los estilos 1 y 2 se parecen en ataque y se diferencian en el saque y en la red. En las zonas donde los colores se tocan, una actuación podría pertenecer a dos estilos: la silueta media es {glue}`km_sil` y el {glue}`km_neg` de las actuaciones queda más cerca de otro grupo que del suyo.
+
+**Figura 6.19.** Actuaciones según % de ataque y kills por set, coloreadas por estilo (muestra de 3.000; ✕ = centroide).
+
+```{code-cell} ipython3
+mu = km_df.sample(3000, random_state=SEMILLA_KM)
+fig = go.Figure()
+for i in range(K_EST):
+    d = mu[mu.E == i]
+    fig.add_scatter(x=d.hitpct, y=d.kills_set, mode="markers", name=f"E{i + 1}",
+                    marker=dict(color=COL_E[i], size=5, opacity=0.55),
+                    hovertemplate=f"E{i + 1}<br>% de ataque: %{{x:.2f}}<br>Kills por set: %{{y:.1f}}<extra></extra>")
+for i, g in enumerate(resumen.grupo):
+    c = km_df[km_df.grupo == g]
+    fig.add_scatter(x=[c.hitpct.mean()], y=[c.kills_set.mean()], mode="markers+text", showlegend=False,
+                    text=[f"E{i + 1}"], textposition=["top right", "bottom right", "top left", "bottom left"][i],
+                    textfont=dict(size=13, color="#111827"),
+                    marker=dict(symbol="x", size=17, color=COL_E[i], line=dict(color="white", width=2)))
+fig.update_layout(height=520)
+estilo_plotly(fig, "Actuaciones de la AVP según % de ataque y kills, por estilo", "% de ataque", "Kills por set")
+```
+
+**Paso 5: comprobar que los estilos son distintos.** La Figura 6.20 muestra la distribución de cada acción dentro de cada estilo. Donde las cajas de un estilo no se tocan con las de otro, esa acción los diferencia; por ejemplo, la mediana del % de ataque pasa de {glue}`km_hit_e1` en E1 a {glue}`km_hit_e4` en E4.
+
+**Figura 6.20.** Distribución de las ocho acciones en cada estilo (caja: 50 % central; línea: mediana).
+
+```{code-cell} ipython3
+fig = make_subplots(rows=2, cols=4, subplot_titles=[ETQ_KM[v] for v in VKM],
+                    horizontal_spacing=0.06, vertical_spacing=0.16)
+for j, v in enumerate(VKM):
+    for i in range(K_EST):
+        y = km_df.loc[km_df.E == i, v]
+        fig.add_trace(go.Box(y=y, name=f"E{i + 1}", marker_color=COL_E[i], boxpoints=False,
+                             showlegend=False), row=j // 4 + 1, col=j % 4 + 1)
+fig.update_layout(height=620)
+estilo_plotly(fig, "Las ocho acciones en cada estilo de juego (AVP)", "", "")
+```
+
+**Paso 6: cuánto gana cada estilo.** Los estilos se diferencian mucho en el resultado (Tabla 6.5): E1 gana el {glue}`km_e1_v` de sus partidos, E2 el {glue}`km_e2_v`, E3 el {glue}`km_e3_v` y E4 apenas el {glue}`km_e4_v`.
+
+**Tabla 6.5.** Estilos de juego de la AVP: tamaño, % de victorias y silueta media.
+
+```{code-cell} ipython3
+:tags: [remove-input]
+t = resumen.drop(columns="grupo").copy()
+t["% de victorias"] = [f"{fmt(v, 1)} ± {fmt(e, 1)}" for v, e in zip(t["% de victorias"], t["IC 95 %"])]
+t = t.drop(columns="IC 95 %").rename(columns={"% de victorias": "% de victorias (IC 95 %)"})
+(GT(t)
+ .fmt_number(columns=["n"], decimals=0, sep_mark=".", dec_mark=",")
+ .fmt_number(columns=["% de actuaciones"], decimals=1, sep_mark=".", dec_mark=",")
+ .fmt_number(columns=["Silueta media"], decimals=3, sep_mark=".", dec_mark=",")
+ .tab_source_note("K-means con k = 4 sobre ocho acciones por set estandarizadas; una fila = una pareja en un partido.")
+ .opt_stylize(style=1, color="gray"))
+```
+
+La diferencia de victorias confirma lo que mostró el análisis bivariado: lo que más separa al estilo que gana del que pierde es la **eficacia en ataque**. El estilo 4 no pierde "por ser" el estilo 4: cuando el ataque no funciona, el partido se pierde y la actuación queda en ese grupo. Por eso los estilos sirven para **describir** cómo jugó una pareja, no para anticipar quién gana.
+
+```{admonition} Para el entrenador
+:class: tip
+Los cuatro estilos son un lenguaje común para describir un partido ("hoy jugamos tipo E3: mucho ataque y mucha defensa, poca eficacia"). Dos parejas pueden ganar de formas distintas, sacando fuerte (E1) o dominando la red (E2), pero las dos convierten bien sus ataques. Si su pareja cae seguido en el estilo 4, la prioridad es la eficacia en ataque, no el volumen.
 ```

@@ -22,7 +22,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score, accuracy_score, f1_score, roc_curve, confusion_matrix
+from sklearn.metrics import roc_auc_score, accuracy_score, f1_score, roc_curve, confusion_matrix, brier_score_loss
+from sklearn.calibration import calibration_curve
 from sklearn.inspection import permutation_importance
 from xgboost import XGBClassifier
 import statsmodels.formula.api as smf
@@ -79,7 +80,7 @@ pegar("t81_yte", fmt_pct(100 * yte.mean()))
 
 ```{code-cell} ipython3
 fig = go.Figure()
-for valor, nombre, color in [(1, "Gana A", PAL["Ganador"]), (0, "Gana B", PAL["Perdedor"])]:
+for valor, nombre, color in [(1, "A gana", PAL["Ganador"]), (0, "A pierde", PAL["Perdedor"])]:
     n = [(train.a_gana == valor).sum(), (test.a_gana == valor).sum()]
     pct = [100 * n[0] / len(train), 100 * n[1] / len(test)]
     fig.add_bar(x=["Entrenamiento (2000–2016)", "Prueba (2017–2019)"], y=n, name=nombre,
@@ -141,7 +142,7 @@ El punto de comparación es lo que haría un entrenador sin modelo: apostar por 
 
 ```{code-cell} ipython3
 modelos = {
-    "Regresión logística": (LogisticRegression(penalty=None, max_iter=1000), {}),
+    "Regresión logística": (LogisticRegression(C=np.inf, max_iter=1000), {}),
     "Random Forest": (RandomForestClassifier(n_estimators=500, random_state=RANDOM_STATE, n_jobs=-1),
                       {"mod__max_features": [2, 3, 5], "mod__min_samples_split": [5, 20, 50]}),
     "XGBoost": (XGBClassifier(random_state=RANDOM_STATE, eval_metric="logloss", n_jobs=-1),
@@ -262,7 +263,7 @@ for nombre, p in [("Regla del ranking", prob_regla), *probs.items()]:
                               dash="dash" if nombre == "Regla del ranking" else "solid"),
                     hovertemplate=nombre + "<br>FPR: %{x:.2f}<br>TPR: %{y:.2f}<extra></extra>")
 fig.add_scatter(x=[0, 1], y=[0, 1], mode="lines", showlegend=False, hoverinfo="skip",
-                line=dict(color="#C9D6E3", dash="dot"))
+                line=dict(color=PIZARRA[0], dash="dot"))
 fig.update_xaxes(range=[0, 1])
 fig.update_yaxes(range=[0, 1])
 fig.update_layout(height=560)
@@ -325,7 +326,7 @@ Con un umbral de 0,5, el mejor modelo acierta {glue}`f83_tp` partidos en los que
 ```{code-cell} ipython3
 p_mejor = probs[mejor.Modelo]
 fig = go.Figure()
-for valor, nombre, color in [(1, "Real: gana A", PAL["Ganador"]), (0, "Real: gana B", PAL["Perdedor"])]:
+for valor, nombre, color in [(1, "Real: A gana", PAL["Ganador"]), (0, "Real: A pierde", PAL["Perdedor"])]:
     fig.add_histogram(x=p_mejor[yte.values == valor], name=nombre, marker_color=color, opacity=0.6,
                       xbins=dict(start=0, end=1, size=0.025),
                       hovertemplate=nombre + "<br>Probabilidad: %{x}<br>Partidos: %{y:,}<extra></extra>")
@@ -346,9 +347,45 @@ pegar("f84_acc_dudosos", fmt_pct(100 * ((p_mejor[~claros] >= 0.5) == yte.values[
 
 Las dos distribuciones se separan, pero se superponen mucho alrededor de 0,5 (Figura 8.4): en buena parte de los partidos el modelo no tiene una preferencia clara. Solo el {glue}`f84_pct_claros` de los partidos de prueba recibe una probabilidad por debajo de 0,25 o por encima de 0,75; en ellos el modelo acierta el {glue}`f84_acc_claros`, frente al {glue}`f84_acc_dudosos` en los demás. Para el entrenador, la probabilidad es más útil que la predicción binaria: indica cuándo el partido está realmente abierto.
 
+## Calibración de las probabilidades
+
+Si la probabilidad del modelo es lo que más le sirve al entrenador, hay que comprobar que se puede leer tal cual: que cuando el modelo dice 70 %, la pareja gane cerca del 70 % de esas veces. Eso se llama **calibración**. Para verificarla, los partidos de prueba se agrupan en diez intervalos según la probabilidad predicha y en cada uno se compara la probabilidad media con la proporción real de victorias. Un modelo bien calibrado queda sobre la diagonal. Como resumen se usa la puntuación de Brier, el error cuadrático medio entre la probabilidad y el resultado (0 es perfecto; 0,25 es lo que obtiene quien siempre dice 50 %).
+
+```{code-cell} ipython3
+:tags: [remove-cell]
+real_c, pred_c = calibration_curve(yte, p_mejor, n_bins=10, strategy="uniform")
+n_c = np.histogram(p_mejor, bins=np.linspace(0, 1, 11))[0]
+n_c = n_c[n_c > 0]
+brier = brier_score_loss(yte, p_mejor)
+desv = np.abs(real_c - pred_c)[n_c >= 100]
+registrar("f8_cal_brier", brier)
+pegar("cal_brier", fmt(brier, 3))
+pegar("cal_desv", fmt(100 * desv.max(), 0))
+pegar("cal_modelo", mejor.Modelo)
+```
+
+**Figura 8.5.** Calibración del mejor modelo: probabilidad predicha frente a proporción real de victorias (prueba 2017–2019).
+
+```{code-cell} ipython3
+fig = go.Figure()
+fig.add_scatter(x=[0, 1], y=[0, 1], mode="lines", name="Calibración perfecta",
+                line=dict(color=GRIS_TOTAL, dash="dash"), hoverinfo="skip")
+fig.add_scatter(x=pred_c, y=real_c, mode="lines+markers", name=mejor.Modelo,
+                line=dict(color=MAR, width=2.5), marker=dict(size=[max(6, min(22, n / 60)) for n in n_c]),
+                customdata=n_c,
+                hovertemplate="Predicho: %{x:.2f}<br>Ganó de verdad: %{y:.2f}<br>Partidos: %{customdata:,}<extra></extra>")
+fig.update_xaxes(range=[0, 1], tickformat=".0%")
+fig.update_yaxes(range=[0, 1], tickformat=".0%")
+fig.update_layout(height=520)
+estilo_plotly(fig, f"Calibración de {mejor.Modelo} en la prueba (tamaño del punto = partidos)",
+              "Probabilidad predicha de que gane A", "Proporción real en que ganó A")
+```
+
+Los puntos quedan muy cerca de la diagonal (Figura 8.5): en los intervalos con al menos 100 partidos, la proporción real se aleja de la probabilidad predicha como máximo {glue}`cal_desv` puntos porcentuales. La puntuación de Brier de {glue}`cal_modelo` es {glue}`cal_brier`, por debajo del 0,25 de quien siempre dice 50 %. La regla del ranking no entra en esta comparación porque no da una probabilidad, solo ordena a las parejas. El modelo casi no acierta más partidos que la regla, pero su probabilidad está bien calibrada: dice **qué tan favorita** es una pareja, y esa cifra se puede leer tal cual. Por eso es el modelo que usa el dashboard.
+
 ## Importancia de variables
 
-**Figura 8.5.** Importancia de variables por permutación (caída de AUC en prueba).
+**Figura 8.6.** Importancia de variables por permutación (caída de AUC en prueba).
 
 ```{code-cell} ipython3
 etq_var = {"dif_rank": "Diferencia de ranking", "dif_edad": "Diferencia de edad",
@@ -391,7 +428,7 @@ pegar("f85_segunda", etq_var[segunda].lower())
 pegar("f85_contexto", fmt(contexto_max, 3))
 ```
 
-En los tres modelos, la variable más importante es la diferencia de ranking: al desordenarla al azar, la AUC cae entre {glue}`f85_rank_min` y {glue}`f85_rank_max` (Figura 8.5). Ninguna otra variable baja la AUC más de {glue}`f85_resto`; la segunda en importancia es la {glue}`f85_segunda`. El contexto (circuito, género y etapa) aporta como máximo {glue}`f85_contexto`: prácticamente nada. Se usa la importancia por permutación, y no la importancia interna de cada algoritmo, porque mide lo mismo en los tres modelos.
+En los tres modelos, la variable más importante es la diferencia de ranking: al desordenarla al azar, la AUC cae entre {glue}`f85_rank_min` y {glue}`f85_rank_max` (Figura 8.6). Ninguna otra variable baja la AUC más de {glue}`f85_resto`; la segunda en importancia es la {glue}`f85_segunda`. El contexto (circuito, género y etapa) aporta como máximo {glue}`f85_contexto`: prácticamente nada. Se usa la importancia por permutación, y no la importancia interna de cada algoritmo, porque mide lo mismo en los tres modelos.
 
 ## Interpretación con la regresión logística
 
