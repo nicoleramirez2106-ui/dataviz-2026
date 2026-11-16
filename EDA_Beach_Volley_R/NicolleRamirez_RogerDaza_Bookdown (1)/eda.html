@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="es" xml:lang="es">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Capítulo 6 Análisis exploratorio (EDA) | ¿Qué hace ganar a una pareja de voleibol de playa?</title>
+  <meta name="description" content="Libro de análisis exploratorio de datos sobre 76.749 partidos de voleibol de playa (FIVB y AVP, 2000-2019), pensado para un entrenador que arma parejas y prepara partidos. Versión en R (bookdown)." />
+  <meta name="generator" content="bookdown 0.48 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Capítulo 6 Análisis exploratorio (EDA) | ¿Qué hace ganar a una pareja de voleibol de playa?" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Libro de análisis exploratorio de datos sobre 76.749 partidos de voleibol de playa (FIVB y AVP, 2000-2019), pensado para un entrenador que arma parejas y prepara partidos. Versión en R (bookdown)." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Capítulo 6 Análisis exploratorio (EDA) | ¿Qué hace ganar a una pareja de voleibol de playa?" />
+  
+  <meta name="twitter:description" content="Libro de análisis exploratorio de datos sobre 76.749 partidos de voleibol de playa (FIVB y AVP, 2000-2019), pensado para un entrenador que arma parejas y prepara partidos. Versión en R (bookdown)." />
+  
+
+<meta name="author" content="Nicolle Ramírez y Roger Daza" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="limpieza.html"/>
+<link rel="next" href="temporal.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link href="libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="libs/datatables-binding-0.34.0/datatables.js"></script>
+<link href="libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+
+
+<style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./"><strong>¿Qué hace ganar a una pareja de voleibol de playa?</strong></a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Prefacio</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#c%C3%B3mo-leer-este-libro"><i class="fa fa-check"></i>Cómo leer este libro</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="contexto.html"><a href="contexto.html"><i class="fa fa-check"></i><b>1</b> Contexto</a>
+<ul>
+<li class="chapter" data-level="" data-path="contexto.html"><a href="contexto.html#el-voleibol-de-playa-y-los-circuitos-fivb-y-avp"><i class="fa fa-check"></i>El voleibol de playa y los circuitos FIVB y AVP</a></li>
+<li class="chapter" data-level="" data-path="contexto.html"><a href="contexto.html#pregunta-de-investigaci%C3%B3n-y-usuario-del-an%C3%A1lisis"><i class="fa fa-check"></i>Pregunta de investigación y usuario del análisis</a></li>
+<li class="chapter" data-level="" data-path="contexto.html"><a href="contexto.html#planteamiento-del-problema"><i class="fa fa-check"></i>Planteamiento del problema</a></li>
+<li class="chapter" data-level="" data-path="contexto.html"><a href="contexto.html#justificaci%C3%B3n"><i class="fa fa-check"></i>Justificación</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="objetivos.html"><a href="objetivos.html"><i class="fa fa-check"></i><b>2</b> Objetivos</a>
+<ul>
+<li class="chapter" data-level="" data-path="objetivos.html"><a href="objetivos.html#objetivo-general"><i class="fa fa-check"></i>Objetivo general</a></li>
+<li class="chapter" data-level="" data-path="objetivos.html"><a href="objetivos.html#objetivos-espec%C3%ADficos"><i class="fa fa-check"></i>Objetivos específicos</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="metodologia.html"><a href="metodologia.html"><i class="fa fa-check"></i><b>3</b> Metodología</a>
+<ul>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#marco-te%C3%B3rico"><i class="fa fa-check"></i>Marco teórico</a>
+<ul>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#enfoque-del-estudio"><i class="fa fa-check"></i>Enfoque del estudio</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#unidades-de-an%C3%A1lisis"><i class="fa fa-check"></i>Unidades de análisis</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#favorito-y-sorpresa"><i class="fa fa-check"></i>Favorito y sorpresa</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#tratamiento-estad%C3%ADstico-y-pruebas-no-param%C3%A9tricas"><i class="fa fa-check"></i>Tratamiento estadístico y pruebas no paramétricas</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#an%C3%A1lisis-de-solapamiento"><i class="fa fa-check"></i>Análisis de solapamiento</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#an%C3%A1lisis-multivariado-y-redundancia"><i class="fa fa-check"></i>Análisis multivariado y redundancia</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#tendencias-en-el-tiempo-prueba-de-mann-kendall"><i class="fa fa-check"></i>Tendencias en el tiempo: prueba de Mann-Kendall</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#clasificaci%C3%B3n-supervisada"><i class="fa fa-check"></i>Clasificación supervisada</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#m%C3%A9tricas-de-evaluaci%C3%B3n"><i class="fa fa-check"></i>Métricas de evaluación</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#agrupamiento-no-supervisado-k-means"><i class="fa fa-check"></i>Agrupamiento no supervisado: K-means</a></li>
+<li class="chapter" data-level="" data-path="metodologia.html"><a href="metodologia.html#fases-del-procesamiento"><i class="fa fa-check"></i>Fases del procesamiento</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="datos.html"><a href="datos.html"><i class="fa fa-check"></i><b>4</b> Descripción del conjunto de datos</a>
+<ul>
+<li class="chapter" data-level="" data-path="datos.html"><a href="datos.html#estructura-y-variables"><i class="fa fa-check"></i>Estructura y variables</a></li>
+<li class="chapter" data-level="" data-path="datos.html"><a href="datos.html#cobertura-por-circuito-g%C3%A9nero-y-etapa"><i class="fa fa-check"></i>Cobertura por circuito, género y etapa</a></li>
+<li class="chapter" data-level="" data-path="datos.html"><a href="datos.html#pa%C3%ADses-sede-y-de-procedencia"><i class="fa fa-check"></i>Países sede y de procedencia</a></li>
+<li class="chapter" data-level="" data-path="datos.html"><a href="datos.html#datos-at%C3%ADpicos"><i class="fa fa-check"></i>Datos atípicos</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="limpieza.html"><a href="limpieza.html"><i class="fa fa-check"></i><b>5</b> Limpieza y preparación</a>
+<ul>
+<li class="chapter" data-level="" data-path="limpieza.html"><a href="limpieza.html#duplicados-y-llave-del-partido"><i class="fa fa-check"></i>Duplicados y llave del partido</a></li>
+<li class="chapter" data-level="" data-path="limpieza.html"><a href="limpieza.html#valores-faltantes"><i class="fa fa-check"></i>Valores faltantes</a></li>
+<li class="chapter" data-level="" data-path="limpieza.html"><a href="limpieza.html#correcciones-de-calidad"><i class="fa fa-check"></i>Correcciones de calidad</a></li>
+<li class="chapter" data-level="" data-path="limpieza.html"><a href="limpieza.html#formato-largo-y-archivos-limpios"><i class="fa fa-check"></i>Formato largo y archivos limpios</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="eda.html"><a href="eda.html"><i class="fa fa-check"></i><b>6</b> Análisis exploratorio (EDA)</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="eda.html"><a href="eda.html#an%C3%A1lisis-univariado"><i class="fa fa-check"></i><b>6.1</b> Análisis univariado</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="eda.html"><a href="eda.html#el-partido"><i class="fa fa-check"></i><b>6.1.1</b> El partido</a></li>
+<li class="chapter" data-level="6.1.2" data-path="eda.html"><a href="eda.html#los-jugadores-y-las-parejas"><i class="fa fa-check"></i><b>6.1.2</b> Los jugadores y las parejas</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="eda.html"><a href="eda.html#an%C3%A1lisis-bivariado"><i class="fa fa-check"></i><b>6.2</b> Análisis bivariado</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="eda.html"><a href="eda.html#parejas-ganadoras-frente-a-perdedoras"><i class="fa fa-check"></i><b>6.2.1</b> Parejas ganadoras frente a perdedoras</a></li>
+<li class="chapter" data-level="6.2.2" data-path="eda.html"><a href="eda.html#poder-discriminante"><i class="fa fa-check"></i><b>6.2.2</b> Poder discriminante</a></li>
+<li class="chapter" data-level="6.2.3" data-path="eda.html"><a href="eda.html#estad%C3%ADsticas-de-juego-solo-para-una-parte-de-los-partidos"><i class="fa fa-check"></i><b>6.2.3</b> Estadísticas de juego (solo para una parte de los partidos)</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="eda.html"><a href="eda.html#an%C3%A1lisis-multivariado"><i class="fa fa-check"></i><b>6.3</b> Análisis multivariado</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="eda.html"><a href="eda.html#correlaci%C3%B3n-de-spearman"><i class="fa fa-check"></i><b>6.3.1</b> Correlación de Spearman</a></li>
+<li class="chapter" data-level="6.3.2" data-path="eda.html"><a href="eda.html#redundancia-entre-factores"><i class="fa fa-check"></i><b>6.3.2</b> Redundancia entre factores</a></li>
+<li class="chapter" data-level="6.3.3" data-path="eda.html"><a href="eda.html#estilos-de-juego-k-means-solo-avp"><i class="fa fa-check"></i><b>6.3.3</b> Estilos de juego (K-means, solo AVP)</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="temporal.html"><a href="temporal.html"><i class="fa fa-check"></i><b>7</b> Análisis temporal</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="temporal.html"><a href="temporal.html#partidos-por-a%C3%B1o-y-por-torneo"><i class="fa fa-check"></i><b>7.1</b> Partidos por año y por torneo</a></li>
+<li class="chapter" data-level="7.2" data-path="temporal.html"><a href="temporal.html#duraci%C3%B3n-de-los-partidos"><i class="fa fa-check"></i><b>7.2</b> Duración de los partidos</a></li>
+<li class="chapter" data-level="7.3" data-path="temporal.html"><a href="temporal.html#edad-y-estatura-de-los-jugadores"><i class="fa fa-check"></i><b>7.3</b> Edad y estatura de los jugadores</a></li>
+<li class="chapter" data-level="7.4" data-path="temporal.html"><a href="temporal.html#tasa-de-sorpresas"><i class="fa fa-check"></i><b>7.4</b> Tasa de sorpresas</a></li>
+<li class="chapter" data-level="7.5" data-path="temporal.html"><a href="temporal.html#tendencias-prueba-de-mann-kendall"><i class="fa fa-check"></i><b>7.5</b> Tendencias: prueba de Mann-Kendall</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="modelado.html"><a href="modelado.html"><i class="fa fa-check"></i><b>8</b> Modelado</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="modelado.html"><a href="modelado.html#variable-respuesta-y-partici%C3%B3n-de-los-datos"><i class="fa fa-check"></i><b>8.1</b> Variable respuesta y partición de los datos</a></li>
+<li class="chapter" data-level="8.2" data-path="modelado.html"><a href="modelado.html#hiperpar%C3%A1metros-y-validaci%C3%B3n-cruzada"><i class="fa fa-check"></i><b>8.2</b> Hiperparámetros y validación cruzada</a></li>
+<li class="chapter" data-level="8.3" data-path="modelado.html"><a href="modelado.html#comparaci%C3%B3n-de-los-modelos"><i class="fa fa-check"></i><b>8.3</b> Comparación de los modelos</a></li>
+<li class="chapter" data-level="8.4" data-path="modelado.html"><a href="modelado.html#calibraci%C3%B3n-de-las-probabilidades"><i class="fa fa-check"></i><b>8.4</b> Calibración de las probabilidades</a></li>
+<li class="chapter" data-level="8.5" data-path="modelado.html"><a href="modelado.html#razones-de-odds-de-la-regresi%C3%B3n-log%C3%ADstica"><i class="fa fa-check"></i><b>8.5</b> Razones de odds de la regresión logística</a></li>
+<li class="chapter" data-level="8.6" data-path="modelado.html"><a href="modelado.html#modelo-secundario-de-la-avp-estad%C3%ADsticas-de-juego"><i class="fa fa-check"></i><b>8.6</b> Modelo secundario de la AVP: estadísticas de juego</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="conclusiones.html"><a href="conclusiones.html"><i class="fa fa-check"></i><b>9</b> Conclusiones</a>
+<ul>
+<li class="chapter" data-level="" data-path="conclusiones.html"><a href="conclusiones.html#hallazgos-principales"><i class="fa fa-check"></i>Hallazgos principales</a></li>
+<li class="chapter" data-level="" data-path="conclusiones.html"><a href="conclusiones.html#recomendaciones-para-el-entrenador"><i class="fa fa-check"></i>Recomendaciones para el entrenador</a></li>
+<li class="chapter" data-level="" data-path="conclusiones.html"><a href="conclusiones.html#limitaciones"><i class="fa fa-check"></i>Limitaciones</a></li>
+<li class="chapter" data-level="" data-path="conclusiones.html"><a href="conclusiones.html#pr%C3%B3ximos-pasos-el-dashboard"><i class="fa fa-check"></i>Próximos pasos: el dashboard</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="referencias.html"><a href="referencias.html"><i class="fa fa-check"></i>Referencias</a></li>
+<li class="divider"></li>
+<li><a>Nicolle Ramírez y Roger Daza</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">¿Qué hace ganar a una pareja de voleibol de playa?</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="eda" class="section level1 hasAnchor" number="6">
+<h1><span class="header-section-number">Capítulo 6</span> Análisis exploratorio (EDA)<a href="eda.html#eda" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Este capítulo responde la pregunta del libro con los archivos limpios del capítulo 5: <code>partidos</code> (un partido por fila) y <code>parejas</code> (una fila por pareja y partido). Avanza en tres niveles, de lo simple a lo conjunto: cada variable por separado (6.1), cada variable frente al resultado (6.2) y varias variables a la vez (6.3). Cada sección termina con un recuadro <strong>«Para el entrenador»</strong>.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="eda.html#cb20-1" tabindex="-1"></a>asimetria <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb20-2"><a href="eda.html#cb20-2" tabindex="-1"></a>  x <span class="ot">&lt;-</span> x[<span class="sc">!</span><span class="fu">is.na</span>(x)]</span>
+<span id="cb20-3"><a href="eda.html#cb20-3" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">mean</span>(x)</span>
+<span id="cb20-4"><a href="eda.html#cb20-4" tabindex="-1"></a>  <span class="fu">mean</span>((x <span class="sc">-</span> m)<span class="sc">^</span><span class="dv">3</span>) <span class="sc">/</span> <span class="fu">mean</span>((x <span class="sc">-</span> m)<span class="sc">^</span><span class="dv">2</span>)<span class="sc">^</span><span class="fl">1.5</span></span>
+<span id="cb20-5"><a href="eda.html#cb20-5" tabindex="-1"></a>}</span>
+<span id="cb20-6"><a href="eda.html#cb20-6" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="eda.html#cb20-7" tabindex="-1"></a>resumir <span class="ot">&lt;-</span> <span class="cf">function</span>(x, nombre) {</span>
+<span id="cb20-8"><a href="eda.html#cb20-8" tabindex="-1"></a>  x <span class="ot">&lt;-</span> x[<span class="sc">!</span><span class="fu">is.na</span>(x)]</span>
+<span id="cb20-9"><a href="eda.html#cb20-9" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">Variable =</span> nombre, <span class="at">n =</span> <span class="fu">length</span>(x), <span class="at">Media =</span> <span class="fu">mean</span>(x), <span class="at">Mediana =</span> <span class="fu">median</span>(x),</span>
+<span id="cb20-10"><a href="eda.html#cb20-10" tabindex="-1"></a>         <span class="at">DE =</span> <span class="fu">sd</span>(x), <span class="at">P25 =</span> <span class="fu">quantile</span>(x, .<span class="dv">25</span>, <span class="at">names =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb20-11"><a href="eda.html#cb20-11" tabindex="-1"></a>         <span class="at">P75 =</span> <span class="fu">quantile</span>(x, .<span class="dv">75</span>, <span class="at">names =</span> <span class="cn">FALSE</span>), Mín <span class="ot">=</span> <span class="fu">min</span>(x), Máx <span class="ot">=</span> <span class="fu">max</span>(x),</span>
+<span id="cb20-12"><a href="eda.html#cb20-12" tabindex="-1"></a>         Asimetría <span class="ot">=</span> <span class="fu">asimetria</span>(x))</span>
+<span id="cb20-13"><a href="eda.html#cb20-13" tabindex="-1"></a>}</span>
+<span id="cb20-14"><a href="eda.html#cb20-14" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="eda.html#cb20-15" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="cf">function</span>(p) <span class="fu">ifelse</span>(p <span class="sc">&lt;</span> <span class="fl">0.001</span>, <span class="st">&quot;&lt; 0,001&quot;</span>, <span class="fu">fmt</span>(p, <span class="dv">3</span>))</span></code></pre></div>
+<div id="análisis-univariado" class="section level2 hasAnchor" number="6.1">
+<h2><span class="header-section-number">6.1</span> Análisis univariado<a href="eda.html#an%C3%A1lisis-univariado" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="el-partido" class="section level3 hasAnchor" number="6.1.1">
+<h3><span class="header-section-number">6.1.1</span> El partido<a href="eda.html#el-partido" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Antes de describir cada variable, la figura muestra la variable respuesta del libro. En el panel izquierdo, la pareja A es la ganadora cuando el <code>match_id</code> es par y la perdedora cuando es impar (capítulo 3), por lo que el reparto entre «Gana A» y «Gana B» es casi 50/50 por construcción. En el panel derecho, el favorito es la pareja mejor rankeada; los partidos sin ranking numérico en alguna de las dos parejas, o con el mismo ranking, quedan aparte.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="eda.html#cb21-1" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb21-2"><a href="eda.html#cb21-2" tabindex="-1"></a>  partidos <span class="sc">%&gt;%</span> <span class="fu">transmute</span>(<span class="at">panel =</span> <span class="st">&quot;¿Gana la pareja A o la B?&quot;</span>,</span>
+<span id="cb21-3"><a href="eda.html#cb21-3" tabindex="-1"></a>                         <span class="at">categoria =</span> <span class="fu">ifelse</span>(match_id <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>, <span class="st">&quot;Gana A&quot;</span>, <span class="st">&quot;Gana B&quot;</span>)),</span>
+<span id="cb21-4"><a href="eda.html#cb21-4" tabindex="-1"></a>  partidos <span class="sc">%&gt;%</span> <span class="fu">transmute</span>(<span class="at">panel =</span> <span class="st">&quot;¿Gana el favorito?&quot;</span>,</span>
+<span id="cb21-5"><a href="eda.html#cb21-5" tabindex="-1"></a>                         <span class="at">categoria =</span> <span class="fu">case_when</span>(<span class="fu">is.na</span>(rank_diff) <span class="sc">|</span> rank_diff <span class="sc">==</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">&quot;Sin ranking comparable&quot;</span>,</span>
+<span id="cb21-6"><a href="eda.html#cb21-6" tabindex="-1"></a>                                               rank_diff <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">~</span> <span class="st">&quot;Gana el favorito&quot;</span>,</span>
+<span id="cb21-7"><a href="eda.html#cb21-7" tabindex="-1"></a>                                               <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">&quot;Sorpresa&quot;</span>))</span>
+<span id="cb21-8"><a href="eda.html#cb21-8" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-9"><a href="eda.html#cb21-9" tabindex="-1"></a>  <span class="fu">count</span>(panel, categoria) <span class="sc">%&gt;%</span></span>
+<span id="cb21-10"><a href="eda.html#cb21-10" tabindex="-1"></a>  <span class="fu">group_by</span>(panel) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">p =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n)) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb21-11"><a href="eda.html#cb21-11" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">categoria =</span> <span class="fu">factor</span>(categoria, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Gana A&quot;</span>, <span class="st">&quot;Gana B&quot;</span>, <span class="st">&quot;Gana el favorito&quot;</span>,</span>
+<span id="cb21-12"><a href="eda.html#cb21-12" tabindex="-1"></a>                                                  <span class="st">&quot;Sorpresa&quot;</span>, <span class="st">&quot;Sin ranking comparable&quot;</span>)))</span>
+<span id="cb21-13"><a href="eda.html#cb21-13" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="eda.html#cb21-14" tabindex="-1"></a><span class="fu">ggplot</span>(resp, <span class="fu">aes</span>(categoria, n, <span class="at">fill =</span> categoria)) <span class="sc">+</span></span>
+<span id="cb21-15"><a href="eda.html#cb21-15" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb21-16"><a href="eda.html#cb21-16" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="fu">fmt</span>(n), <span class="st">&quot; (&quot;</span>, <span class="fu">pct</span>(p), <span class="st">&quot;)&quot;</span>)), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>, <span class="at">size =</span> <span class="fl">3.4</span>) <span class="sc">+</span></span>
+<span id="cb21-17"><a href="eda.html#cb21-17" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;Gana A&quot;</span> <span class="ot">=</span> <span class="st">&quot;#0B3B5C&quot;</span>, <span class="st">&quot;Gana B&quot;</span> <span class="ot">=</span> <span class="st">&quot;#5B8DB0&quot;</span>,</span>
+<span id="cb21-18"><a href="eda.html#cb21-18" tabindex="-1"></a>                               <span class="st">&quot;Gana el favorito&quot;</span> <span class="ot">=</span> <span class="st">&quot;#0B3B5C&quot;</span>, <span class="st">&quot;Sorpresa&quot;</span> <span class="ot">=</span> <span class="st">&quot;#E4572E&quot;</span>,</span>
+<span id="cb21-19"><a href="eda.html#cb21-19" tabindex="-1"></a>                               <span class="st">&quot;Sin ranking comparable&quot;</span> <span class="ot">=</span> <span class="st">&quot;#C9D6E3&quot;</span>), <span class="at">guide =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-20"><a href="eda.html#cb21-20" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="cf">function</span>(x) <span class="fu">fmt</span>(x), <span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">15</span>))) <span class="sc">+</span></span>
+<span id="cb21-21"><a href="eda.html#cb21-21" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>panel, <span class="at">scales =</span> <span class="st">&quot;free_x&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-22"><a href="eda.html#cb21-22" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">&quot;Número de partidos&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-respuesta"></span>
+<img src="voleibol_playa_files/figure-html/fig-respuesta-1.png" alt="Variable respuesta: qué pareja gana (A o B) y si ganó el favorito." width="100%" />
+<p class="caption">
+Figura 6.1: Variable respuesta: qué pareja gana (A o B) y si ganó el favorito.
+</p>
+</div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="eda.html#cb22-1" tabindex="-1"></a><span class="fu">bind_rows</span>(</span>
+<span id="cb22-2"><a href="eda.html#cb22-2" tabindex="-1"></a>  <span class="fu">resumir</span>(partidos<span class="sc">$</span>duration_min, <span class="st">&quot;Duración del partido (min)&quot;</span>),</span>
+<span id="cb22-3"><a href="eda.html#cb22-3" tabindex="-1"></a>  <span class="fu">resumir</span>(partidos<span class="sc">$</span>n_sets, <span class="st">&quot;Sets por partido&quot;</span>),</span>
+<span id="cb22-4"><a href="eda.html#cb22-4" tabindex="-1"></a>  <span class="fu">resumir</span>(parejas<span class="sc">$</span>rank_num, <span class="st">&quot;Ranking de la pareja (1 = mejor)&quot;</span>),</span>
+<span id="cb22-5"><a href="eda.html#cb22-5" tabindex="-1"></a>  <span class="fu">resumir</span>(parejas<span class="sc">$</span>edad, <span class="st">&quot;Edad media de la pareja (años)&quot;</span>),</span>
+<span id="cb22-6"><a href="eda.html#cb22-6" tabindex="-1"></a>  <span class="fu">resumir</span>(parejas<span class="sc">$</span>estatura, <span class="st">&quot;Estatura media de la pareja (pulgadas)&quot;</span>)</span>
+<span id="cb22-7"><a href="eda.html#cb22-7" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">tabla</span>(<span class="at">caption =</span> <span class="st">&quot;Estadísticos descriptivos de las variables numéricas principales.&quot;</span>)</span></code></pre></div>
+<table style="width:100%;">
+<caption><span id="tab:tab-descriptivos">Tabla 6.1: </span>Estadísticos descriptivos de las variables numéricas principales.</caption>
+<colgroup>
+<col width="38%" />
+<col width="7%" />
+<col width="5%" />
+<col width="7%" />
+<col width="5%" />
+<col width="5%" />
+<col width="5%" />
+<col width="5%" />
+<col width="6%" />
+<col width="9%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="right">n</th>
+<th align="right">Media</th>
+<th align="right">Mediana</th>
+<th align="right">DE</th>
+<th align="right">P25</th>
+<th align="right">P75</th>
+<th align="right">Mín</th>
+<th align="right">Máx</th>
+<th align="right">Asimetría</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Duración del partido (min)</td>
+<td align="right">74.506</td>
+<td align="right">43,92</td>
+<td align="right">42,00</td>
+<td align="right">10,95</td>
+<td align="right">36,00</td>
+<td align="right">51,00</td>
+<td align="right">2,00</td>
+<td align="right">134,00</td>
+<td align="right">0,81</td>
+</tr>
+<tr class="even">
+<td align="left">Sets por partido</td>
+<td align="right">75.840</td>
+<td align="right">2,32</td>
+<td align="right">2,00</td>
+<td align="right">0,47</td>
+<td align="right">2,00</td>
+<td align="right">3,00</td>
+<td align="right">1,00</td>
+<td align="right">3,00</td>
+<td align="right">0,70</td>
+</tr>
+<tr class="odd">
+<td align="left">Ranking de la pareja (1 = mejor)</td>
+<td align="right">118.306</td>
+<td align="right">14,95</td>
+<td align="right">14,00</td>
+<td align="right">9,75</td>
+<td align="right">7,00</td>
+<td align="right">23,00</td>
+<td align="right">1,00</td>
+<td align="right">64,00</td>
+<td align="right">0,48</td>
+</tr>
+<tr class="even">
+<td align="left">Edad media de la pareja (años)</td>
+<td align="right">151.014</td>
+<td align="right">28,56</td>
+<td align="right">28,45</td>
+<td align="right">4,30</td>
+<td align="right">25,59</td>
+<td align="right">31,46</td>
+<td align="right">13,49</td>
+<td align="right">53,82</td>
+<td align="right">0,16</td>
+</tr>
+<tr class="odd">
+<td align="left">Estatura media de la pareja (pulgadas)</td>
+<td align="right">136.405</td>
+<td align="right">73,62</td>
+<td align="right">73,50</td>
+<td align="right">3,17</td>
+<td align="right">71,00</td>
+<td align="right">76,50</td>
+<td align="right">63,00</td>
+<td align="right">82,00</td>
+<td align="right">-0,11</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="eda.html#cb23-1" tabindex="-1"></a>med_dur <span class="ot">&lt;-</span> <span class="fu">median</span>(partidos<span class="sc">$</span>duration_min, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-2"><a href="eda.html#cb23-2" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="eda.html#cb23-3" tabindex="-1"></a>partidos <span class="sc">%&gt;%</span></span>
+<span id="cb23-4"><a href="eda.html#cb23-4" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(duration_min)) <span class="sc">%&gt;%</span></span>
+<span id="cb23-5"><a href="eda.html#cb23-5" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(duration_min)) <span class="sc">+</span></span>
+<span id="cb23-6"><a href="eda.html#cb23-6" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">2</span>, <span class="at">fill =</span> col_azul, <span class="at">color =</span> <span class="st">&quot;white&quot;</span>) <span class="sc">+</span></span>
+<span id="cb23-7"><a href="eda.html#cb23-7" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> med_dur, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>) <span class="sc">+</span></span>
+<span id="cb23-8"><a href="eda.html#cb23-8" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Duración (minutos)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Número de partidos&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-duracion"></span>
+<img src="voleibol_playa_files/figure-html/fig-duracion-1.png" alt="Duración de los partidos (minutos). La línea marca la mediana." width="100%" />
+<p class="caption">
+Figura 6.2: Duración de los partidos (minutos). La línea marca la mediana.
+</p>
+</div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="eda.html#cb24-1" tabindex="-1"></a>partidos <span class="sc">%&gt;%</span></span>
+<span id="cb24-2"><a href="eda.html#cb24-2" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(n_sets)) <span class="sc">%&gt;%</span></span>
+<span id="cb24-3"><a href="eda.html#cb24-3" tabindex="-1"></a>  <span class="fu">count</span>(n_sets) <span class="sc">%&gt;%</span></span>
+<span id="cb24-4"><a href="eda.html#cb24-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n)) <span class="sc">%&gt;%</span></span>
+<span id="cb24-5"><a href="eda.html#cb24-5" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="fu">factor</span>(n_sets), p)) <span class="sc">+</span></span>
+<span id="cb24-6"><a href="eda.html#cb24-6" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> col_azul) <span class="sc">+</span></span>
+<span id="cb24-7"><a href="eda.html#cb24-7" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">pct</span>(p)), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb24-8"><a href="eda.html#cb24-8" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="cf">function</span>(x) <span class="fu">paste0</span>(<span class="dv">100</span> <span class="sc">*</span> x, <span class="st">&quot; %&quot;</span>), <span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">12</span>))) <span class="sc">+</span></span>
+<span id="cb24-9"><a href="eda.html#cb24-9" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Sets jugados&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Porcentaje de partidos&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-sets"></span>
+<img src="voleibol_playa_files/figure-html/fig-sets-1.png" alt="Distribución del número de sets jugados." width="100%" />
+<p class="caption">
+Figura 6.3: Distribución del número de sets jugados.
+</p>
+</div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="eda.html#cb25-1" tabindex="-1"></a>p_tres  <span class="ot">&lt;-</span> <span class="fu">mean</span>(partidos<span class="sc">$</span>n_sets <span class="sc">==</span> <span class="dv">3</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb25-2"><a href="eda.html#cb25-2" tabindex="-1"></a>corta_n <span class="ot">&lt;-</span> <span class="fu">sum</span>(partidos<span class="sc">$</span>duracion_corta, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>El partido típico dura <strong>42 minutos</strong> (mediana) y se resuelve en dos sets; el <strong>32,2 %</strong> de los partidos llega a un tercer set. La distribución de la duración tiene cola larga hacia la derecha (asimetría positiva): hay partidos muy largos, pero casi nunca partidos muy cortos.</p>
+</div>
+<div id="los-jugadores-y-las-parejas" class="section level3 hasAnchor" number="6.1.2">
+<h3><span class="header-section-number">6.1.2</span> Los jugadores y las parejas<a href="eda.html#los-jugadores-y-las-parejas" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="eda.html#cb26-1" tabindex="-1"></a>parejas <span class="sc">%&gt;%</span></span>
+<span id="cb26-2"><a href="eda.html#cb26-2" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(rank_num)) <span class="sc">%&gt;%</span></span>
+<span id="cb26-3"><a href="eda.html#cb26-3" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(rank_num)) <span class="sc">+</span></span>
+<span id="cb26-4"><a href="eda.html#cb26-4" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">2</span>, <span class="at">fill =</span> col_azul, <span class="at">color =</span> <span class="st">&quot;white&quot;</span>) <span class="sc">+</span></span>
+<span id="cb26-5"><a href="eda.html#cb26-5" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Ranking de la pareja&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Número de apariciones&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-ranking"></span>
+<img src="voleibol_playa_files/figure-html/fig-ranking-1.png" alt="Ranking de las parejas en cada partido (1 = mejor)." width="100%" />
+<p class="caption">
+Figura 6.4: Ranking de las parejas en cada partido (1 = mejor).
+</p>
+</div>
+<p>El ranking numérico va de 1 a 64 y se concentra en los puestos bajos, porque las parejas mejor rankeadas juegan más partidos (llegan más lejos en cada torneo). Está disponible para <strong>77,1 %</strong> de las apariciones de pareja.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="eda.html#cb27-1" tabindex="-1"></a>jugadores <span class="sc">%&gt;%</span></span>
+<span id="cb27-2"><a href="eda.html#cb27-2" tabindex="-1"></a>  <span class="fu">group_by</span>(Género <span class="ot">=</span> gender) <span class="sc">%&gt;%</span></span>
+<span id="cb27-3"><a href="eda.html#cb27-3" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="st">`</span><span class="at">Jugador-partido</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">n</span>(),</span>
+<span id="cb27-4"><a href="eda.html#cb27-4" tabindex="-1"></a>            <span class="st">`</span><span class="at">Edad mediana (años)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">median</span>(edad, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb27-5"><a href="eda.html#cb27-5" tabindex="-1"></a>            <span class="st">`</span><span class="at">Estatura mediana (pulgadas)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">median</span>(estatura, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb27-6"><a href="eda.html#cb27-6" tabindex="-1"></a>            <span class="st">`</span><span class="at">Estatura mediana (cm)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">median</span>(estatura, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="fl">2.54</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb27-7"><a href="eda.html#cb27-7" tabindex="-1"></a>  <span class="fu">tabla</span>(<span class="at">caption =</span> <span class="st">&quot;Edad y estatura de los jugadores por género.&quot;</span>, <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div>
+<table>
+<caption><span id="tab:tab-genero">Tabla 6.2: </span>Edad y estatura de los jugadores por género.</caption>
+<colgroup>
+<col width="8%" />
+<col width="17%" />
+<col width="21%" />
+<col width="29%" />
+<col width="23%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Género</th>
+<th align="right">Jugador-partido</th>
+<th align="right">Edad mediana (años)</th>
+<th align="right">Estatura mediana (pulgadas)</th>
+<th align="right">Estatura mediana (cm)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Hombres</td>
+<td align="right">161.064</td>
+<td align="right">28,9</td>
+<td align="right">76</td>
+<td align="right">193,0</td>
+</tr>
+<tr class="even">
+<td align="left">Mujeres</td>
+<td align="right">145.932</td>
+<td align="right">27,5</td>
+<td align="right">71</td>
+<td align="right">180,3</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="eda.html#cb28-1" tabindex="-1"></a>jugadores <span class="sc">%&gt;%</span></span>
+<span id="cb28-2"><a href="eda.html#cb28-2" tabindex="-1"></a>  <span class="fu">select</span>(gender, <span class="st">`</span><span class="at">Edad (años)</span><span class="st">`</span> <span class="ot">=</span> edad, <span class="st">`</span><span class="at">Estatura (pulgadas)</span><span class="st">`</span> <span class="ot">=</span> estatura) <span class="sc">%&gt;%</span></span>
+<span id="cb28-3"><a href="eda.html#cb28-3" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>gender, <span class="at">names_to =</span> <span class="st">&quot;variable&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;valor&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb28-4"><a href="eda.html#cb28-4" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(valor)) <span class="sc">%&gt;%</span></span>
+<span id="cb28-5"><a href="eda.html#cb28-5" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(valor, <span class="at">fill =</span> gender)) <span class="sc">+</span></span>
+<span id="cb28-6"><a href="eda.html#cb28-6" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>, <span class="at">position =</span> <span class="st">&quot;identity&quot;</span>, <span class="at">alpha =</span> .<span class="dv">6</span>, <span class="at">color =</span> <span class="st">&quot;white&quot;</span>) <span class="sc">+</span></span>
+<span id="cb28-7"><a href="eda.html#cb28-7" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> col_gen) <span class="sc">+</span></span>
+<span id="cb28-8"><a href="eda.html#cb28-8" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>variable, <span class="at">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="sc">+</span></span>
+<span id="cb28-9"><a href="eda.html#cb28-9" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">&quot;Jugador-partido&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-edad-estatura"></span>
+<img src="voleibol_playa_files/figure-html/fig-edad-estatura-1.png" alt="Edad y estatura de los jugadores por género." width="100%" />
+<p class="caption">
+Figura 6.5: Edad y estatura de los jugadores por género.
+</p>
+</div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="eda.html#cb29-1" tabindex="-1"></a>gen <span class="ot">&lt;-</span> jugadores <span class="sc">%&gt;%</span></span>
+<span id="cb29-2"><a href="eda.html#cb29-2" tabindex="-1"></a>  <span class="fu">group_by</span>(gender) <span class="sc">%&gt;%</span></span>
+<span id="cb29-3"><a href="eda.html#cb29-3" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">edad =</span> <span class="fu">median</span>(edad, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">cm =</span> <span class="fu">median</span>(estatura, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="fl">2.54</span>)</span>
+<span id="cb29-4"><a href="eda.html#cb29-4" tabindex="-1"></a>cm_h <span class="ot">&lt;-</span> gen<span class="sc">$</span>cm[gen<span class="sc">$</span>gender <span class="sc">==</span> <span class="st">&quot;Hombres&quot;</span>]; cm_m <span class="ot">&lt;-</span> gen<span class="sc">$</span>cm[gen<span class="sc">$</span>gender <span class="sc">==</span> <span class="st">&quot;Mujeres&quot;</span>]</span>
+<span id="cb29-5"><a href="eda.html#cb29-5" tabindex="-1"></a>ed_h <span class="ot">&lt;-</span> gen<span class="sc">$</span>edad[gen<span class="sc">$</span>gender <span class="sc">==</span> <span class="st">&quot;Hombres&quot;</span>]; ed_m <span class="ot">&lt;-</span> gen<span class="sc">$</span>edad[gen<span class="sc">$</span>gender <span class="sc">==</span> <span class="st">&quot;Mujeres&quot;</span>]</span></code></pre></div>
+<p>Los hombres son más altos (mediana de <strong>193 cm</strong> frente a <strong>180 cm</strong>) y algo mayores (<strong>28,9</strong> frente a <strong>27,5</strong> años). Como la estatura se distribuye distinto en cada género, <strong>cualquier comparación de estatura debe hacerse dentro del mismo género</strong>.</p>
+<div class="entrenador">
+<p><strong>Para el entrenador</strong></p>
+<ul>
+<li>Un partido normal son dos sets y unos <strong>42 minutos</strong>; planear la preparación física para un tercer set tiene sentido (ocurre en cerca de <strong>1 de cada 3</strong> partidos).</li>
+<li>El ranking se mueve en una escala de 1 a 64: una diferencia de 5 puestos es una brecha moderada, una de 30 es enorme.</li>
+<li>La estatura y la edad de referencia <strong>no son las mismas en hombres y mujeres</strong>: compare a una pareja con su propio género.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="análisis-bivariado" class="section level2 hasAnchor" number="6.2">
+<h2><span class="header-section-number">6.2</span> Análisis bivariado<a href="eda.html#an%C3%A1lisis-bivariado" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="parejas-ganadoras-frente-a-perdedoras" class="section level3 hasAnchor" number="6.2.1">
+<h3><span class="header-section-number">6.2.1</span> Parejas ganadoras frente a perdedoras<a href="eda.html#parejas-ganadoras-frente-a-perdedoras" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Se compara cada variable entre las parejas que ganaron y las que perdieron, con la prueba de Mann-Whitney, el tamaño de efecto rango-biserial y el solapamiento (capítulo 3). Para el <strong>ranking</strong> un número menor es mejor; por eso en esa fila se invierte el signo y un efecto positivo siempre significa «la pareja ganadora tiene el valor más favorable».</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="eda.html#cb30-1" tabindex="-1"></a>ovl <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y, <span class="at">bins =</span> <span class="dv">30</span>) {</span>
+<span id="cb30-2"><a href="eda.html#cb30-2" tabindex="-1"></a>  br <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fu">min</span>(<span class="fu">c</span>(x, y)), <span class="fu">max</span>(<span class="fu">c</span>(x, y)), <span class="at">length.out =</span> bins <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb30-3"><a href="eda.html#cb30-3" tabindex="-1"></a>  a <span class="ot">&lt;-</span> <span class="fu">hist</span>(x, <span class="at">breaks =</span> br, <span class="at">right =</span> <span class="cn">FALSE</span>, <span class="at">include.lowest =</span> <span class="cn">TRUE</span>, <span class="at">plot =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>counts <span class="sc">/</span> <span class="fu">length</span>(x)</span>
+<span id="cb30-4"><a href="eda.html#cb30-4" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="fu">hist</span>(y, <span class="at">breaks =</span> br, <span class="at">right =</span> <span class="cn">FALSE</span>, <span class="at">include.lowest =</span> <span class="cn">TRUE</span>, <span class="at">plot =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>counts <span class="sc">/</span> <span class="fu">length</span>(y)</span>
+<span id="cb30-5"><a href="eda.html#cb30-5" tabindex="-1"></a>  <span class="fu">sum</span>(<span class="fu">pmin</span>(a, b))</span>
+<span id="cb30-6"><a href="eda.html#cb30-6" tabindex="-1"></a>}</span>
+<span id="cb30-7"><a href="eda.html#cb30-7" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="eda.html#cb30-8" tabindex="-1"></a>magnitud <span class="ot">&lt;-</span> <span class="cf">function</span>(r) {</span>
+<span id="cb30-9"><a href="eda.html#cb30-9" tabindex="-1"></a>  <span class="fu">as.character</span>(<span class="fu">cut</span>(<span class="fu">abs</span>(r), <span class="fu">c</span>(<span class="sc">-</span><span class="cn">Inf</span>, .<span class="dv">1</span>, .<span class="dv">3</span>, .<span class="dv">5</span>, <span class="cn">Inf</span>), <span class="at">right =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb30-10"><a href="eda.html#cb30-10" tabindex="-1"></a>                   <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;trivial&quot;</span>, <span class="st">&quot;pequeño&quot;</span>, <span class="st">&quot;mediano&quot;</span>, <span class="st">&quot;grande&quot;</span>)))</span>
+<span id="cb30-11"><a href="eda.html#cb30-11" tabindex="-1"></a>}</span>
+<span id="cb30-12"><a href="eda.html#cb30-12" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="eda.html#cb30-13" tabindex="-1"></a>comparar <span class="ot">&lt;-</span> <span class="cf">function</span>(v, nombre, <span class="at">signo =</span> <span class="dv">1</span>) {</span>
+<span id="cb30-14"><a href="eda.html#cb30-14" tabindex="-1"></a>  w <span class="ot">&lt;-</span> parejas[[v]][parejas<span class="sc">$</span>gano <span class="sc">==</span> <span class="dv">1</span>]; w <span class="ot">&lt;-</span> w[<span class="sc">!</span><span class="fu">is.na</span>(w)]</span>
+<span id="cb30-15"><a href="eda.html#cb30-15" tabindex="-1"></a>  l <span class="ot">&lt;-</span> parejas[[v]][parejas<span class="sc">$</span>gano <span class="sc">==</span> <span class="dv">0</span>]; l <span class="ot">&lt;-</span> l[<span class="sc">!</span><span class="fu">is.na</span>(l)]</span>
+<span id="cb30-16"><a href="eda.html#cb30-16" tabindex="-1"></a>  test <span class="ot">&lt;-</span> <span class="fu">wilcox.test</span>(w, l, <span class="at">exact =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb30-17"><a href="eda.html#cb30-17" tabindex="-1"></a>  r <span class="ot">&lt;-</span> signo <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> <span class="fu">unname</span>(test<span class="sc">$</span>statistic) <span class="sc">/</span> (<span class="fu">as.numeric</span>(<span class="fu">length</span>(w)) <span class="sc">*</span> <span class="fu">length</span>(l)) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb30-18"><a href="eda.html#cb30-18" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">Variable =</span> nombre, <span class="st">`</span><span class="at">n ganadoras</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">length</span>(w), <span class="st">`</span><span class="at">n perdedoras</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">length</span>(l),</span>
+<span id="cb30-19"><a href="eda.html#cb30-19" tabindex="-1"></a>         <span class="st">`</span><span class="at">Mediana ganadoras</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">median</span>(w), <span class="st">`</span><span class="at">Mediana perdedoras</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">median</span>(l),</span>
+<span id="cb30-20"><a href="eda.html#cb30-20" tabindex="-1"></a>         <span class="st">`</span><span class="at">r rango-biserial</span><span class="st">`</span> <span class="ot">=</span> r, <span class="st">`</span><span class="at">Prob. de superioridad</span><span class="st">`</span> <span class="ot">=</span> (r <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">/</span> <span class="dv">2</span>,</span>
+<span id="cb30-21"><a href="eda.html#cb30-21" tabindex="-1"></a>         <span class="at">Solapamiento =</span> <span class="fu">ovl</span>(w, l), <span class="at">p =</span> <span class="fu">fp</span>(test<span class="sc">$</span>p.value), <span class="at">Magnitud =</span> <span class="fu">magnitud</span>(r))</span>
+<span id="cb30-22"><a href="eda.html#cb30-22" tabindex="-1"></a>}</span>
+<span id="cb30-23"><a href="eda.html#cb30-23" tabindex="-1"></a></span>
+<span id="cb30-24"><a href="eda.html#cb30-24" tabindex="-1"></a>comp <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb30-25"><a href="eda.html#cb30-25" tabindex="-1"></a>  <span class="fu">comparar</span>(<span class="st">&quot;rank_num&quot;</span>, <span class="st">&quot;Ranking (mejor = menor)&quot;</span>, <span class="at">signo =</span> <span class="sc">-</span><span class="dv">1</span>),</span>
+<span id="cb30-26"><a href="eda.html#cb30-26" tabindex="-1"></a>  <span class="fu">comparar</span>(<span class="st">&quot;edad&quot;</span>, <span class="st">&quot;Edad media de la pareja&quot;</span>),</span>
+<span id="cb30-27"><a href="eda.html#cb30-27" tabindex="-1"></a>  <span class="fu">comparar</span>(<span class="st">&quot;estatura&quot;</span>, <span class="st">&quot;Estatura media de la pareja&quot;</span>)</span>
+<span id="cb30-28"><a href="eda.html#cb30-28" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="eda.html#cb31-1" tabindex="-1"></a>comp <span class="sc">%&gt;%</span> <span class="fu">tabla</span>(<span class="at">caption =</span> <span class="st">&quot;Parejas ganadoras frente a perdedoras: prueba de Mann-Whitney, tamaño de efecto y solapamiento.&quot;</span>, <span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div>
+<table style="width:100%;">
+<caption><span id="tab:tab-comparacion">Tabla 6.3: </span>Parejas ganadoras frente a perdedoras: prueba de Mann-Whitney, tamaño de efecto y solapamiento.</caption>
+<colgroup>
+<col width="17%" />
+<col width="7%" />
+<col width="8%" />
+<col width="11%" />
+<col width="11%" />
+<col width="10%" />
+<col width="13%" />
+<col width="8%" />
+<col width="5%" />
+<col width="5%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="right">n ganadoras</th>
+<th align="right">n perdedoras</th>
+<th align="right">Mediana ganadoras</th>
+<th align="right">Mediana perdedoras</th>
+<th align="right">r rango-biserial</th>
+<th align="right">Prob. de superioridad</th>
+<th align="right">Solapamiento</th>
+<th align="left">p</th>
+<th align="left">Magnitud</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Ranking (mejor = menor)</td>
+<td align="right">64.869</td>
+<td align="right">53.437</td>
+<td align="right">12,00</td>
+<td align="right">16,000</td>
+<td align="right">0,211</td>
+<td align="right">0,605</td>
+<td align="right">0,840</td>
+<td align="left">&lt; 0,001</td>
+<td align="left">pequeño</td>
+</tr>
+<tr class="even">
+<td align="left">Edad media de la pareja</td>
+<td align="right">76.026</td>
+<td align="right">74.988</td>
+<td align="right">28,68</td>
+<td align="right">28,218</td>
+<td align="right">0,059</td>
+<td align="right">0,530</td>
+<td align="right">0,951</td>
+<td align="left">&lt; 0,001</td>
+<td align="left">trivial</td>
+</tr>
+<tr class="odd">
+<td align="left">Estatura media de la pareja</td>
+<td align="right">70.368</td>
+<td align="right">66.037</td>
+<td align="right">74,00</td>
+<td align="right">73,500</td>
+<td align="right">0,044</td>
+<td align="right">0,522</td>
+<td align="right">0,952</td>
+<td align="left">&lt; 0,001</td>
+<td align="left">trivial</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="eda.html#cb32-1" tabindex="-1"></a>parejas <span class="sc">%&gt;%</span></span>
+<span id="cb32-2"><a href="eda.html#cb32-2" tabindex="-1"></a>  <span class="fu">select</span>(resultado, <span class="st">`</span><span class="at">Ranking</span><span class="st">`</span> <span class="ot">=</span> rank_num, <span class="st">`</span><span class="at">Edad media (años)</span><span class="st">`</span> <span class="ot">=</span> edad,</span>
+<span id="cb32-3"><a href="eda.html#cb32-3" tabindex="-1"></a>         <span class="st">`</span><span class="at">Estatura media (pulgadas)</span><span class="st">`</span> <span class="ot">=</span> estatura) <span class="sc">%&gt;%</span></span>
+<span id="cb32-4"><a href="eda.html#cb32-4" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>resultado, <span class="at">names_to =</span> <span class="st">&quot;variable&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;valor&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-5"><a href="eda.html#cb32-5" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(valor)) <span class="sc">%&gt;%</span></span>
+<span id="cb32-6"><a href="eda.html#cb32-6" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(valor, <span class="at">fill =</span> resultado, <span class="at">color =</span> resultado)) <span class="sc">+</span></span>
+<span id="cb32-7"><a href="eda.html#cb32-7" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> .<span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb32-8"><a href="eda.html#cb32-8" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> col_res) <span class="sc">+</span> <span class="fu">scale_color_manual</span>(<span class="at">values =</span> col_res) <span class="sc">+</span></span>
+<span id="cb32-9"><a href="eda.html#cb32-9" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>variable, <span class="at">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="sc">+</span></span>
+<span id="cb32-10"><a href="eda.html#cb32-10" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">&quot;Densidad&quot;</span>, <span class="at">fill =</span> <span class="cn">NULL</span>, <span class="at">color =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-densidades"></span>
+<img src="voleibol_playa_files/figure-html/fig-densidades-1.png" alt="Distribución de ranking, edad y estatura en parejas ganadoras y perdedoras." width="100%" />
+<p class="caption">
+Figura 6.6: Distribución de ranking, edad y estatura en parejas ganadoras y perdedoras.
+</p>
+</div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="eda.html#cb33-1" tabindex="-1"></a>r_rank <span class="ot">&lt;-</span> comp<span class="sc">$</span><span class="st">`</span><span class="at">r rango-biserial</span><span class="st">`</span>[<span class="dv">1</span>]; ps_rank <span class="ot">&lt;-</span> comp<span class="sc">$</span><span class="st">`</span><span class="at">Prob. de superioridad</span><span class="st">`</span>[<span class="dv">1</span>]; ov_rank <span class="ot">&lt;-</span> comp<span class="sc">$</span>Solapamiento[<span class="dv">1</span>]</span>
+<span id="cb33-2"><a href="eda.html#cb33-2" tabindex="-1"></a>r_edad <span class="ot">&lt;-</span> comp<span class="sc">$</span><span class="st">`</span><span class="at">r rango-biserial</span><span class="st">`</span>[<span class="dv">2</span>]; r_est <span class="ot">&lt;-</span> comp<span class="sc">$</span><span class="st">`</span><span class="at">r rango-biserial</span><span class="st">`</span>[<span class="dv">3</span>]</span>
+<span id="cb33-3"><a href="eda.html#cb33-3" tabindex="-1"></a>ov_edad <span class="ot">&lt;-</span> comp<span class="sc">$</span>Solapamiento[<span class="dv">2</span>]; ov_est <span class="ot">&lt;-</span> comp<span class="sc">$</span>Solapamiento[<span class="dv">3</span>]</span></code></pre></div>
+<p>Con decenas de miles de partidos las tres diferencias son «estadísticamente significativas», pero <strong>su tamaño es muy distinto</strong>:</p>
+<ul>
+<li><strong>Ranking:</strong> efecto <strong>pequeño</strong> (r = 0,21). Una pareja ganadora elegida al azar tiene mejor ranking que una perdedora en el <strong>61 %</strong> de los casos. Las distribuciones se solapan un 84 %.</li>
+<li><strong>Edad:</strong> efecto <strong>trivial</strong> (r = 0,06) y solapamiento de 95 %. Las ganadoras son apenas unos meses mayores, y buena parte de eso es un reflejo del ranking: las parejas mejor rankeadas tienden a ser más veteranas.</li>
+<li><strong>Estatura:</strong> efecto <strong>trivial</strong> (r = 0,04) y solapamiento de 95 %. Ser más alta en promedio da, como mucho, una ventaja mínima.</li>
+</ul>
+<div class="entrenador">
+<p><strong>Para el entrenador</strong></p>
+<ul>
+<li>De los tres factores, <strong>solo el ranking separa de forma útil</strong> a ganadoras y perdedoras. Edad y estatura medias casi no ayudan a distinguirlas: las dos distribuciones son prácticamente la misma.</li>
+<li>Que una diferencia sea «significativa» no quiere decir que sirva para decidir: con tantos partidos, hasta diferencias de pocos meses de edad lo son.</li>
+</ul>
+</div>
+</div>
+<div id="poder-discriminante" class="section level3 hasAnchor" number="6.2.2">
+<h3><span class="header-section-number">6.2.2</span> Poder discriminante<a href="eda.html#poder-discriminante" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Para comparar todas las variables del equipo en una sola mirada, cada una se resume con el tamaño del efecto de Mann-Whitney: la correlación rango-biserial (RBC). Cuanto más lejos de cero (en valor absoluto), mejor separa a las parejas ganadoras de las perdedoras. Se clasifica como <strong>alto</strong> si |RBC| ≥ 0,5, <strong>moderado</strong> si está entre 0,3 y 0,5 y <strong>bajo</strong> si es menor a 0,3. Las estadísticas de juego solo se evalúan en la AVP con estadísticas completas.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="eda.html#cb34-1" tabindex="-1"></a><span class="co"># Tabla por pareja: una fila por pareja en cada partido (ganadora y perdedora)</span></span>
+<span id="cb34-2"><a href="eda.html#cb34-2" tabindex="-1"></a>H_cm <span class="ot">&lt;-</span> <span class="fl">2.54</span></span>
+<span id="cb34-3"><a href="eda.html#cb34-3" tabindex="-1"></a>stt_p <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;kills&quot;</span>, <span class="st">&quot;attacks&quot;</span>, <span class="st">&quot;errors&quot;</span>, <span class="st">&quot;aces&quot;</span>, <span class="st">&quot;serve_errors&quot;</span>, <span class="st">&quot;blocks&quot;</span>, <span class="st">&quot;digs&quot;</span>)</span>
+<span id="cb34-4"><a href="eda.html#cb34-4" tabindex="-1"></a>tiene_p <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">is.na</span>(partidos[<span class="fu">grep</span>(<span class="st">&quot;_tot_&quot;</span>, <span class="fu">names</span>(partidos))])) <span class="sc">==</span> <span class="dv">0</span></span>
+<span id="cb34-5"><a href="eda.html#cb34-5" tabindex="-1"></a>lado_p <span class="ot">&lt;-</span> <span class="cf">function</span>(pre, otro, res) {</span>
+<span id="cb34-6"><a href="eda.html#cb34-6" tabindex="-1"></a>  o <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">circuito =</span> <span class="fu">as.character</span>(partidos<span class="sc">$</span>circuit), <span class="at">resultado =</span> res,</span>
+<span id="cb34-7"><a href="eda.html#cb34-7" tabindex="-1"></a>              <span class="at">rank_main =</span> partidos[[<span class="fu">paste0</span>(pre, <span class="st">&quot;_rank_num&quot;</span>)]],</span>
+<span id="cb34-8"><a href="eda.html#cb34-8" tabindex="-1"></a>              <span class="at">edad_media =</span> partidos[[<span class="fu">paste0</span>(pre, <span class="st">&quot;_age&quot;</span>)]],</span>
+<span id="cb34-9"><a href="eda.html#cb34-9" tabindex="-1"></a>              <span class="at">estatura_media_cm =</span> partidos[[<span class="fu">paste0</span>(pre, <span class="st">&quot;_hgt&quot;</span>)]] <span class="sc">*</span> H_cm,</span>
+<span id="cb34-10"><a href="eda.html#cb34-10" tabindex="-1"></a>              <span class="at">dif_edad_pareja =</span> <span class="fu">abs</span>(partidos[[<span class="fu">paste0</span>(pre, <span class="st">&quot;_p1_age&quot;</span>)]] <span class="sc">-</span> partidos[[<span class="fu">paste0</span>(pre, <span class="st">&quot;_p2_age&quot;</span>)]]),</span>
+<span id="cb34-11"><a href="eda.html#cb34-11" tabindex="-1"></a>              <span class="at">dif_estatura_pareja_cm =</span> <span class="fu">abs</span>(partidos[[<span class="fu">paste0</span>(pre, <span class="st">&quot;_p1_hgt&quot;</span>)]] <span class="sc">-</span> partidos[[<span class="fu">paste0</span>(pre, <span class="st">&quot;_p2_hgt&quot;</span>)]]) <span class="sc">*</span> H_cm,</span>
+<span id="cb34-12"><a href="eda.html#cb34-12" tabindex="-1"></a>              <span class="at">rank_rival =</span> partidos[[<span class="fu">paste0</span>(otro, <span class="st">&quot;_rank_num&quot;</span>)]],</span>
+<span id="cb34-13"><a href="eda.html#cb34-13" tabindex="-1"></a>              <span class="at">duracion_min =</span> <span class="fu">ifelse</span>(partidos<span class="sc">$</span>walkover, <span class="cn">NA_real_</span>, partidos<span class="sc">$</span>duration_min),</span>
+<span id="cb34-14"><a href="eda.html#cb34-14" tabindex="-1"></a>              <span class="at">genero =</span> <span class="fu">as.character</span>(partidos<span class="sc">$</span>gender), <span class="at">tiene =</span> tiene_p)</span>
+<span id="cb34-15"><a href="eda.html#cb34-15" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> stt_p) o[[k]] <span class="ot">&lt;-</span> partidos[[<span class="fu">paste0</span>(pre, <span class="st">&quot;_p1_tot_&quot;</span>, k)]] <span class="sc">+</span> partidos[[<span class="fu">paste0</span>(pre, <span class="st">&quot;_p2_tot_&quot;</span>, k)]]</span>
+<span id="cb34-16"><a href="eda.html#cb34-16" tabindex="-1"></a>  o<span class="sc">$</span>hitpct <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.na</span>(o<span class="sc">$</span>attacks) <span class="sc">&amp;</span> o<span class="sc">$</span>attacks <span class="sc">&gt;</span> <span class="dv">0</span>, (o<span class="sc">$</span>kills <span class="sc">-</span> o<span class="sc">$</span>errors) <span class="sc">/</span> o<span class="sc">$</span>attacks, <span class="cn">NA_real_</span>)</span>
+<span id="cb34-17"><a href="eda.html#cb34-17" tabindex="-1"></a>  o</span>
+<span id="cb34-18"><a href="eda.html#cb34-18" tabindex="-1"></a>}</span>
+<span id="cb34-19"><a href="eda.html#cb34-19" tabindex="-1"></a>eq_ana <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">lado_p</span>(<span class="st">&quot;w&quot;</span>, <span class="st">&quot;l&quot;</span>, <span class="st">&quot;Ganador&quot;</span>), <span class="fu">lado_p</span>(<span class="st">&quot;l&quot;</span>, <span class="st">&quot;w&quot;</span>, <span class="st">&quot;Perdedor&quot;</span>))</span>
+<span id="cb34-20"><a href="eda.html#cb34-20" tabindex="-1"></a></span>
+<span id="cb34-21"><a href="eda.html#cb34-21" tabindex="-1"></a><span class="co"># Mann-Whitney U (aproximación normal con corrección de continuidad y de empates) y RBC</span></span>
+<span id="cb34-22"><a href="eda.html#cb34-22" tabindex="-1"></a>mw_rbc <span class="ot">&lt;-</span> <span class="cf">function</span>(g, p) {</span>
+<span id="cb34-23"><a href="eda.html#cb34-23" tabindex="-1"></a>  g <span class="ot">&lt;-</span> g[<span class="sc">!</span><span class="fu">is.na</span>(g)]; p <span class="ot">&lt;-</span> p[<span class="sc">!</span><span class="fu">is.na</span>(p)]</span>
+<span id="cb34-24"><a href="eda.html#cb34-24" tabindex="-1"></a>  n1 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">length</span>(g)); n2 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">length</span>(p)); N <span class="ot">&lt;-</span> n1 <span class="sc">+</span> n2</span>
+<span id="cb34-25"><a href="eda.html#cb34-25" tabindex="-1"></a>  <span class="cf">if</span> (n1 <span class="sc">&lt;</span> <span class="dv">10</span> <span class="sc">||</span> n2 <span class="sc">&lt;</span> <span class="dv">10</span>) <span class="fu">return</span>(<span class="cn">NULL</span>)</span>
+<span id="cb34-26"><a href="eda.html#cb34-26" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">c</span>(g, p); U <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">rank</span>(x)[<span class="fu">seq_len</span>(n1)]) <span class="sc">-</span> n1 <span class="sc">*</span> (n1 <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb34-27"><a href="eda.html#cb34-27" tabindex="-1"></a>  tl <span class="ot">&lt;-</span> <span class="fu">rle</span>(<span class="fu">sort</span>(x))<span class="sc">$</span>lengths</span>
+<span id="cb34-28"><a href="eda.html#cb34-28" tabindex="-1"></a>  sg <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(n1 <span class="sc">*</span> n2 <span class="sc">/</span> <span class="dv">12</span> <span class="sc">*</span> ((N <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">-</span> <span class="fu">sum</span>(tl<span class="sc">^</span><span class="dv">3</span> <span class="sc">-</span> tl) <span class="sc">/</span> (N <span class="sc">*</span> (N <span class="sc">-</span> <span class="dv">1</span>))))</span>
+<span id="cb34-29"><a href="eda.html#cb34-29" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">rbc =</span> <span class="dv">2</span> <span class="sc">*</span> U <span class="sc">/</span> (n1 <span class="sc">*</span> n2) <span class="sc">-</span> <span class="dv">1</span>, <span class="at">n =</span> N)</span>
+<span id="cb34-30"><a href="eda.html#cb34-30" tabindex="-1"></a>}</span>
+<span id="cb34-31"><a href="eda.html#cb34-31" tabindex="-1"></a>vars_poder <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">rank_main =</span> <span class="st">&quot;Ranking principal&quot;</span>, <span class="at">edad_media =</span> <span class="st">&quot;Edad media de la pareja&quot;</span>,</span>
+<span id="cb34-32"><a href="eda.html#cb34-32" tabindex="-1"></a>                <span class="at">estatura_media_cm =</span> <span class="st">&quot;Estatura media de la pareja&quot;</span>, <span class="at">dif_edad_pareja =</span> <span class="st">&quot;Dif. de edad entre compañeros&quot;</span>,</span>
+<span id="cb34-33"><a href="eda.html#cb34-33" tabindex="-1"></a>                <span class="at">dif_estatura_pareja_cm =</span> <span class="st">&quot;Dif. de estatura entre compañeros&quot;</span>, <span class="at">hitpct =</span> <span class="st">&quot;% de ataque (AVP)&quot;</span>,</span>
+<span id="cb34-34"><a href="eda.html#cb34-34" tabindex="-1"></a>                <span class="at">errors =</span> <span class="st">&quot;Errores de ataque (AVP)&quot;</span>, <span class="at">blocks =</span> <span class="st">&quot;Bloqueos (AVP)&quot;</span>, <span class="at">kills =</span> <span class="st">&quot;Kills (AVP)&quot;</span>,</span>
+<span id="cb34-35"><a href="eda.html#cb34-35" tabindex="-1"></a>                <span class="at">aces =</span> <span class="st">&quot;Aces (AVP)&quot;</span>, <span class="at">digs =</span> <span class="st">&quot;Defensas (AVP)&quot;</span>, <span class="at">attacks =</span> <span class="st">&quot;Ataques (AVP)&quot;</span>, <span class="at">serve_errors =</span> <span class="st">&quot;Errores de saque (AVP)&quot;</span>)</span>
+<span id="cb34-36"><a href="eda.html#cb34-36" tabindex="-1"></a>solo_avp_p <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;hitpct&quot;</span>, <span class="st">&quot;errors&quot;</span>, <span class="st">&quot;blocks&quot;</span>, <span class="st">&quot;kills&quot;</span>, <span class="st">&quot;aces&quot;</span>, <span class="st">&quot;digs&quot;</span>, <span class="st">&quot;attacks&quot;</span>, <span class="st">&quot;serve_errors&quot;</span>)</span>
+<span id="cb34-37"><a href="eda.html#cb34-37" tabindex="-1"></a>poder_tab <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">lapply</span>(<span class="fu">names</span>(vars_poder), <span class="cf">function</span>(v) {</span>
+<span id="cb34-38"><a href="eda.html#cb34-38" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="cf">if</span> (v <span class="sc">%in%</span> solo_avp_p) eq_ana[eq_ana<span class="sc">$</span>circuito <span class="sc">==</span> <span class="st">&quot;AVP&quot;</span> <span class="sc">&amp;</span> eq_ana<span class="sc">$</span>tiene, ] <span class="cf">else</span> eq_ana</span>
+<span id="cb34-39"><a href="eda.html#cb34-39" tabindex="-1"></a>  r <span class="ot">&lt;-</span> <span class="fu">mw_rbc</span>(d[[v]][d<span class="sc">$</span>resultado <span class="sc">==</span> <span class="st">&quot;Ganador&quot;</span>], d[[v]][d<span class="sc">$</span>resultado <span class="sc">==</span> <span class="st">&quot;Perdedor&quot;</span>])</span>
+<span id="cb34-40"><a href="eda.html#cb34-40" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(r)) <span class="cn">NULL</span> <span class="cf">else</span> <span class="fu">tibble</span>(<span class="at">variable =</span> vars_poder[[v]], <span class="at">rbc =</span> r<span class="sc">$</span>rbc, <span class="at">n =</span> r<span class="sc">$</span>n)</span>
+<span id="cb34-41"><a href="eda.html#cb34-41" tabindex="-1"></a>}))</span>
+<span id="cb34-42"><a href="eda.html#cb34-42" tabindex="-1"></a>poder_tab<span class="sc">$</span>abs <span class="ot">&lt;-</span> <span class="fu">abs</span>(poder_tab<span class="sc">$</span>rbc)</span>
+<span id="cb34-43"><a href="eda.html#cb34-43" tabindex="-1"></a>poder_tab<span class="sc">$</span>poder <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(poder_tab<span class="sc">$</span>abs <span class="sc">&gt;=</span> <span class="fl">0.5</span>, <span class="st">&quot;Alto&quot;</span>, <span class="fu">ifelse</span>(poder_tab<span class="sc">$</span>abs <span class="sc">&gt;=</span> <span class="fl">0.3</span>, <span class="st">&quot;Moderado&quot;</span>, <span class="st">&quot;Bajo&quot;</span>))</span>
+<span id="cb34-44"><a href="eda.html#cb34-44" tabindex="-1"></a>poder_tab <span class="ot">&lt;-</span> poder_tab[<span class="fu">order</span>(poder_tab<span class="sc">$</span>abs), ]</span>
+<span id="cb34-45"><a href="eda.html#cb34-45" tabindex="-1"></a>poder_tab<span class="sc">$</span>variable <span class="ot">&lt;-</span> <span class="fu">factor</span>(poder_tab<span class="sc">$</span>variable, <span class="at">levels =</span> poder_tab<span class="sc">$</span>variable)</span>
+<span id="cb34-46"><a href="eda.html#cb34-46" tabindex="-1"></a>n_alto <span class="ot">&lt;-</span> <span class="fu">sum</span>(poder_tab<span class="sc">$</span>poder <span class="sc">==</span> <span class="st">&quot;Alto&quot;</span>); n_mod <span class="ot">&lt;-</span> <span class="fu">sum</span>(poder_tab<span class="sc">$</span>poder <span class="sc">==</span> <span class="st">&quot;Moderado&quot;</span>); n_bajo <span class="ot">&lt;-</span> <span class="fu">sum</span>(poder_tab<span class="sc">$</span>poder <span class="sc">==</span> <span class="st">&quot;Bajo&quot;</span>)</span>
+<span id="cb34-47"><a href="eda.html#cb34-47" tabindex="-1"></a>nom_alto <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="fu">as.character</span>(poder_tab<span class="sc">$</span>variable[poder_tab<span class="sc">$</span>poder <span class="sc">==</span> <span class="st">&quot;Alto&quot;</span>]), <span class="at">collapse =</span> <span class="st">&quot; y &quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="eda.html#cb35-1" tabindex="-1"></a><span class="fu">ggplot</span>(poder_tab, <span class="fu">aes</span>(<span class="at">x =</span> abs, <span class="at">y =</span> variable, <span class="at">fill =</span> poder)) <span class="sc">+</span></span>
+<span id="cb35-2"><a href="eda.html#cb35-2" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb35-3"><a href="eda.html#cb35-3" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">format</span>(<span class="fu">round</span>(abs, <span class="dv">2</span>), <span class="at">decimal.mark =</span> <span class="st">&quot;,&quot;</span>)), <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.15</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb35-4"><a href="eda.html#cb35-4" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.5</span>), <span class="at">linetype =</span> <span class="st">&quot;dotted&quot;</span>, <span class="at">colour =</span> col_gris) <span class="sc">+</span></span>
+<span id="cb35-5"><a href="eda.html#cb35-5" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="at">Alto =</span> PIZARRA[<span class="dv">5</span>], <span class="at">Moderado =</span> PIZARRA[<span class="dv">3</span>], <span class="at">Bajo =</span> PIZARRA[<span class="dv">1</span>]), <span class="at">name =</span> <span class="st">&quot;Poder&quot;</span>) <span class="sc">+</span></span>
+<span id="cb35-6"><a href="eda.html#cb35-6" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.02</span>))) <span class="sc">+</span></span>
+<span id="cb35-7"><a href="eda.html#cb35-7" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;|Correlación rango-biserial| (0–1)&quot;</span>, <span class="at">y =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb35-8"><a href="eda.html#cb35-8" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;top&quot;</span>, <span class="at">panel.grid.major.y =</span> <span class="fu">element_blank</span>())</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:poder-fig"></span>
+<img src="voleibol_playa_files/figure-html/poder-fig-1.png" alt="Poder discriminante de las variables (|RBC|)." width="100%" />
+<p class="caption">
+Figura 6.7: Poder discriminante de las variables (|RBC|).
+</p>
+</div>
+<p>1 variable tiene poder alto, 4 tienen poder moderado y 8 poder bajo. La de poder alto es % de ataque (AVP), y las de poder moderado son también estadísticas de juego de la AVP. Las variables físicas y el ranking absoluto quedan en poder bajo: por sí solas no anticipan quién gana.
+### Cuándo el ranking anticipa el resultado</p>
+<p>Se llama <strong>sorpresa</strong> al partido que gana la pareja peor rankeada. Solo se consideran los partidos donde las dos parejas tienen ranking numérico y distinto.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="eda.html#cb36-1" tabindex="-1"></a>fav <span class="ot">&lt;-</span> partidos <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(rank_diff), rank_diff <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb36-2"><a href="eda.html#cb36-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sorpresa =</span> rank_diff <span class="sc">&lt;</span> <span class="dv">0</span>)</span>
+<span id="cb36-3"><a href="eda.html#cb36-3" tabindex="-1"></a>n_fav    <span class="ot">&lt;-</span> <span class="fu">nrow</span>(fav)</span>
+<span id="cb36-4"><a href="eda.html#cb36-4" tabindex="-1"></a>tasa_fav <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="sc">!</span>fav<span class="sc">$</span>sorpresa)</span></code></pre></div>
+<p>De <strong>53.375 partidos</strong> con ranking en ambas parejas, el favorito (la pareja mejor rankeada) ganó el <strong>70,1 %</strong> y hubo sorpresa en el <strong>29,9 %</strong>: casi uno de cada tres partidos no respeta el orden del ranking. Pero ese promedio esconde mucho, porque <strong>depende de la brecha entre las parejas</strong>:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="eda.html#cb37-1" tabindex="-1"></a>brecha <span class="ot">&lt;-</span> fav <span class="sc">%&gt;%</span></span>
+<span id="cb37-2"><a href="eda.html#cb37-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">Brecha de ranking</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">cut</span>(<span class="fu">abs</span>(rank_diff), <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">40</span>, <span class="dv">64</span>),</span>
+<span id="cb37-3"><a href="eda.html#cb37-3" tabindex="-1"></a>                                   <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;1–2&quot;</span>, <span class="st">&quot;3–5&quot;</span>, <span class="st">&quot;6–10&quot;</span>, <span class="st">&quot;11–20&quot;</span>, <span class="st">&quot;21–40&quot;</span>, <span class="st">&quot;41–64&quot;</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb37-4"><a href="eda.html#cb37-4" tabindex="-1"></a>  <span class="fu">group_by</span>(<span class="st">`</span><span class="at">Brecha de ranking</span><span class="st">`</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb37-5"><a href="eda.html#cb37-5" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Partidos =</span> <span class="fu">n</span>(), <span class="st">`</span><span class="at">Gana el favorito (%)</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean</span>(<span class="sc">!</span>sorpresa))</span>
+<span id="cb37-6"><a href="eda.html#cb37-6" tabindex="-1"></a></span>
+<span id="cb37-7"><a href="eda.html#cb37-7" tabindex="-1"></a><span class="fu">tabla</span>(brecha, <span class="at">caption =</span> <span class="st">&quot;Probabilidad de que gane el favorito según la brecha de ranking.&quot;</span>, <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div>
+<table>
+<caption><span id="tab:tab-brecha">Tabla 6.4: </span>Probabilidad de que gane el favorito según la brecha de ranking.</caption>
+<thead>
+<tr class="header">
+<th align="left">Brecha de ranking</th>
+<th align="right">Partidos</th>
+<th align="right">Gana el favorito (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1–2</td>
+<td align="right">7.880</td>
+<td align="right">55,9</td>
+</tr>
+<tr class="even">
+<td align="left">3–5</td>
+<td align="right">9.836</td>
+<td align="right">62,2</td>
+</tr>
+<tr class="odd">
+<td align="left">6–10</td>
+<td align="right">11.165</td>
+<td align="right">68,6</td>
+</tr>
+<tr class="even">
+<td align="left">11–20</td>
+<td align="right">18.456</td>
+<td align="right">75,4</td>
+</tr>
+<tr class="odd">
+<td align="left">21–40</td>
+<td align="right">5.918</td>
+<td align="right">87,6</td>
+</tr>
+<tr class="even">
+<td align="left">41–64</td>
+<td align="right">120</td>
+<td align="right">96,7</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="eda.html#cb38-1" tabindex="-1"></a><span class="fu">ggplot</span>(brecha, <span class="fu">aes</span>(<span class="st">`</span><span class="at">Brecha de ranking</span><span class="st">`</span>, <span class="st">`</span><span class="at">Gana el favorito (%)</span><span class="st">`</span>)) <span class="sc">+</span></span>
+<span id="cb38-2"><a href="eda.html#cb38-2" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> col_azul) <span class="sc">+</span></span>
+<span id="cb38-3"><a href="eda.html#cb38-3" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">50</span>, <span class="at">linetype =</span> <span class="st">&quot;dashed&quot;</span>) <span class="sc">+</span></span>
+<span id="cb38-4"><a href="eda.html#cb38-4" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="fu">fmt</span>(<span class="st">`</span><span class="at">Gana el favorito (%)</span><span class="st">`</span>, <span class="dv">0</span>), <span class="st">&quot; %&quot;</span>)), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb38-5"><a href="eda.html#cb38-5" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">105</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb38-6"><a href="eda.html#cb38-6" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Brecha de ranking entre las dos parejas (puestos)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Gana el favorito (%)&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-brecha"></span>
+<img src="voleibol_playa_files/figure-html/fig-brecha-1.png" alt="Probabilidad de victoria del favorito según la brecha de ranking. La línea punteada es el azar (50 %)." width="100%" />
+<p class="caption">
+Figura 6.8: Probabilidad de victoria del favorito según la brecha de ranking. La línea punteada es el azar (50 %).
+</p>
+</div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="eda.html#cb39-1" tabindex="-1"></a>p_b1 <span class="ot">&lt;-</span> brecha<span class="sc">$</span><span class="st">`</span><span class="at">Gana el favorito (%)</span><span class="st">`</span>[<span class="dv">1</span>]</span>
+<span id="cb39-2"><a href="eda.html#cb39-2" tabindex="-1"></a>p_b6 <span class="ot">&lt;-</span> brecha<span class="sc">$</span><span class="st">`</span><span class="at">Gana el favorito (%)</span><span class="st">`</span>[<span class="fu">nrow</span>(brecha)]</span></code></pre></div>
+<p>Cuando las parejas están a 1 o 2 puestos, el ranking casi no informa (el favorito gana el <strong>56 %</strong>, poco más que una moneda al aire). A medida que la brecha crece, la ventaja sube de forma sostenida hasta el <strong>97 %</strong> con brechas de 41 puestos o más.</p>
+<p>¿Cambia la tasa de sorpresas según el circuito, el género o la etapa?</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="eda.html#cb40-1" tabindex="-1"></a>tasas <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb40-2"><a href="eda.html#cb40-2" tabindex="-1"></a>  fav <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(<span class="at">Factor =</span> <span class="st">&quot;Circuito&quot;</span>, <span class="at">Grupo =</span> <span class="fu">as.character</span>(circuit)) <span class="sc">%&gt;%</span></span>
+<span id="cb40-3"><a href="eda.html#cb40-3" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">Partidos =</span> <span class="fu">n</span>(), <span class="st">`</span><span class="at">Sorpresas (%)</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean</span>(sorpresa)),</span>
+<span id="cb40-4"><a href="eda.html#cb40-4" tabindex="-1"></a>  fav <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(<span class="at">Factor =</span> <span class="st">&quot;Género&quot;</span>, <span class="at">Grupo =</span> <span class="fu">as.character</span>(gender)) <span class="sc">%&gt;%</span></span>
+<span id="cb40-5"><a href="eda.html#cb40-5" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">Partidos =</span> <span class="fu">n</span>(), <span class="st">`</span><span class="at">Sorpresas (%)</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean</span>(sorpresa)),</span>
+<span id="cb40-6"><a href="eda.html#cb40-6" tabindex="-1"></a>  fav <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(<span class="at">Factor =</span> <span class="st">&quot;Etapa&quot;</span>, <span class="at">Grupo =</span> <span class="fu">as.character</span>(etapa)) <span class="sc">%&gt;%</span></span>
+<span id="cb40-7"><a href="eda.html#cb40-7" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">Partidos =</span> <span class="fu">n</span>(), <span class="st">`</span><span class="at">Sorpresas (%)</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean</span>(sorpresa))</span>
+<span id="cb40-8"><a href="eda.html#cb40-8" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
+<span id="cb40-9"><a href="eda.html#cb40-9" tabindex="-1"></a></span>
+<span id="cb40-10"><a href="eda.html#cb40-10" tabindex="-1"></a>chi_v <span class="ot">&lt;-</span> <span class="cf">function</span>(f, nombre) {</span>
+<span id="cb40-11"><a href="eda.html#cb40-11" tabindex="-1"></a>  tb <span class="ot">&lt;-</span> <span class="fu">table</span>(fav[[f]], fav<span class="sc">$</span>sorpresa)</span>
+<span id="cb40-12"><a href="eda.html#cb40-12" tabindex="-1"></a>  tb <span class="ot">&lt;-</span> tb[<span class="fu">rowSums</span>(tb) <span class="sc">&gt;</span> <span class="dv">0</span>, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb40-13"><a href="eda.html#cb40-13" tabindex="-1"></a>  ct <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(<span class="fu">chisq.test</span>(tb))</span>
+<span id="cb40-14"><a href="eda.html#cb40-14" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">Factor =</span> nombre, <span class="st">`</span><span class="at">χ²</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">unname</span>(ct<span class="sc">$</span>statistic), <span class="at">gl =</span> <span class="fu">unname</span>(ct<span class="sc">$</span>parameter),</span>
+<span id="cb40-15"><a href="eda.html#cb40-15" tabindex="-1"></a>         <span class="at">p =</span> <span class="fu">fp</span>(ct<span class="sc">$</span>p.value),</span>
+<span id="cb40-16"><a href="eda.html#cb40-16" tabindex="-1"></a>         <span class="st">`</span><span class="at">V de Cramér</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sqrt</span>(<span class="fu">unname</span>(ct<span class="sc">$</span>statistic) <span class="sc">/</span> (<span class="fu">sum</span>(tb) <span class="sc">*</span> (<span class="fu">min</span>(<span class="fu">dim</span>(tb)) <span class="sc">-</span> <span class="dv">1</span>))))</span>
+<span id="cb40-17"><a href="eda.html#cb40-17" tabindex="-1"></a>}</span>
+<span id="cb40-18"><a href="eda.html#cb40-18" tabindex="-1"></a>asoc <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">chi_v</span>(<span class="st">&quot;circuit&quot;</span>, <span class="st">&quot;Circuito&quot;</span>), <span class="fu">chi_v</span>(<span class="st">&quot;gender&quot;</span>, <span class="st">&quot;Género&quot;</span>), <span class="fu">chi_v</span>(<span class="st">&quot;etapa&quot;</span>, <span class="st">&quot;Etapa&quot;</span>))</span>
+<span id="cb40-19"><a href="eda.html#cb40-19" tabindex="-1"></a>asoc<span class="sc">$</span>Magnitud <span class="ot">&lt;-</span> <span class="fu">magnitud</span>(asoc<span class="sc">$</span><span class="st">`</span><span class="at">V de Cramér</span><span class="st">`</span>)</span>
+<span id="cb40-20"><a href="eda.html#cb40-20" tabindex="-1"></a></span>
+<span id="cb40-21"><a href="eda.html#cb40-21" tabindex="-1"></a><span class="fu">tabla</span>(tasas, <span class="at">caption =</span> <span class="st">&quot;Tasa de sorpresas por circuito, género y etapa del torneo.&quot;</span>, <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div>
+<table>
+<caption><span id="tab:tab-sorpresas">Tabla 6.5: </span>Tasa de sorpresas por circuito, género y etapa del torneo.</caption>
+<thead>
+<tr class="header">
+<th align="left">Factor</th>
+<th align="left">Grupo</th>
+<th align="right">Partidos</th>
+<th align="right">Sorpresas (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Circuito</td>
+<td align="left">AVP</td>
+<td align="right">14.969</td>
+<td align="right">25,4</td>
+</tr>
+<tr class="even">
+<td align="left">Circuito</td>
+<td align="left">FIVB</td>
+<td align="right">38.406</td>
+<td align="right">31,7</td>
+</tr>
+<tr class="odd">
+<td align="left">Género</td>
+<td align="left">Hombres</td>
+<td align="right">26.726</td>
+<td align="right">31,1</td>
+</tr>
+<tr class="even">
+<td align="left">Género</td>
+<td align="left">Mujeres</td>
+<td align="right">26.649</td>
+<td align="right">28,7</td>
+</tr>
+<tr class="odd">
+<td align="left">Etapa</td>
+<td align="left">Clasificatoria</td>
+<td align="right">337</td>
+<td align="right">54,9</td>
+</tr>
+<tr class="even">
+<td align="left">Etapa</td>
+<td align="left">Cuadro eliminatorio</td>
+<td align="right">35.982</td>
+<td align="right">29,9</td>
+</tr>
+<tr class="odd">
+<td align="left">Etapa</td>
+<td align="left">Fase de grupos</td>
+<td align="right">17.056</td>
+<td align="right">29,5</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="eda.html#cb41-1" tabindex="-1"></a><span class="fu">tabla</span>(asoc, <span class="at">caption =</span> <span class="st">&quot;Chi-cuadrado y V de Cramér entre la sorpresa y cada factor.&quot;</span>, <span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div>
+<table>
+<caption><span id="tab:tab-asociacion">Tabla 6.6: </span>Chi-cuadrado y V de Cramér entre la sorpresa y cada factor.</caption>
+<thead>
+<tr class="header">
+<th align="left">Factor</th>
+<th align="right">χ²</th>
+<th align="right">gl</th>
+<th align="left">p</th>
+<th align="right">V de Cramér</th>
+<th align="left">Magnitud</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Circuito</td>
+<td align="right">203,224</td>
+<td align="right">1</td>
+<td align="left">&lt; 0,001</td>
+<td align="right">0,062</td>
+<td align="left">trivial</td>
+</tr>
+<tr class="even">
+<td align="left">Género</td>
+<td align="right">34,458</td>
+<td align="right">1</td>
+<td align="left">&lt; 0,001</td>
+<td align="right">0,025</td>
+<td align="left">trivial</td>
+</tr>
+<tr class="odd">
+<td align="left">Etapa</td>
+<td align="right">101,987</td>
+<td align="right">2</td>
+<td align="left">&lt; 0,001</td>
+<td align="right">0,044</td>
+<td align="left">trivial</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="eda.html#cb42-1" tabindex="-1"></a>s_fivb <span class="ot">&lt;-</span> tasas<span class="sc">$</span><span class="st">`</span><span class="at">Sorpresas (%)</span><span class="st">`</span>[tasas<span class="sc">$</span>Grupo <span class="sc">==</span> <span class="st">&quot;FIVB&quot;</span>]</span>
+<span id="cb42-2"><a href="eda.html#cb42-2" tabindex="-1"></a>s_avp  <span class="ot">&lt;-</span> tasas<span class="sc">$</span><span class="st">`</span><span class="at">Sorpresas (%)</span><span class="st">`</span>[tasas<span class="sc">$</span>Grupo <span class="sc">==</span> <span class="st">&quot;AVP&quot;</span>]</span>
+<span id="cb42-3"><a href="eda.html#cb42-3" tabindex="-1"></a>n_clas <span class="ot">&lt;-</span> tasas<span class="sc">$</span>Partidos[tasas<span class="sc">$</span>Grupo <span class="sc">==</span> <span class="st">&quot;Clasificatoria&quot;</span>]</span>
+<span id="cb42-4"><a href="eda.html#cb42-4" tabindex="-1"></a>v_circ <span class="ot">&lt;-</span> asoc[[<span class="st">&quot;V de Cramér&quot;</span>]][<span class="dv">1</span>]</span></code></pre></div>
+<p>La tasa de sorpresas es <strong>mayor en la FIVB (31,7 %) que en la AVP (25,4 %)</strong>, pero el efecto es <strong>trivial</strong> (V = 0,06); entre géneros la diferencia es todavía menor. En la fase clasificatoria el porcentaje parece muy alto, pero hay solo 337 partidos con ranking en ambas parejas (las clasificatorias casi no tienen ranking numérico), así que <strong>esa cifra no es confiable</strong>.</p>
+<p>Lo que sí cambia es el <strong>tiempo</strong>:</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="eda.html#cb43-1" tabindex="-1"></a>tasa_anio <span class="ot">&lt;-</span> fav <span class="sc">%&gt;%</span></span>
+<span id="cb43-2"><a href="eda.html#cb43-2" tabindex="-1"></a>  <span class="fu">group_by</span>(year) <span class="sc">%&gt;%</span></span>
+<span id="cb43-3"><a href="eda.html#cb43-3" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">partidos =</span> <span class="fu">n</span>(), <span class="at">tasa =</span> <span class="fu">mean</span>(sorpresa)) <span class="sc">%&gt;%</span></span>
+<span id="cb43-4"><a href="eda.html#cb43-4" tabindex="-1"></a>  <span class="fu">filter</span>(partidos <span class="sc">&gt;=</span> <span class="dv">200</span>)</span>
+<span id="cb43-5"><a href="eda.html#cb43-5" tabindex="-1"></a></span>
+<span id="cb43-6"><a href="eda.html#cb43-6" tabindex="-1"></a><span class="fu">ggplot</span>(tasa_anio, <span class="fu">aes</span>(year, <span class="dv">100</span> <span class="sc">*</span> tasa)) <span class="sc">+</span></span>
+<span id="cb43-7"><a href="eda.html#cb43-7" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> col_azul, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb43-8"><a href="eda.html#cb43-8" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> col_azul, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb43-9"><a href="eda.html#cb43-9" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">2000</span>, <span class="dv">2019</span>, <span class="dv">2</span>)) <span class="sc">+</span></span>
+<span id="cb43-10"><a href="eda.html#cb43-10" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Año&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Sorpresas (%)&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-sorpresas-anio"></span>
+<img src="voleibol_playa_files/figure-html/fig-sorpresas-anio-1.png" alt="Tasa de sorpresas por año (años con al menos 200 partidos con ranking en ambas parejas)." width="100%" />
+<p class="caption">
+Figura 6.9: Tasa de sorpresas por año (años con al menos 200 partidos con ranking en ambas parejas).
+</p>
+</div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="eda.html#cb44-1" tabindex="-1"></a>t03 <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">*</span> tasa_anio<span class="sc">$</span>tasa[tasa_anio<span class="sc">$</span>year <span class="sc">==</span> <span class="dv">2003</span>]</span>
+<span id="cb44-2"><a href="eda.html#cb44-2" tabindex="-1"></a>t19 <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">*</span> tasa_anio<span class="sc">$</span>tasa[tasa_anio<span class="sc">$</span>year <span class="sc">==</span> <span class="dv">2019</span>]</span></code></pre></div>
+<p>La tasa de sorpresas pasó de <strong>27,6 % en 2003 a 35,4 % en 2019</strong>: en los años recientes el ranking anticipa <strong>menos</strong> el resultado que a comienzos de los 2000. Es un patrón descriptivo; los datos no permiten explicar por qué.</p>
+<div class="entrenador">
+<p><strong>Para el entrenador</strong></p>
+<ul>
+<li><strong>Con brecha pequeña (menos de 6 puestos), no confíe en el ranking:</strong> el favorito gana apenas entre 5 y 6 de cada 10 veces. Ahí pesan otros factores (estilo de juego, rival, estado de forma).</li>
+<li><strong>Con brecha grande (más de 20 puestos), el ranking sí manda:</strong> el favorito gana cerca de 9 de cada 10 partidos con brechas de 21 a 40 puestos.</li>
+<li>Prepare más a fondo el partido contra una pareja ligeramente mejor: una sorpresa en ese caso es normal, no una rareza.</li>
+<li>El ranking de hoy anticipa <strong>menos</strong> que el de hace quince años: no dé por hecho que el favorito ganará.</li>
+</ul>
+</div>
+</div>
+<div id="estadísticas-de-juego-solo-para-una-parte-de-los-partidos" class="section level3 hasAnchor" number="6.2.3">
+<h3><span class="header-section-number">6.2.3</span> Estadísticas de juego (solo para una parte de los partidos)<a href="eda.html#estad%C3%ADsticas-de-juego-solo-para-una-parte-de-los-partidos" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Las estadísticas de juego solo existen para una minoría de partidos y casi todas son de la AVP (capítulo 5). Se comparan las parejas ganadoras y perdedoras <strong>en el mismo partido</strong> con los totales de la pareja (suma de los dos jugadores), en los partidos que tienen todas las estadísticas completas.</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="eda.html#cb45-1" tabindex="-1"></a>vars_stat <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">attacks =</span> <span class="st">&quot;Ataques&quot;</span>, <span class="at">kills =</span> <span class="st">&quot;Kills (ataques ganadores)&quot;</span>,</span>
+<span id="cb45-2"><a href="eda.html#cb45-2" tabindex="-1"></a>               <span class="at">errors =</span> <span class="st">&quot;Errores de ataque&quot;</span>, <span class="at">aces =</span> <span class="st">&quot;Aces&quot;</span>,</span>
+<span id="cb45-3"><a href="eda.html#cb45-3" tabindex="-1"></a>               <span class="at">serve_errors =</span> <span class="st">&quot;Errores de saque&quot;</span>, <span class="at">blocks =</span> <span class="st">&quot;Bloqueos&quot;</span>, <span class="at">digs =</span> <span class="st">&quot;Defensas (digs)&quot;</span>)</span>
+<span id="cb45-4"><a href="eda.html#cb45-4" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="eda.html#cb45-5" tabindex="-1"></a>cols_necesarias <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">lapply</span>(<span class="fu">names</span>(vars_stat), <span class="cf">function</span>(k) {</span>
+<span id="cb45-6"><a href="eda.html#cb45-6" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;w&quot;</span>, <span class="st">&quot;l&quot;</span>), <span class="at">each =</span> <span class="dv">2</span>), <span class="st">&quot;_p&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="st">&quot;_tot_&quot;</span>, k)</span>
+<span id="cb45-7"><a href="eda.html#cb45-7" tabindex="-1"></a>}))</span>
+<span id="cb45-8"><a href="eda.html#cb45-8" tabindex="-1"></a>gs <span class="ot">&lt;-</span> partidos <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">if_all</span>(<span class="fu">all_of</span>(cols_necesarias), <span class="sc">~</span> <span class="sc">!</span><span class="fu">is.na</span>(.)))</span>
+<span id="cb45-9"><a href="eda.html#cb45-9" tabindex="-1"></a></span>
+<span id="cb45-10"><a href="eda.html#cb45-10" tabindex="-1"></a>fila_stat <span class="ot">&lt;-</span> <span class="cf">function</span>(w, l, nombre) {</span>
+<span id="cb45-11"><a href="eda.html#cb45-11" tabindex="-1"></a>  U <span class="ot">&lt;-</span> <span class="fu">unname</span>(<span class="fu">wilcox.test</span>(w, l, <span class="at">exact =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>statistic)</span>
+<span id="cb45-12"><a href="eda.html#cb45-12" tabindex="-1"></a>  <span class="fu">tibble</span>(Estadística <span class="ot">=</span> nombre, <span class="st">`</span><span class="at">Media ganadora</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(w), <span class="st">`</span><span class="at">Media perdedora</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(l),</span>
+<span id="cb45-13"><a href="eda.html#cb45-13" tabindex="-1"></a>         <span class="st">`</span><span class="at">r rango-biserial</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">2</span> <span class="sc">*</span> U <span class="sc">/</span> (<span class="fu">as.numeric</span>(<span class="fu">length</span>(w)) <span class="sc">*</span> <span class="fu">length</span>(l)) <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb45-14"><a href="eda.html#cb45-14" tabindex="-1"></a>         <span class="st">`</span><span class="at">Gana más la ganadora (%)</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean</span>(w <span class="sc">&gt;</span> l),</span>
+<span id="cb45-15"><a href="eda.html#cb45-15" tabindex="-1"></a>         <span class="st">`</span><span class="at">Gana más la perdedora (%)</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">mean</span>(l <span class="sc">&gt;</span> w))</span>
+<span id="cb45-16"><a href="eda.html#cb45-16" tabindex="-1"></a>}</span>
+<span id="cb45-17"><a href="eda.html#cb45-17" tabindex="-1"></a></span>
+<span id="cb45-18"><a href="eda.html#cb45-18" tabindex="-1"></a>tab_stats <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">lapply</span>(<span class="fu">names</span>(vars_stat), <span class="cf">function</span>(k) {</span>
+<span id="cb45-19"><a href="eda.html#cb45-19" tabindex="-1"></a>  w <span class="ot">&lt;-</span> gs[[<span class="fu">paste0</span>(<span class="st">&quot;w_p1_tot_&quot;</span>, k)]] <span class="sc">+</span> gs[[<span class="fu">paste0</span>(<span class="st">&quot;w_p2_tot_&quot;</span>, k)]]</span>
+<span id="cb45-20"><a href="eda.html#cb45-20" tabindex="-1"></a>  l <span class="ot">&lt;-</span> gs[[<span class="fu">paste0</span>(<span class="st">&quot;l_p1_tot_&quot;</span>, k)]] <span class="sc">+</span> gs[[<span class="fu">paste0</span>(<span class="st">&quot;l_p2_tot_&quot;</span>, k)]]</span>
+<span id="cb45-21"><a href="eda.html#cb45-21" tabindex="-1"></a>  <span class="fu">fila_stat</span>(w, l, vars_stat[[k]])</span>
+<span id="cb45-22"><a href="eda.html#cb45-22" tabindex="-1"></a>}))</span>
+<span id="cb45-23"><a href="eda.html#cb45-23" tabindex="-1"></a></span>
+<span id="cb45-24"><a href="eda.html#cb45-24" tabindex="-1"></a><span class="co"># Efectividad de ataque de la pareja: (kills - errores) / ataques</span></span>
+<span id="cb45-25"><a href="eda.html#cb45-25" tabindex="-1"></a>hit <span class="ot">&lt;-</span> <span class="cf">function</span>(p) {</span>
+<span id="cb45-26"><a href="eda.html#cb45-26" tabindex="-1"></a>  (gs[[<span class="fu">paste0</span>(p, <span class="st">&quot;_p1_tot_kills&quot;</span>)]] <span class="sc">+</span> gs[[<span class="fu">paste0</span>(p, <span class="st">&quot;_p2_tot_kills&quot;</span>)]] <span class="sc">-</span></span>
+<span id="cb45-27"><a href="eda.html#cb45-27" tabindex="-1"></a>     gs[[<span class="fu">paste0</span>(p, <span class="st">&quot;_p1_tot_errors&quot;</span>)]] <span class="sc">-</span> gs[[<span class="fu">paste0</span>(p, <span class="st">&quot;_p2_tot_errors&quot;</span>)]]) <span class="sc">/</span></span>
+<span id="cb45-28"><a href="eda.html#cb45-28" tabindex="-1"></a>    (gs[[<span class="fu">paste0</span>(p, <span class="st">&quot;_p1_tot_attacks&quot;</span>)]] <span class="sc">+</span> gs[[<span class="fu">paste0</span>(p, <span class="st">&quot;_p2_tot_attacks&quot;</span>)]])</span>
+<span id="cb45-29"><a href="eda.html#cb45-29" tabindex="-1"></a>}</span>
+<span id="cb45-30"><a href="eda.html#cb45-30" tabindex="-1"></a>hit_w <span class="ot">&lt;-</span> <span class="fu">hit</span>(<span class="st">&quot;w&quot;</span>); hit_l <span class="ot">&lt;-</span> <span class="fu">hit</span>(<span class="st">&quot;l&quot;</span>)</span>
+<span id="cb45-31"><a href="eda.html#cb45-31" tabindex="-1"></a>tab_stats <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(tab_stats,</span>
+<span id="cb45-32"><a href="eda.html#cb45-32" tabindex="-1"></a>                       <span class="fu">fila_stat</span>(hit_w[<span class="fu">is.finite</span>(hit_w) <span class="sc">&amp;</span> <span class="fu">is.finite</span>(hit_l)],</span>
+<span id="cb45-33"><a href="eda.html#cb45-33" tabindex="-1"></a>                                 hit_l[<span class="fu">is.finite</span>(hit_w) <span class="sc">&amp;</span> <span class="fu">is.finite</span>(hit_l)],</span>
+<span id="cb45-34"><a href="eda.html#cb45-34" tabindex="-1"></a>                                 <span class="st">&quot;Efectividad de ataque ((kills − errores) / ataques)&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="eda.html#cb46-1" tabindex="-1"></a><span class="fu">tabla</span>(tab_stats, <span class="at">caption =</span> <span class="st">&quot;Estadísticas de juego por pareja: ganadoras frente a perdedoras (partidos con estadísticas completas).&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>)</span></code></pre></div>
+<table>
+<caption><span id="tab:tab-stats">Tabla 6.7: </span>Estadísticas de juego por pareja: ganadoras frente a perdedoras (partidos con estadísticas completas).</caption>
+<colgroup>
+<col width="34%" />
+<col width="9%" />
+<col width="10%" />
+<col width="11%" />
+<col width="16%" />
+<col width="17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Estadística</th>
+<th align="right">Media ganadora</th>
+<th align="right">Media perdedora</th>
+<th align="right">r rango-biserial</th>
+<th align="right">Gana más la ganadora (%)</th>
+<th align="right">Gana más la perdedora (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Ataques</td>
+<td align="right">52,05</td>
+<td align="right">53,86</td>
+<td align="right">-0,09</td>
+<td align="right">36,17</td>
+<td align="right">58,67</td>
+</tr>
+<tr class="even">
+<td align="left">Kills (ataques ganadores)</td>
+<td align="right">29,54</td>
+<td align="right">25,34</td>
+<td align="right">0,35</td>
+<td align="right">75,50</td>
+<td align="right">18,99</td>
+</tr>
+<tr class="odd">
+<td align="left">Errores de ataque</td>
+<td align="right">5,82</td>
+<td align="right">8,71</td>
+<td align="right">-0,48</td>
+<td align="right">17,58</td>
+<td align="right">72,27</td>
+</tr>
+<tr class="even">
+<td align="left">Aces</td>
+<td align="right">2,66</td>
+<td align="right">1,63</td>
+<td align="right">0,30</td>
+<td align="right">57,10</td>
+<td align="right">24,68</td>
+</tr>
+<tr class="odd">
+<td align="left">Errores de saque</td>
+<td align="right">3,96</td>
+<td align="right">4,14</td>
+<td align="right">-0,04</td>
+<td align="right">40,84</td>
+<td align="right">45,53</td>
+</tr>
+<tr class="even">
+<td align="left">Bloqueos</td>
+<td align="right">3,47</td>
+<td align="right">2,12</td>
+<td align="right">0,36</td>
+<td align="right">62,89</td>
+<td align="right">21,87</td>
+</tr>
+<tr class="odd">
+<td align="left">Defensas (digs)</td>
+<td align="right">16,92</td>
+<td align="right">14,34</td>
+<td align="right">0,23</td>
+<td align="right">67,83</td>
+<td align="right">24,30</td>
+</tr>
+<tr class="even">
+<td align="left">Efectividad de ataque ((kills − errores) / ataques)</td>
+<td align="right">0,47</td>
+<td align="right">0,30</td>
+<td align="right">0,69</td>
+<td align="right">89,89</td>
+<td align="right">9,91</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="eda.html#cb47-1" tabindex="-1"></a>n_gs <span class="ot">&lt;-</span> <span class="fu">nrow</span>(gs)</span>
+<span id="cb47-2"><a href="eda.html#cb47-2" tabindex="-1"></a>pct_avp_gs <span class="ot">&lt;-</span> <span class="fu">mean</span>(gs<span class="sc">$</span>circuit <span class="sc">==</span> <span class="st">&quot;AVP&quot;</span>)</span>
+<span id="cb47-3"><a href="eda.html#cb47-3" tabindex="-1"></a>fila <span class="ot">&lt;-</span> <span class="cf">function</span>(nombre) tab_stats[tab_stats<span class="sc">$</span>Estadística <span class="sc">==</span> nombre, ]</span>
+<span id="cb47-4"><a href="eda.html#cb47-4" tabindex="-1"></a>r_err  <span class="ot">&lt;-</span> <span class="fu">fila</span>(<span class="st">&quot;Errores de ataque&quot;</span>)<span class="sc">$</span><span class="st">`</span><span class="at">r rango-biserial</span><span class="st">`</span></span>
+<span id="cb47-5"><a href="eda.html#cb47-5" tabindex="-1"></a>r_hit  <span class="ot">&lt;-</span> <span class="fu">fila</span>(<span class="st">&quot;Efectividad de ataque ((kills − errores) / ataques)&quot;</span>)<span class="sc">$</span><span class="st">`</span><span class="at">r rango-biserial</span><span class="st">`</span></span>
+<span id="cb47-6"><a href="eda.html#cb47-6" tabindex="-1"></a>r_blq  <span class="ot">&lt;-</span> <span class="fu">fila</span>(<span class="st">&quot;Bloqueos&quot;</span>)<span class="sc">$</span><span class="st">`</span><span class="at">r rango-biserial</span><span class="st">`</span></span>
+<span id="cb47-7"><a href="eda.html#cb47-7" tabindex="-1"></a>r_sq   <span class="ot">&lt;-</span> <span class="fu">fila</span>(<span class="st">&quot;Errores de saque&quot;</span>)<span class="sc">$</span><span class="st">`</span><span class="at">r rango-biserial</span><span class="st">`</span></span>
+<span id="cb47-8"><a href="eda.html#cb47-8" tabindex="-1"></a>r_aces <span class="ot">&lt;-</span> <span class="fu">fila</span>(<span class="st">&quot;Aces&quot;</span>)<span class="sc">$</span><span class="st">`</span><span class="at">r rango-biserial</span><span class="st">`</span></span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="eda.html#cb48-1" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">resultado =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;ganadora&quot;</span>, <span class="st">&quot;perdedora&quot;</span>), <span class="at">each =</span> <span class="fu">length</span>(hit_w)),</span>
+<span id="cb48-2"><a href="eda.html#cb48-2" tabindex="-1"></a>       <span class="at">hit =</span> <span class="fu">c</span>(hit_w, hit_l)) <span class="sc">%&gt;%</span></span>
+<span id="cb48-3"><a href="eda.html#cb48-3" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.finite</span>(hit)) <span class="sc">%&gt;%</span></span>
+<span id="cb48-4"><a href="eda.html#cb48-4" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(resultado, hit, <span class="at">fill =</span> resultado)) <span class="sc">+</span></span>
+<span id="cb48-5"><a href="eda.html#cb48-5" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">outlier.alpha =</span> .<span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb48-6"><a href="eda.html#cb48-6" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> col_res, <span class="at">guide =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb48-7"><a href="eda.html#cb48-7" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">&quot;Efectividad de ataque&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-stats"></span>
+<img src="voleibol_playa_files/figure-html/fig-stats-1.png" alt="Efectividad de ataque de la pareja, ganadoras frente a perdedoras (partidos con estadísticas completas)." width="100%" />
+<p class="caption">
+Figura 6.10: Efectividad de ataque de la pareja, ganadoras frente a perdedoras (partidos con estadísticas completas).
+</p>
+</div>
+<p>Hay <strong>14.332 partidos</strong> con estadísticas completas, y el <strong>91 %</strong> son de la AVP, así que esta sección describe sobre todo a ese circuito. Lo que más separa a ganadoras de perdedoras no es cuánto ataca la pareja, sino <strong>cuánto falla</strong>: los <strong>errores de ataque</strong> (r = -0,48) y la <strong>efectividad de ataque</strong> (r = 0,69) tienen los efectos más grandes, seguidos por los bloqueos (r = 0,36). Los errores de saque casi no distinguen (r = -0,04).</p>
+<div class="entrenador">
+<p><strong>Para el entrenador</strong> (válido sobre todo para el circuito AVP)</p>
+<ul>
+<li><strong>Ganar se parece más a cometer pocos errores que a atacar mucho.</strong> Las parejas ganadoras atacan casi lo mismo que las perdedoras, pero cometen bastantes menos errores de ataque.</li>
+<li><strong>Entrene la selección de tiros y la efectividad</strong> (kills menos errores sobre ataques) antes que el volumen de ataques.</li>
+<li><strong>El bloqueo y los aces</strong> también acompañan a la victoria de forma consistente (r = 0,36 y 0,30); en cambio, <strong>los errores de saque</strong> casi no distinguen a ganadoras de perdedoras.</li>
+<li>Son asociaciones: una pareja que va ganando también falla menos.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="análisis-multivariado" class="section level2 hasAnchor" number="6.3">
+<h2><span class="header-section-number">6.3</span> Análisis multivariado<a href="eda.html#an%C3%A1lisis-multivariado" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Hasta aquí cada factor se miró por separado. Pero el ranking, la edad y la estatura pueden solaparse entre sí. Para estudiarlo se arma, para cada partido, una pareja A frente a una pareja B (A es la ganadora si el <code>match_id</code> es par, y la perdedora si es impar; ver el capítulo 3), y se usan las <strong>diferencias A − B</strong> de cada factor.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="eda.html#cb49-1" tabindex="-1"></a>dif <span class="ot">&lt;-</span> partidos <span class="sc">%&gt;%</span></span>
+<span id="cb49-2"><a href="eda.html#cb49-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">A_gana =</span> <span class="fu">as.integer</span>(match_id <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>),</span>
+<span id="cb49-3"><a href="eda.html#cb49-3" tabindex="-1"></a>         <span class="at">s =</span> <span class="fu">ifelse</span>(A_gana <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>),</span>
+<span id="cb49-4"><a href="eda.html#cb49-4" tabindex="-1"></a>         <span class="at">dif_ranking  =</span> s <span class="sc">*</span> (l_rank_num <span class="sc">-</span> w_rank_num),  <span class="co"># &gt; 0: A mejor rankeada</span></span>
+<span id="cb49-5"><a href="eda.html#cb49-5" tabindex="-1"></a>         <span class="at">dif_edad     =</span> s <span class="sc">*</span> (w_age <span class="sc">-</span> l_age),</span>
+<span id="cb49-6"><a href="eda.html#cb49-6" tabindex="-1"></a>         <span class="at">dif_estatura =</span> s <span class="sc">*</span> (w_hgt <span class="sc">-</span> l_hgt)) <span class="sc">%&gt;%</span></span>
+<span id="cb49-7"><a href="eda.html#cb49-7" tabindex="-1"></a>  <span class="fu">select</span>(match_id, A_gana, dif_ranking, dif_edad, dif_estatura)</span>
+<span id="cb49-8"><a href="eda.html#cb49-8" tabindex="-1"></a></span>
+<span id="cb49-9"><a href="eda.html#cb49-9" tabindex="-1"></a>dc <span class="ot">&lt;-</span> dif <span class="sc">%&gt;%</span> <span class="fu">drop_na</span>(dif_ranking, dif_edad, dif_estatura)</span>
+<span id="cb49-10"><a href="eda.html#cb49-10" tabindex="-1"></a>n_dc <span class="ot">&lt;-</span> <span class="fu">nrow</span>(dc)</span></code></pre></div>
+<p>El análisis conjunto usa los <strong>48.371 partidos</strong> que tienen ranking, edad y estatura de las dos parejas (63 % del total).</p>
+<div id="correlación-de-spearman" class="section level3 hasAnchor" number="6.3.1">
+<h3><span class="header-section-number">6.3.1</span> Correlación de Spearman<a href="eda.html#correlaci%C3%B3n-de-spearman" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>La correlación de Spearman (<span class="math inline">\(\rho\)</span>) mide si dos variables se mueven juntas usando rangos, sin suponer que la relación sea una recta. Se calcula entre las variables de cada pareja que se conocen antes del partido y la duración.</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="eda.html#cb50-1" tabindex="-1"></a>vars_sp <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;rank_main&quot;</span>, <span class="st">&quot;rank_rival&quot;</span>, <span class="st">&quot;edad_media&quot;</span>, <span class="st">&quot;estatura_media_cm&quot;</span>, <span class="st">&quot;dif_edad_pareja&quot;</span>, <span class="st">&quot;dif_estatura_pareja_cm&quot;</span>, <span class="st">&quot;duracion_min&quot;</span>)</span>
+<span id="cb50-2"><a href="eda.html#cb50-2" tabindex="-1"></a>etq_sp <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Ranking propio&quot;</span>, <span class="st">&quot;Ranking rival&quot;</span>, <span class="st">&quot;Edad media&quot;</span>, <span class="st">&quot;Estatura media&quot;</span>, <span class="st">&quot;Dif. edad pareja&quot;</span>, <span class="st">&quot;Dif. estatura pareja&quot;</span>, <span class="st">&quot;Duración&quot;</span>)</span>
+<span id="cb50-3"><a href="eda.html#cb50-3" tabindex="-1"></a>rho_sp <span class="ot">&lt;-</span> <span class="fu">suppressWarnings</span>(<span class="fu">cor</span>(<span class="fu">as.data.frame</span>(eq_ana[vars_sp]), <span class="at">method =</span> <span class="st">&quot;spearman&quot;</span>, <span class="at">use =</span> <span class="st">&quot;pairwise.complete.obs&quot;</span>))</span>
+<span id="cb50-4"><a href="eda.html#cb50-4" tabindex="-1"></a><span class="fu">dimnames</span>(rho_sp) <span class="ot">&lt;-</span> <span class="fu">list</span>(etq_sp, etq_sp)</span>
+<span id="cb50-5"><a href="eda.html#cb50-5" tabindex="-1"></a>tri <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">as.table</span>(rho_sp)); <span class="fu">names</span>(tri) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;fila&quot;</span>, <span class="st">&quot;col&quot;</span>, <span class="st">&quot;rho&quot;</span>)</span>
+<span id="cb50-6"><a href="eda.html#cb50-6" tabindex="-1"></a>tri<span class="sc">$</span>fi <span class="ot">&lt;-</span> <span class="fu">match</span>(tri<span class="sc">$</span>fila, etq_sp); tri<span class="sc">$</span>ci <span class="ot">&lt;-</span> <span class="fu">match</span>(tri<span class="sc">$</span>col, etq_sp)</span>
+<span id="cb50-7"><a href="eda.html#cb50-7" tabindex="-1"></a>tri <span class="ot">&lt;-</span> tri[tri<span class="sc">$</span>fi <span class="sc">&gt;=</span> tri<span class="sc">$</span>ci, ]</span>
+<span id="cb50-8"><a href="eda.html#cb50-8" tabindex="-1"></a>tri<span class="sc">$</span>fila <span class="ot">&lt;-</span> <span class="fu">factor</span>(tri<span class="sc">$</span>fila, <span class="at">levels =</span> <span class="fu">rev</span>(etq_sp)); tri<span class="sc">$</span>col <span class="ot">&lt;-</span> <span class="fu">factor</span>(tri<span class="sc">$</span>col, <span class="at">levels =</span> etq_sp)</span>
+<span id="cb50-9"><a href="eda.html#cb50-9" tabindex="-1"></a><span class="fu">ggplot</span>(tri, <span class="fu">aes</span>(col, fila, <span class="at">fill =</span> rho)) <span class="sc">+</span></span>
+<span id="cb50-10"><a href="eda.html#cb50-10" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="at">colour =</span> <span class="st">&quot;white&quot;</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb50-11"><a href="eda.html#cb50-11" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">format</span>(<span class="fu">round</span>(rho, <span class="dv">2</span>), <span class="at">decimal.mark =</span> <span class="st">&quot;,&quot;</span>)), <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb50-12"><a href="eda.html#cb50-12" tabindex="-1"></a>  <span class="fu">scale_fill_gradient2</span>(<span class="at">low =</span> <span class="st">&quot;#6E9A74&quot;</span>, <span class="at">mid =</span> <span class="st">&quot;#F7F7F7&quot;</span>, <span class="at">high =</span> <span class="st">&quot;#33475E&quot;</span>, <span class="at">midpoint =</span> <span class="dv">0</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), <span class="at">name =</span> <span class="st">&quot;rho&quot;</span>) <span class="sc">+</span></span>
+<span id="cb50-13"><a href="eda.html#cb50-13" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb50-14"><a href="eda.html#cb50-14" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">30</span>, <span class="at">hjust =</span> <span class="dv">1</span>), <span class="at">panel.grid =</span> <span class="fu">element_blank</span>())</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:spearman-fig"></span>
+<img src="voleibol_playa_files/figure-html/spearman-fig-1.png" alt="Matriz de correlación de Spearman entre variables del equipo." width="100%" />
+<p class="caption">
+Figura 6.11: Matriz de correlación de Spearman entre variables del equipo.
+</p>
+</div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="eda.html#cb51-1" tabindex="-1"></a>pares_sp <span class="ot">&lt;-</span> tri[tri<span class="sc">$</span>fi <span class="sc">&gt;</span> tri<span class="sc">$</span>ci, ]</span>
+<span id="cb51-2"><a href="eda.html#cb51-2" tabindex="-1"></a>pares_sp <span class="ot">&lt;-</span> pares_sp[<span class="fu">order</span>(<span class="sc">-</span><span class="fu">abs</span>(pares_sp<span class="sc">$</span>rho)), ]</span>
+<span id="cb51-3"><a href="eda.html#cb51-3" tabindex="-1"></a>rho_max_sp <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">abs</span>(pares_sp<span class="sc">$</span>rho))</span>
+<span id="cb51-4"><a href="eda.html#cb51-4" tabindex="-1"></a>rho_rival_sp <span class="ot">&lt;-</span> rho_sp[<span class="st">&quot;Ranking rival&quot;</span>, <span class="st">&quot;Ranking propio&quot;</span>]</span></code></pre></div>
+<p>Ninguna correlación es fuerte: la más alta en valor absoluto es entre edad media y dif. edad pareja (rho = 0,25), y el resto no supera 0,21 en valor absoluto. El ranking propio y el del rival casi no se relacionan (rho = 0,03), lo esperable en torneos donde se cruzan equipos de todos los niveles. Las variables que se conocen antes del partido no se repiten entre sí, algo que la sección siguiente confirma con el VIF.</p>
+</div>
+<div id="redundancia-entre-factores" class="section level3 hasAnchor" number="6.3.2">
+<h3><span class="header-section-number">6.3.2</span> Redundancia entre factores<a href="eda.html#redundancia-entre-factores" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="eda.html#cb52-1" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">cor</span>(dc[, <span class="fu">c</span>(<span class="st">&quot;A_gana&quot;</span>, <span class="st">&quot;dif_ranking&quot;</span>, <span class="st">&quot;dif_edad&quot;</span>, <span class="st">&quot;dif_estatura&quot;</span>)])</span>
+<span id="cb52-2"><a href="eda.html#cb52-2" tabindex="-1"></a><span class="fu">rownames</span>(m) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(m) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;A gana&quot;</span>, <span class="st">&quot;Ventaja de ranking&quot;</span>, <span class="st">&quot;Dif. de edad&quot;</span>, <span class="st">&quot;Dif. de estatura&quot;</span>)</span>
+<span id="cb52-3"><a href="eda.html#cb52-3" tabindex="-1"></a></span>
+<span id="cb52-4"><a href="eda.html#cb52-4" tabindex="-1"></a><span class="fu">corrplot</span>(m, <span class="at">method =</span> <span class="st">&quot;number&quot;</span>, <span class="at">col =</span> <span class="fu">colorRampPalette</span>(<span class="fu">c</span>(<span class="st">&quot;#E4572E&quot;</span>, <span class="st">&quot;#F7F7F7&quot;</span>, <span class="st">&quot;#0B3B5C&quot;</span>))(<span class="dv">200</span>), <span class="at">type =</span> <span class="st">&quot;upper&quot;</span>, <span class="at">tl.col =</span> <span class="st">&quot;black&quot;</span>, <span class="at">tl.srt =</span> <span class="dv">35</span>,</span>
+<span id="cb52-5"><a href="eda.html#cb52-5" tabindex="-1"></a>         <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-correlacion"></span>
+<img src="voleibol_playa_files/figure-html/fig-correlacion-1.png" alt="Correlación entre el resultado (A gana) y las diferencias de ranking, edad y estatura." width="70%" />
+<p class="caption">
+Figura 6.12: Correlación entre el resultado (A gana) y las diferencias de ranking, edad y estatura.
+</p>
+</div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="eda.html#cb53-1" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;dif_ranking&quot;</span>, <span class="st">&quot;dif_edad&quot;</span>, <span class="st">&quot;dif_estatura&quot;</span>)</span>
+<span id="cb53-2"><a href="eda.html#cb53-2" tabindex="-1"></a>vif <span class="ot">&lt;-</span> <span class="fu">sapply</span>(preds, <span class="cf">function</span>(v) {</span>
+<span id="cb53-3"><a href="eda.html#cb53-3" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">reformulate</span>(<span class="fu">setdiff</span>(preds, v), <span class="at">response =</span> v)</span>
+<span id="cb53-4"><a href="eda.html#cb53-4" tabindex="-1"></a>  <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">summary</span>(<span class="fu">lm</span>(f, <span class="at">data =</span> dc))<span class="sc">$</span>r.squared)</span>
+<span id="cb53-5"><a href="eda.html#cb53-5" tabindex="-1"></a>})</span>
+<span id="cb53-6"><a href="eda.html#cb53-6" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">Factor =</span> <span class="fu">c</span>(<span class="st">&quot;Ventaja de ranking&quot;</span>, <span class="st">&quot;Diferencia de edad&quot;</span>, <span class="st">&quot;Diferencia de estatura&quot;</span>),</span>
+<span id="cb53-7"><a href="eda.html#cb53-7" tabindex="-1"></a>       <span class="at">VIF =</span> <span class="fu">unname</span>(vif)) <span class="sc">%&gt;%</span></span>
+<span id="cb53-8"><a href="eda.html#cb53-8" tabindex="-1"></a>  <span class="fu">tabla</span>(<span class="at">caption =</span> <span class="st">&quot;Factor de inflación de la varianza (VIF).&quot;</span>, <span class="at">digits =</span> <span class="dv">2</span>)</span></code></pre></div>
+<table>
+<caption><span id="tab:vif">Tabla 6.8: </span>Factor de inflación de la varianza (VIF).</caption>
+<thead>
+<tr class="header">
+<th align="left">Factor</th>
+<th align="right">VIF</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Ventaja de ranking</td>
+<td align="right">1,06</td>
+</tr>
+<tr class="even">
+<td align="left">Diferencia de edad</td>
+<td align="right">1,04</td>
+</tr>
+<tr class="odd">
+<td align="left">Diferencia de estatura</td>
+<td align="right">1,01</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="eda.html#cb54-1" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> m[<span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>]                       <span class="co"># solo los tres factores, sin la columna «A gana»</span></span>
+<span id="cb54-2"><a href="eda.html#cb54-2" tabindex="-1"></a>max_cor <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">abs</span>(m3[<span class="fu">upper.tri</span>(m3)]))</span></code></pre></div>
+<p>Los tres factores casi no se solapan: la correlación más alta <strong>entre ellos</strong> es de 0,21 (ranking con edad) y todos los VIF están muy cerca de 1 (la alarma sería 5). <strong>Ninguno es redundante</strong>: cada uno aporta información distinta. Y de los tres, el ranking es, de lejos, el que más se relaciona con el resultado (columna «A gana»).</p>
+<div class="entrenador">
+<p><strong>Para el entrenador</strong></p>
+<ul>
+<li>Ranking, edad y estatura no se repiten entre sí: cada uno aporta información distinta, y el ranking es el que más se relaciona con el resultado.</li>
+<li>Son asociaciones observadas en el circuito profesional; no prueban que cambiar un factor produzca un cambio en el resultado.</li>
+</ul>
+</div>
+</div>
+<div id="estilos-de-juego-k-means-solo-avp" class="section level3 hasAnchor" number="6.3.3">
+<h3><span class="header-section-number">6.3.3</span> Estilos de juego (K-means, solo AVP)<a href="eda.html#estilos-de-juego-k-means-solo-avp" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Los análisis anteriores miran las estadísticas de juego una por una. Aquí se miran las ocho a la vez para encontrar <strong>estilos de juego</strong>: combinaciones de acciones que aparecen juntas con frecuencia. Se usa K-means sobre las actuaciones (una pareja en un partido) de la AVP con estadísticas completas, siguiendo el procedimiento descrito en la sección de metodología: estadísticas por set, estandarización, elección de <span class="math inline">\(k\)</span> con la silueta y descripción de cada grupo por su centroide.</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="eda.html#cb55-1" tabindex="-1"></a>acc_km <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;kills&quot;</span>, <span class="st">&quot;aces&quot;</span>, <span class="st">&quot;blocks&quot;</span>, <span class="st">&quot;digs&quot;</span>, <span class="st">&quot;attacks&quot;</span>, <span class="st">&quot;errors&quot;</span>, <span class="st">&quot;serve_errors&quot;</span>)</span>
+<span id="cb55-2"><a href="eda.html#cb55-2" tabindex="-1"></a>vkm <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">paste0</span>(acc_km, <span class="st">&quot;_set&quot;</span>), <span class="st">&quot;hitpct&quot;</span>)</span>
+<span id="cb55-3"><a href="eda.html#cb55-3" tabindex="-1"></a>etq_km <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">kills_set =</span> <span class="st">&quot;Kills&quot;</span>, <span class="at">aces_set =</span> <span class="st">&quot;Aces&quot;</span>, <span class="at">blocks_set =</span> <span class="st">&quot;Bloqueos&quot;</span>, <span class="at">digs_set =</span> <span class="st">&quot;Defensas&quot;</span>,</span>
+<span id="cb55-4"><a href="eda.html#cb55-4" tabindex="-1"></a>            <span class="at">attacks_set =</span> <span class="st">&quot;Ataques&quot;</span>, <span class="at">errors_set =</span> <span class="st">&quot;Errores de ataque&quot;</span>,</span>
+<span id="cb55-5"><a href="eda.html#cb55-5" tabindex="-1"></a>            <span class="at">serve_errors_set =</span> <span class="st">&quot;Errores de saque&quot;</span>, <span class="at">hitpct =</span> <span class="st">&quot;% de ataque&quot;</span>)</span>
+<span id="cb55-6"><a href="eda.html#cb55-6" tabindex="-1"></a>etq_km_min <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">kills_set =</span> <span class="st">&quot;kills&quot;</span>, <span class="at">aces_set =</span> <span class="st">&quot;aces&quot;</span>, <span class="at">blocks_set =</span> <span class="st">&quot;bloqueos&quot;</span>, <span class="at">digs_set =</span> <span class="st">&quot;defensas&quot;</span>,</span>
+<span id="cb55-7"><a href="eda.html#cb55-7" tabindex="-1"></a>                <span class="at">attacks_set =</span> <span class="st">&quot;ataques&quot;</span>, <span class="at">errors_set =</span> <span class="st">&quot;errores de ataque&quot;</span>,</span>
+<span id="cb55-8"><a href="eda.html#cb55-8" tabindex="-1"></a>                <span class="at">serve_errors_set =</span> <span class="st">&quot;errores de saque&quot;</span>, <span class="at">hitpct =</span> <span class="st">&quot;% de ataque&quot;</span>)</span>
+<span id="cb55-9"><a href="eda.html#cb55-9" tabindex="-1"></a></span>
+<span id="cb55-10"><a href="eda.html#cb55-10" tabindex="-1"></a><span class="co"># Actuaciones: AVP con estadísticas completas, sin forfeits; estadísticas por set</span></span>
+<span id="cb55-11"><a href="eda.html#cb55-11" tabindex="-1"></a>av_km <span class="ot">&lt;-</span> partidos <span class="sc">%&gt;%</span> <span class="fu">filter</span>(circuit <span class="sc">==</span> <span class="st">&quot;AVP&quot;</span>, <span class="sc">!</span>walkover, <span class="sc">!</span><span class="fu">is.na</span>(n_sets), n_sets <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb55-12"><a href="eda.html#cb55-12" tabindex="-1"></a>lado_km <span class="ot">&lt;-</span> <span class="cf">function</span>(pre, gano) {</span>
+<span id="cb55-13"><a href="eda.html#cb55-13" tabindex="-1"></a>  o <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">match_id =</span> av_km<span class="sc">$</span>match_id, <span class="at">year =</span> av_km<span class="sc">$</span>year, <span class="at">gano =</span> gano)</span>
+<span id="cb55-14"><a href="eda.html#cb55-14" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> acc_km) {</span>
+<span id="cb55-15"><a href="eda.html#cb55-15" tabindex="-1"></a>    o[[<span class="fu">paste0</span>(k, <span class="st">&quot;_set&quot;</span>)]] <span class="ot">&lt;-</span> (av_km[[<span class="fu">paste0</span>(pre, <span class="st">&quot;_p1_tot_&quot;</span>, k)]] <span class="sc">+</span> av_km[[<span class="fu">paste0</span>(pre, <span class="st">&quot;_p2_tot_&quot;</span>, k)]]) <span class="sc">/</span> av_km<span class="sc">$</span>n_sets</span>
+<span id="cb55-16"><a href="eda.html#cb55-16" tabindex="-1"></a>  }</span>
+<span id="cb55-17"><a href="eda.html#cb55-17" tabindex="-1"></a>  o</span>
+<span id="cb55-18"><a href="eda.html#cb55-18" tabindex="-1"></a>}</span>
+<span id="cb55-19"><a href="eda.html#cb55-19" tabindex="-1"></a>km_df <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">lado_km</span>(<span class="st">&quot;w&quot;</span>, <span class="dv">1</span><span class="dt">L</span>), <span class="fu">lado_km</span>(<span class="st">&quot;l&quot;</span>, <span class="dv">0</span><span class="dt">L</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb55-20"><a href="eda.html#cb55-20" tabindex="-1"></a>  <span class="fu">drop_na</span>() <span class="sc">%&gt;%</span> <span class="fu">filter</span>(attacks_set <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb55-21"><a href="eda.html#cb55-21" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hitpct =</span> (kills_set <span class="sc">-</span> errors_set) <span class="sc">/</span> attacks_set) <span class="sc">%&gt;%</span></span>
+<span id="cb55-22"><a href="eda.html#cb55-22" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.finite</span>(hitpct))</span>
+<span id="cb55-23"><a href="eda.html#cb55-23" tabindex="-1"></a>Z_km <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">as.matrix</span>(km_df[, vkm]))</span></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="eda.html#cb56-1" tabindex="-1"></a><span class="co"># Elección de k: silueta media sobre una muestra de 2.000 actuaciones (para que sea rápido)</span></span>
+<span id="cb56-2"><a href="eda.html#cb56-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb56-3"><a href="eda.html#cb56-3" tabindex="-1"></a>idx_km <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(Z_km), <span class="fu">min</span>(<span class="dv">2000</span>, <span class="fu">nrow</span>(Z_km)))</span>
+<span id="cb56-4"><a href="eda.html#cb56-4" tabindex="-1"></a>dz_km <span class="ot">&lt;-</span> <span class="fu">dist</span>(Z_km[idx_km, ])</span>
+<span id="cb56-5"><a href="eda.html#cb56-5" tabindex="-1"></a>sil_k <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">6</span>, <span class="cf">function</span>(k) {</span>
+<span id="cb56-6"><a href="eda.html#cb56-6" tabindex="-1"></a>  cl <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(Z_km, k, <span class="at">nstart =</span> <span class="dv">10</span>, <span class="at">iter.max =</span> <span class="dv">50</span>)<span class="sc">$</span>cluster</span>
+<span id="cb56-7"><a href="eda.html#cb56-7" tabindex="-1"></a>  <span class="fu">mean</span>(cluster<span class="sc">::</span><span class="fu">silhouette</span>(cl[idx_km], dz_km)[, <span class="st">&quot;sil_width&quot;</span>])</span>
+<span id="cb56-8"><a href="eda.html#cb56-8" tabindex="-1"></a>})</span>
+<span id="cb56-9"><a href="eda.html#cb56-9" tabindex="-1"></a><span class="fu">names</span>(sil_k) <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">6</span></span>
+<span id="cb56-10"><a href="eda.html#cb56-10" tabindex="-1"></a>K_EST <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb56-11"><a href="eda.html#cb56-11" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb56-12"><a href="eda.html#cb56-12" tabindex="-1"></a>km_fit <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(Z_km, K_EST, <span class="at">nstart =</span> <span class="dv">20</span>, <span class="at">iter.max =</span> <span class="dv">50</span>)</span>
+<span id="cb56-13"><a href="eda.html#cb56-13" tabindex="-1"></a>sil_obj <span class="ot">&lt;-</span> cluster<span class="sc">::</span><span class="fu">silhouette</span>(km_fit<span class="sc">$</span>cluster[idx_km], dz_km)</span>
+<span id="cb56-14"><a href="eda.html#cb56-14" tabindex="-1"></a>sil_ind <span class="ot">&lt;-</span> sil_obj[, <span class="st">&quot;sil_width&quot;</span>]</span>
+<span id="cb56-15"><a href="eda.html#cb56-15" tabindex="-1"></a>sil_grupo <span class="ot">&lt;-</span> <span class="fu">tapply</span>(sil_ind, sil_obj[, <span class="st">&quot;cluster&quot;</span>], mean)</span>
+<span id="cb56-16"><a href="eda.html#cb56-16" tabindex="-1"></a></span>
+<span id="cb56-17"><a href="eda.html#cb56-17" tabindex="-1"></a><span class="co"># Centroides en puntajes z, nombre de cada estilo y orden por % de victorias</span></span>
+<span id="cb56-18"><a href="eda.html#cb56-18" tabindex="-1"></a>cz <span class="ot">&lt;-</span> km_fit<span class="sc">$</span>centers</span>
+<span id="cb56-19"><a href="eda.html#cb56-19" tabindex="-1"></a><span class="fu">colnames</span>(cz) <span class="ot">&lt;-</span> vkm</span>
+<span id="cb56-20"><a href="eda.html#cb56-20" tabindex="-1"></a>nombre_estilo <span class="ot">&lt;-</span> <span class="cf">function</span>(z) {</span>
+<span id="cb56-21"><a href="eda.html#cb56-21" tabindex="-1"></a>  orden <span class="ot">&lt;-</span> <span class="fu">names</span>(<span class="fu">sort</span>(<span class="fu">abs</span>(z), <span class="at">decreasing =</span> <span class="cn">TRUE</span>))[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
+<span id="cb56-22"><a href="eda.html#cb56-22" tabindex="-1"></a>  rasgos <span class="ot">&lt;-</span> <span class="fu">character</span>()</span>
+<span id="cb56-23"><a href="eda.html#cb56-23" tabindex="-1"></a>  <span class="cf">for</span> (v <span class="cf">in</span> orden) {</span>
+<span id="cb56-24"><a href="eda.html#cb56-24" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">abs</span>(z[[v]]) <span class="sc">&gt;=</span> <span class="fl">0.25</span>) rasgos <span class="ot">&lt;-</span> <span class="fu">c</span>(rasgos, <span class="fu">paste</span>(<span class="fu">ifelse</span>(z[[v]] <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="st">&quot;más&quot;</span>, <span class="st">&quot;menos&quot;</span>), etq_km_min[[v]]))</span>
+<span id="cb56-25"><a href="eda.html#cb56-25" tabindex="-1"></a>  }</span>
+<span id="cb56-26"><a href="eda.html#cb56-26" tabindex="-1"></a>  t <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">length</span>(rasgos) <span class="sc">==</span> <span class="dv">0</span>) <span class="st">&quot;estilo promedio&quot;</span> <span class="cf">else</span> <span class="fu">paste</span>(rasgos, <span class="at">collapse =</span> <span class="st">&quot; y &quot;</span>)</span>
+<span id="cb56-27"><a href="eda.html#cb56-27" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="fu">toupper</span>(<span class="fu">substr</span>(t, <span class="dv">1</span>, <span class="dv">1</span>)), <span class="fu">substr</span>(t, <span class="dv">2</span>, <span class="fu">nchar</span>(t)))</span>
+<span id="cb56-28"><a href="eda.html#cb56-28" tabindex="-1"></a>}</span>
+<span id="cb56-29"><a href="eda.html#cb56-29" tabindex="-1"></a>resumen_km <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span>K_EST, <span class="cf">function</span>(g) {</span>
+<span id="cb56-30"><a href="eda.html#cb56-30" tabindex="-1"></a>  s <span class="ot">&lt;-</span> km_df[km_fit<span class="sc">$</span>cluster <span class="sc">==</span> g, ]</span>
+<span id="cb56-31"><a href="eda.html#cb56-31" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">mean</span>(s<span class="sc">$</span>gano)</span>
+<span id="cb56-32"><a href="eda.html#cb56-32" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">g =</span> g, <span class="at">Estilo =</span> <span class="fu">nombre_estilo</span>(cz[g, ]), <span class="at">n =</span> <span class="fu">nrow</span>(s), <span class="st">`</span><span class="at">% de actuaciones</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">nrow</span>(s) <span class="sc">/</span> <span class="fu">nrow</span>(km_df),</span>
+<span id="cb56-33"><a href="eda.html#cb56-33" tabindex="-1"></a>         <span class="st">`</span><span class="at">% de victorias</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> p, <span class="st">`</span><span class="at">IC 95 %</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">196</span> <span class="sc">*</span> <span class="fu">sqrt</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p) <span class="sc">/</span> <span class="fu">nrow</span>(s)),</span>
+<span id="cb56-34"><a href="eda.html#cb56-34" tabindex="-1"></a>         <span class="st">`</span><span class="at">Silueta media</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">unname</span>(sil_grupo[<span class="fu">as.character</span>(g)]))</span>
+<span id="cb56-35"><a href="eda.html#cb56-35" tabindex="-1"></a>})) <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">% de victorias</span><span class="st">`</span>))</span>
+<span id="cb56-36"><a href="eda.html#cb56-36" tabindex="-1"></a>resumen_km<span class="sc">$</span>E <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;E&quot;</span>, <span class="dv">1</span><span class="sc">:</span>K_EST)</span>
+<span id="cb56-37"><a href="eda.html#cb56-37" tabindex="-1"></a>km_df<span class="sc">$</span>E <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">paste0</span>(<span class="st">&quot;E&quot;</span>, <span class="fu">match</span>(km_fit<span class="sc">$</span>cluster, resumen_km<span class="sc">$</span>g)), <span class="at">levels =</span> <span class="fu">paste0</span>(<span class="st">&quot;E&quot;</span>, <span class="dv">1</span><span class="sc">:</span>K_EST))</span>
+<span id="cb56-38"><a href="eda.html#cb56-38" tabindex="-1"></a></span>
+<span id="cb56-39"><a href="eda.html#cb56-39" tabindex="-1"></a><span class="co"># Colores: de azul mar (el estilo que más gana) a coral (el que más pierde)</span></span>
+<span id="cb56-40"><a href="eda.html#cb56-40" tabindex="-1"></a>COL_E <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">E1 =</span> <span class="st">&quot;#0B3B5C&quot;</span>, <span class="at">E2 =</span> <span class="st">&quot;#5B8DB0&quot;</span>, <span class="at">E3 =</span> <span class="st">&quot;#EFA58C&quot;</span>, <span class="at">E4 =</span> <span class="st">&quot;#E4572E&quot;</span>)</span>
+<span id="cb56-41"><a href="eda.html#cb56-41" tabindex="-1"></a>clave_km <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span>K_EST, <span class="cf">function</span>(i) {</span>
+<span id="cb56-42"><a href="eda.html#cb56-42" tabindex="-1"></a>  z <span class="ot">&lt;-</span> cz[resumen_km<span class="sc">$</span>g[i], ]</span>
+<span id="cb56-43"><a href="eda.html#cb56-43" tabindex="-1"></a>  top <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">abs</span>(z), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
+<span id="cb56-44"><a href="eda.html#cb56-44" tabindex="-1"></a>  <span class="fu">names</span>(top)[top <span class="sc">&gt;=</span> <span class="fl">0.25</span>]</span>
+<span id="cb56-45"><a href="eda.html#cb56-45" tabindex="-1"></a>})</span>
+<span id="cb56-46"><a href="eda.html#cb56-46" tabindex="-1"></a></span>
+<span id="cb56-47"><a href="eda.html#cb56-47" tabindex="-1"></a>km_n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(km_df)</span>
+<span id="cb56-48"><a href="eda.html#cb56-48" tabindex="-1"></a>km_partidos <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(km_df<span class="sc">$</span>match_id))</span>
+<span id="cb56-49"><a href="eda.html#cb56-49" tabindex="-1"></a>km_anios <span class="ot">&lt;-</span> <span class="fu">range</span>(km_df<span class="sc">$</span>year)</span>
+<span id="cb56-50"><a href="eda.html#cb56-50" tabindex="-1"></a>km_sil <span class="ot">&lt;-</span> <span class="fu">mean</span>(sil_ind)</span>
+<span id="cb56-51"><a href="eda.html#cb56-51" tabindex="-1"></a>km_neg <span class="ot">&lt;-</span> <span class="fu">mean</span>(sil_ind <span class="sc">&lt;</span> <span class="dv">0</span>)</span>
+<span id="cb56-52"><a href="eda.html#cb56-52" tabindex="-1"></a>hit_med <span class="ot">&lt;-</span> <span class="fu">tapply</span>(km_df<span class="sc">$</span>hitpct, km_df<span class="sc">$</span>E, median)</span></code></pre></div>
+<p><strong>Paso 1: los datos y la estandarización.</strong> Se usaron 26.106 actuaciones de 13.057 partidos de la AVP (2004–2019). Las ocho acciones están en escalas muy distintas: una pareja hace en promedio 23 ataques por set, pero solo 0,9 aces. Sin estandarizar, los ataques dominarían las distancias; después de convertirlas a puntajes z, todas quedan centradas en 0 y con la misma dispersión.</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="eda.html#cb57-1" tabindex="-1"></a><span class="fu">bind_rows</span>(</span>
+<span id="cb57-2"><a href="eda.html#cb57-2" tabindex="-1"></a>  km_df[, vkm] <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">&quot;v&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;valor&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">momento =</span> <span class="st">&quot;Antes: cada acción en su unidad&quot;</span>),</span>
+<span id="cb57-3"><a href="eda.html#cb57-3" tabindex="-1"></a>  <span class="fu">as_tibble</span>(Z_km) <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">&quot;v&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;valor&quot;</span>) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">momento =</span> <span class="st">&quot;Después: puntajes z&quot;</span>)</span>
+<span id="cb57-4"><a href="eda.html#cb57-4" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb57-5"><a href="eda.html#cb57-5" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">v =</span> <span class="fu">factor</span>(etq_km[v], <span class="at">levels =</span> <span class="fu">rev</span>(etq_km[vkm])),</span>
+<span id="cb57-6"><a href="eda.html#cb57-6" tabindex="-1"></a>         <span class="at">momento =</span> <span class="fu">factor</span>(momento, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;Antes: cada acción en su unidad&quot;</span>, <span class="st">&quot;Después: puntajes z&quot;</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb57-7"><a href="eda.html#cb57-7" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(valor, v)) <span class="sc">+</span></span>
+<span id="cb57-8"><a href="eda.html#cb57-8" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> col_azul, <span class="at">alpha =</span> .<span class="dv">6</span>, <span class="at">outlier.shape =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb57-9"><a href="eda.html#cb57-9" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>momento, <span class="at">scales =</span> <span class="st">&quot;free_x&quot;</span>) <span class="sc">+</span></span>
+<span id="cb57-10"><a href="eda.html#cb57-10" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-km-estandarizar"></span>
+<img src="voleibol_playa_files/figure-html/fig-km-estandarizar-1.png" alt="Las ocho acciones antes y después de estandarizar (puntajes z)." width="100%" />
+<p class="caption">
+Figura 6.13: Las ocho acciones antes y después de estandarizar (puntajes z).
+</p>
+</div>
+<p><strong>Paso 2: cuántos estilos.</strong> La silueta media de cada <span class="math inline">\(k\)</span> está en la Figura siguiente: 0,165 con dos grupos, 0,161 con cuatro y 0,141 con seis. Se eligió <span class="math inline">\(k = 4\)</span> porque cuatro estilos bastan para describir el juego sin abrumar. Todas las siluetas son bajas (la mayor es 0,167): los estilos se solapan y deben leerse como tendencias, no como tipos de pareja bien separados.</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="eda.html#cb58-1" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">k =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">sil =</span> <span class="fu">as.numeric</span>(sil_k)) <span class="sc">%&gt;%</span></span>
+<span id="cb58-2"><a href="eda.html#cb58-2" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(k, sil)) <span class="sc">+</span></span>
+<span id="cb58-3"><a href="eda.html#cb58-3" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> col_azul, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb58-4"><a href="eda.html#cb58-4" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">size =</span> k <span class="sc">==</span> K_EST, <span class="at">color =</span> k <span class="sc">==</span> K_EST)) <span class="sc">+</span></span>
+<span id="cb58-5"><a href="eda.html#cb58-5" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">fmt</span>(sil, <span class="dv">3</span>)), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">1.2</span>, <span class="at">size =</span> <span class="fl">3.4</span>) <span class="sc">+</span></span>
+<span id="cb58-6"><a href="eda.html#cb58-6" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;TRUE&quot;</span> <span class="ot">=</span> <span class="st">&quot;#111827&quot;</span>, <span class="st">&quot;FALSE&quot;</span> <span class="ot">=</span> col_azul), <span class="at">guide =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb58-7"><a href="eda.html#cb58-7" tabindex="-1"></a>  <span class="fu">scale_size_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;TRUE&quot;</span> <span class="ot">=</span> <span class="dv">4</span>, <span class="st">&quot;FALSE&quot;</span> <span class="ot">=</span> <span class="fl">2.5</span>), <span class="at">guide =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb58-8"><a href="eda.html#cb58-8" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>), <span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">15</span>))) <span class="sc">+</span></span>
+<span id="cb58-9"><a href="eda.html#cb58-9" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Número de grupos (k)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Silueta media&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-km-silueta"></span>
+<img src="voleibol_playa_files/figure-html/fig-km-silueta-1.png" alt="Silueta media según el número de grupos k (k = 4 en negro)." width="100%" />
+<p class="caption">
+Figura 6.14: Silueta media según el número de grupos k (k = 4 en negro).
+</p>
+</div>
+<p><strong>Paso 3: la huella de cada estilo.</strong> El centroide de cada grupo dice cuánto se aleja, en desviaciones estándar, de la actuación promedio en cada acción. Las barras en color son los dos rasgos que dan nombre al estilo. Los estilos se numeran de mayor a menor % de victorias:</p>
+<ul>
+<li><strong>E1. Más aces y más errores de saque</strong> (19 % de las actuaciones).</li>
+<li><strong>E2. Más bloqueos y más % de ataque</strong> (26 % de las actuaciones).</li>
+<li><strong>E3. Más ataques y más defensas</strong> (26 % de las actuaciones).</li>
+<li><strong>E4. Menos % de ataque y menos kills</strong> (29 % de las actuaciones).</li>
+</ul>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="eda.html#cb59-1" tabindex="-1"></a>hu <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span>K_EST, <span class="cf">function</span>(i) {</span>
+<span id="cb59-2"><a href="eda.html#cb59-2" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">E =</span> <span class="fu">paste0</span>(<span class="st">&quot;E&quot;</span>, i), <span class="at">v =</span> vkm, <span class="at">z =</span> <span class="fu">as.numeric</span>(cz[resumen_km<span class="sc">$</span>g[i], vkm]), <span class="at">clave =</span> vkm <span class="sc">%in%</span> clave_km[[i]])</span>
+<span id="cb59-3"><a href="eda.html#cb59-3" tabindex="-1"></a>})) <span class="sc">%&gt;%</span></span>
+<span id="cb59-4"><a href="eda.html#cb59-4" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">v =</span> <span class="fu">factor</span>(etq_km[v], <span class="at">levels =</span> <span class="fu">rev</span>(etq_km[vkm])),</span>
+<span id="cb59-5"><a href="eda.html#cb59-5" tabindex="-1"></a>         <span class="at">color =</span> <span class="fu">ifelse</span>(clave, E, <span class="st">&quot;otro&quot;</span>))</span>
+<span id="cb59-6"><a href="eda.html#cb59-6" tabindex="-1"></a><span class="fu">ggplot</span>(hu, <span class="fu">aes</span>(z, v, <span class="at">fill =</span> color)) <span class="sc">+</span></span>
+<span id="cb59-7"><a href="eda.html#cb59-7" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb59-8"><a href="eda.html#cb59-8" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">&quot;#64748B&quot;</span>) <span class="sc">+</span></span>
+<span id="cb59-9"><a href="eda.html#cb59-9" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="fu">ifelse</span>(z <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="st">&quot;+&quot;</span>, <span class="st">&quot;&quot;</span>), <span class="fu">fmt</span>(z, <span class="dv">1</span>)), <span class="at">hjust =</span> <span class="fu">ifelse</span>(z <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.15</span>, <span class="fl">1.15</span>)), <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb59-10"><a href="eda.html#cb59-10" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(COL_E, <span class="at">otro =</span> <span class="st">&quot;#B4C1CF&quot;</span>), <span class="at">guide =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb59-11"><a href="eda.html#cb59-11" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.9</span>, <span class="fl">1.9</span>), <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb59-12"><a href="eda.html#cb59-12" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>E, <span class="at">nrow =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb59-13"><a href="eda.html#cb59-13" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Desviaciones estándar frente al promedio&quot;</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-km-huella"></span>
+<img src="voleibol_playa_files/figure-html/fig-km-huella-1.png" alt="Centroide de cada estilo: diferencia frente a la actuación promedio en cada acción (desviaciones estándar)." width="100%" />
+<p class="caption">
+Figura 6.15: Centroide de cada estilo: diferencia frente a la actuación promedio en cada acción (desviaciones estándar).
+</p>
+</div>
+<p><strong>Paso 4: dónde cae cada actuación.</strong> Con dos de las acciones en los ejes se ve cómo K-means repartió las actuaciones. En las zonas donde los colores se tocan, una actuación podría pertenecer a dos estilos: la silueta media es 0,16 y el 3 % de las actuaciones queda más cerca de otro grupo que del suyo.</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="eda.html#cb60-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb60-2"><a href="eda.html#cb60-2" tabindex="-1"></a>mu_km <span class="ot">&lt;-</span> km_df[<span class="fu">sample</span>(<span class="fu">nrow</span>(km_df), <span class="fu">min</span>(<span class="dv">3000</span>, <span class="fu">nrow</span>(km_df))), ]</span>
+<span id="cb60-3"><a href="eda.html#cb60-3" tabindex="-1"></a>cen_km <span class="ot">&lt;-</span> km_df <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(E) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(<span class="at">hitpct =</span> <span class="fu">mean</span>(hitpct), <span class="at">kills_set =</span> <span class="fu">mean</span>(kills_set), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>)</span>
+<span id="cb60-4"><a href="eda.html#cb60-4" tabindex="-1"></a><span class="fu">ggplot</span>(mu_km, <span class="fu">aes</span>(hitpct, kills_set, <span class="at">color =</span> E)) <span class="sc">+</span></span>
+<span id="cb60-5"><a href="eda.html#cb60-5" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> .<span class="dv">5</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb60-6"><a href="eda.html#cb60-6" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> cen_km, <span class="at">shape =</span> <span class="dv">4</span>, <span class="at">size =</span> <span class="dv">5</span>, <span class="at">stroke =</span> <span class="fl">1.8</span>, <span class="at">color =</span> <span class="st">&quot;white&quot;</span>) <span class="sc">+</span></span>
+<span id="cb60-7"><a href="eda.html#cb60-7" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> cen_km, <span class="at">shape =</span> <span class="dv">4</span>, <span class="at">size =</span> <span class="dv">4</span>, <span class="at">stroke =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb60-8"><a href="eda.html#cb60-8" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">data =</span> cen_km, <span class="fu">aes</span>(<span class="at">label =</span> E), <span class="at">color =</span> <span class="st">&quot;#111827&quot;</span>, <span class="at">nudge_y =</span> <span class="fl">0.4</span>, <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>) <span class="sc">+</span></span>
+<span id="cb60-9"><a href="eda.html#cb60-9" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> COL_E) <span class="sc">+</span></span>
+<span id="cb60-10"><a href="eda.html#cb60-10" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;% de ataque&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Kills por set&quot;</span>, <span class="at">color =</span> <span class="st">&quot;Estilo&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-km-dispersion"></span>
+<img src="voleibol_playa_files/figure-html/fig-km-dispersion-1.png" alt="Actuaciones según % de ataque y kills por set, coloreadas por estilo (muestra de 3.000; X = centroide)." width="100%" />
+<p class="caption">
+Figura 6.16: Actuaciones según % de ataque y kills por set, coloreadas por estilo (muestra de 3.000; X = centroide).
+</p>
+</div>
+<p><strong>Paso 5: comprobar que los estilos son distintos.</strong> La figura siguiente muestra la distribución de cada acción dentro de cada estilo. Donde las cajas de un estilo no se tocan con las de otro, esa acción los diferencia; por ejemplo, la mediana del % de ataque pasa de 48 % en E1 a 25 % en E4.</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="eda.html#cb61-1" tabindex="-1"></a>km_df <span class="sc">%&gt;%</span></span>
+<span id="cb61-2"><a href="eda.html#cb61-2" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">all_of</span>(vkm), <span class="at">names_to =</span> <span class="st">&quot;v&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;valor&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb61-3"><a href="eda.html#cb61-3" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">v =</span> <span class="fu">factor</span>(etq_km[v], <span class="at">levels =</span> etq_km[vkm])) <span class="sc">%&gt;%</span></span>
+<span id="cb61-4"><a href="eda.html#cb61-4" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(E, valor, <span class="at">fill =</span> E)) <span class="sc">+</span></span>
+<span id="cb61-5"><a href="eda.html#cb61-5" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">outlier.shape =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb61-6"><a href="eda.html#cb61-6" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> COL_E, <span class="at">guide =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span></span>
+<span id="cb61-7"><a href="eda.html#cb61-7" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>v, <span class="at">scales =</span> <span class="st">&quot;free_y&quot;</span>, <span class="at">nrow =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb61-8"><a href="eda.html#cb61-8" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:fig-km-cajas"></span>
+<img src="voleibol_playa_files/figure-html/fig-km-cajas-1.png" alt="Distribución de las ocho acciones en cada estilo (caja: 50 % central; línea: mediana)." width="100%" />
+<p class="caption">
+Figura 6.17: Distribución de las ocho acciones en cada estilo (caja: 50 % central; línea: mediana).
+</p>
+</div>
+<p><strong>Paso 6: cuánto gana cada estilo.</strong> Los estilos se diferencian en el resultado: E1 gana el 74,7 % de sus partidos, E2 el 72,2 %, E3 el 55,3 % y E4 el 9,0 %.</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="eda.html#cb62-1" tabindex="-1"></a>resumen_km <span class="sc">%&gt;%</span></span>
+<span id="cb62-2"><a href="eda.html#cb62-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">% de victorias (IC 95 %)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">paste0</span>(<span class="fu">fmt</span>(<span class="st">`</span><span class="at">% de victorias</span><span class="st">`</span>, <span class="dv">1</span>), <span class="st">&quot; ± &quot;</span>, <span class="fu">fmt</span>(<span class="st">`</span><span class="at">IC 95 %</span><span class="st">`</span>, <span class="dv">1</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb62-3"><a href="eda.html#cb62-3" tabindex="-1"></a>  <span class="fu">select</span>(E, Estilo, n, <span class="st">`</span><span class="at">% de actuaciones</span><span class="st">`</span>, <span class="st">`</span><span class="at">% de victorias (IC 95 %)</span><span class="st">`</span>, <span class="st">`</span><span class="at">Silueta media</span><span class="st">`</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb62-4"><a href="eda.html#cb62-4" tabindex="-1"></a>  <span class="fu">tabla</span>(<span class="at">caption =</span> <span class="st">&quot;Estilos de juego de la AVP: tamaño, % de victorias y silueta media (K-means con k = 4 sobre ocho acciones por set estandarizadas; una fila = una pareja en un partido).&quot;</span>, <span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div>
+<table>
+<caption><span id="tab:tab-km">Tabla 6.9: </span>Estilos de juego de la AVP: tamaño, % de victorias y silueta media (K-means con k = 4 sobre ocho acciones por set estandarizadas; una fila = una pareja en un partido).</caption>
+<colgroup>
+<col width="3%" />
+<col width="32%" />
+<col width="6%" />
+<col width="17%" />
+<col width="25%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">E</th>
+<th align="left">Estilo</th>
+<th align="right">n</th>
+<th align="right">% de actuaciones</th>
+<th align="left">% de victorias (IC 95 %)</th>
+<th align="right">Silueta media</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">E1</td>
+<td align="left">Más aces y más errores de saque</td>
+<td align="right">5.055</td>
+<td align="right">19,363</td>
+<td align="left">74,7 ± 1,2</td>
+<td align="right">0,134</td>
+</tr>
+<tr class="even">
+<td align="left">E2</td>
+<td align="left">Más bloqueos y más % de ataque</td>
+<td align="right">6.685</td>
+<td align="right">25,607</td>
+<td align="left">72,2 ± 1,1</td>
+<td align="right">0,157</td>
+</tr>
+<tr class="odd">
+<td align="left">E3</td>
+<td align="left">Más ataques y más defensas</td>
+<td align="right">6.815</td>
+<td align="right">26,105</td>
+<td align="left">55,3 ± 1,2</td>
+<td align="right">0,162</td>
+</tr>
+<tr class="even">
+<td align="left">E4</td>
+<td align="left">Menos % de ataque y menos kills</td>
+<td align="right">7.551</td>
+<td align="right">28,924</td>
+<td align="left">9,0 ± 0,6</td>
+<td align="right">0,183</td>
+</tr>
+</tbody>
+</table>
+<p>La diferencia de victorias confirma lo que mostró el análisis bivariado: lo que más separa al estilo que gana del que pierde es la <strong>eficacia en ataque</strong>. El estilo E4 no pierde “por ser” el E4: cuando el ataque no funciona, el partido se pierde y la actuación queda en ese grupo. Por eso los estilos sirven para <strong>describir</strong> cómo jugó una pareja, no para anticipar quién gana.</p>
+<div class="entrenador">
+<p><strong>Para el entrenador</strong></p>
+<ul>
+<li>Los cuatro estilos son un lenguaje común para describir un partido (“hoy jugamos tipo E3”). Dos parejas pueden ganar de formas distintas, pero las dos convierten bien sus ataques.</li>
+<li>Si su pareja cae seguido en el estilo E4, la prioridad es la eficacia en ataque, no el volumen.</li>
+<li>Son asociaciones: las estadísticas se producen en el mismo partido que se gana o se pierde.</li>
+</ul>
+</div>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="limpieza.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="temporal.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": null,
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "section",
+    "scroll_highlight": true
+  }
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
